@@ -33,10 +33,14 @@ namespace APICalculos.Controllers
 
             }
 
+        
+
             [HttpGet("buscartipoDeServicioId/{id:int}")]
             public async Task<ActionResult<TipoDeServicio>> BuscarTipoDePagoId(int id)
             {
-                var tipoDeServicioId = await _context.TipoDeServicios.FirstOrDefaultAsync(g => g.TipoDeServicioId == id);
+                var tipoDeServicioId = await _context.TipoDeServicios
+                .Include(s => s.CategoriasServicios)
+                .FirstOrDefaultAsync(g => g.TipoDeServicioId == id);
 
                 if (tipoDeServicioId is null)
                 {
@@ -45,11 +49,13 @@ namespace APICalculos.Controllers
 
                 }
 
-                var tipoDeServicioDTO = new TipoDeServicioDTO
-                {
-                    TipoDeServicioId = tipoDeServicioId.TipoDeServicioId,
-                    NombreServicio = tipoDeServicioId.NombreServicio,
-
+            var tipoDeServicioDTO = new TipoDeServicioDTO
+            {
+                TipoDeServicioId = tipoDeServicioId.TipoDeServicioId,
+                NombreServicio = tipoDeServicioId.NombreServicio,
+                PrecioServicio = tipoDeServicioId.PrecioServicio,
+                NombreCategoriaServicio = tipoDeServicioId.CategoriasServicios.NombreCategoriaServicio,
+                
                 };
 
                 return Ok(tipoDeServicioDTO);
@@ -85,12 +91,7 @@ namespace APICalculos.Controllers
             {
 
                 var existeNombreServicio = await _context.TipoDeServicios.AnyAsync(g => g.NombreServicio.Replace(" ", "").Trim() == tipoDeServicioCreacionDTO.NombreServicio.Replace(" ", "").Trim());
-
-
                 var tipoDeServicioDB = await _context.TipoDeServicios.AsTracking().FirstOrDefaultAsync(a => a.TipoDeServicioId == id);
-
-
-
 
             if (existeNombreServicio)
             {
@@ -98,22 +99,25 @@ namespace APICalculos.Controllers
                 return BadRequest(texto);
             }
 
-            if (!string.IsNullOrWhiteSpace(tipoDeServicioCreacionDTO.NombreServicio))
+            if (tipoDeServicioDB != null)
+            {
+                if (!string.IsNullOrWhiteSpace(tipoDeServicioCreacionDTO.NombreServicio))
                 {
-                tipoDeServicioDB.NombreServicio = tipoDeServicioCreacionDTO.NombreServicio;
+                    tipoDeServicioDB.NombreServicio = tipoDeServicioCreacionDTO.NombreServicio;
                 }
 
-
-
-                if (tipoDeServicioDB is null)
+                if (tipoDeServicioCreacionDTO.CategoriasServiciosId != 0)
                 {
-                    return NotFound();
-
+                    tipoDeServicioDB.CategoriasServiciosId = tipoDeServicioCreacionDTO.CategoriasServiciosId;
                 }
-                if (true)
+
+                if (tipoDeServicioCreacionDTO.PrecioServicio != 0 )
                 {
-
+                    tipoDeServicioDB.PrecioServicio = tipoDeServicioCreacionDTO.PrecioServicio;
                 }
+
+            }
+
 
        
                 await _context.SaveChangesAsync();

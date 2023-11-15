@@ -7,6 +7,7 @@ namespace APICalculos.Entidades.Configuraciones
     {
         public void Configure(EntityTypeBuilder<Cliente> builder)
         {
+            
 
 
             builder.Property(prop => prop.NombreCompletoCliente)
@@ -16,9 +17,6 @@ namespace APICalculos.Entidades.Configuraciones
             builder.Property(prop => prop.NumeroDocumento)
                 .HasMaxLength(20)
                 .IsRequired();
-
-            builder.Property(prop => prop.Historial)
-                .HasMaxLength(500);
 
         }
     }

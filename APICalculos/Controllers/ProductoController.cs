@@ -36,10 +36,26 @@ namespace APICalculos.Controllers
         public async Task<IEnumerable<ProductoDTO>> BuscandoConMapperYDTO()
         {
             return await _context.Productos
-                 .ProjectTo<ProductoDTO>(_mapper.ConfigurationProvider).ToListAsync();
-                
-                
-                
+             .ProjectTo<ProductoDTO>(_mapper.ConfigurationProvider).ToListAsync();
+
+
+        }
+
+        [HttpGet("buscarConPaginacion/{pagina:int}/{tamanoPagina:int}")]
+
+        public async Task<IEnumerable<ProductoDTO>> BuscarPaginacion(int pagina, int tamanoPagina)
+        {
+            var productosQuery = _context.Productos
+                .ProjectTo<ProductoDTO>(_mapper.ConfigurationProvider);
+
+            var productosPaginados = await productosQuery
+                .Skip((pagina - 1) * tamanoPagina)
+                .Take(tamanoPagina)
+                .ToListAsync();
+
+            return productosPaginados;
+
+
         }
 
         [HttpGet("buscarProductoPorId/{id:int}")]
@@ -57,20 +73,43 @@ namespace APICalculos.Controllers
             return productoId;
         }
 
-        //Aca estamos buscando el producto por codigo del producto
-        [HttpGet("buscarpProductoPorCodigo/{codigo}")]
-        public async Task<ActionResult<Producto>> BuscarProductoPorCodigo(string codigo)
+        //Aca estamos buscando el producto por nombre del producto
+        [HttpGet("buscarpProductoPorCodigo/{nombre}")]
+        public async Task<ActionResult<IEnumerable<ProductoDTO>>> BuscarProductoPorCodigo(string nombre)
         {
-            var producto = await _context.Productos.FirstOrDefaultAsync(g => g.CodigoProducto == codigo);
+            if (string.IsNullOrEmpty(nombre))
+            {
+                var todosLosProductos = await BuscandoConMapperYDTO();
+                return Ok(todosLosProductos);
+            } 
+            else
+            {
+                var productoPorNombre = await _context.Productos.
+                    Where(g => g.NombreProducto.ToLower() == nombre.ToLower())
+                    .ProjectTo<ProductoDTO>(_mapper.ConfigurationProvider).ToListAsync();
 
+                if (productoPorNombre.Count == 0)
+                {
+                    var mensajeError = $"No se encontró ningún producto con el código '{nombre}'.";
+                    return StatusCode((int)HttpStatusCode.NotFound, mensajeError);
+                }
+                return Ok(productoPorNombre);
+
+            }
+
+
+            /*
+            var producto = await _context.Productos.FirstOrDefaultAsync(g => g.NombreProducto.ToLower() == nombre.ToLower());
+            Console.WriteLine(producto);
             if (producto is null)
             {
-                var mensajeError = $"No se encontró ningún producto con el código '{codigo}'.";
+                var mensajeError = $"No se encontró ningún producto con el código '{nombre}'.";
                 return StatusCode((int)HttpStatusCode.NotFound, mensajeError);
 
             }
 
             return producto;
+            */
         }
 
         //Aca estamos agrengado nuevos productos
@@ -81,8 +120,6 @@ namespace APICalculos.Controllers
             //Estan buscando el nombre y codigo para que no sea iguales a los ya registrados, se esta filtrando para que no se agregen con espacios
             var existeCodigoProducto = await _context.Productos.AnyAsync(g => g.CodigoProducto.Replace(" ","").Trim() == productoCreacionDTO.CodigoProducto.Replace(" ", "").Trim());
             var existeNombreProducto = await _context.Productos.AnyAsync(g => g.NombreProducto.Replace(" ", "").Trim() == productoCreacionDTO.NombreProducto.Replace(" ", "").Trim());
-
-
 
             if (string.IsNullOrWhiteSpace(productoCreacionDTO.CodigoProducto) || string.IsNullOrWhiteSpace(productoCreacionDTO.NombreProducto))
             {
@@ -142,6 +179,11 @@ namespace APICalculos.Controllers
             if (productoCreacionDTO.PrecioProducto > 0)
             {
                 productoDB.PrecioProducto = productoCreacionDTO.PrecioProducto;
+            }
+
+            if (productoCreacionDTO.Stock > 0)
+            {
+                productoDB.Stock = productoCreacionDTO.Stock;
             }
 
             if (existeCodigoProducto )

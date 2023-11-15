@@ -4,6 +4,7 @@ using APICalculos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APICalculos.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20230927070158_AgregandoCategoriasServicios")]
+    partial class AgregandoCategoriasServicios
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -50,6 +52,10 @@ namespace APICalculos.Migrations
 
                     b.Property<DateTime>("FechaNacimiento")
                         .HasColumnType("date");
+
+                    b.Property<string>("Historial")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("NombreCompletoCliente")
                         .IsRequired()
@@ -120,33 +126,6 @@ namespace APICalculos.Migrations
                     b.ToTable("Gastos");
                 });
 
-            modelBuilder.Entity("APICalculos.Entidades.HistorialClientes", b =>
-                {
-                    b.Property<int>("HistorialClientesId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("HistorialClientesId"), 1L, 1);
-
-                    b.Property<int>("ClienteId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("DescripcionHistorialCliente")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("FechaHistorial")
-                        .HasColumnType("date");
-
-                    b.Property<string>("NombreDeHistorialCliente")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("HistorialClientesId");
-
-                    b.HasIndex("ClienteId");
-
-                    b.ToTable("HistorialClientes");
-                });
-
             modelBuilder.Entity("APICalculos.Entidades.Producto", b =>
                 {
                     b.Property<int>("ProductoId")
@@ -172,9 +151,6 @@ namespace APICalculos.Migrations
 
                     b.Property<decimal>("PrecioProducto")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("Stock")
-                        .HasColumnType("int");
 
                     b.HasKey("ProductoId");
 
@@ -272,6 +248,9 @@ namespace APICalculos.Migrations
                     b.Property<decimal>("PrecioServicio")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<decimal>("PrecioServicioAumento")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("TipoDeServicioId");
 
                     b.HasIndex("CategoriasServiciosId");
@@ -354,17 +333,6 @@ namespace APICalculos.Migrations
                     b.Navigation("TiposDeGastos");
                 });
 
-            modelBuilder.Entity("APICalculos.Entidades.HistorialClientes", b =>
-                {
-                    b.HasOne("APICalculos.Entidades.Cliente", "Cliente")
-                        .WithMany("HistorialClientes")
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Cliente");
-                });
-
             modelBuilder.Entity("APICalculos.Entidades.Servicio", b =>
                 {
                     b.HasOne("APICalculos.Entidades.Cliente", "Cliente")
@@ -433,11 +401,6 @@ namespace APICalculos.Migrations
             modelBuilder.Entity("APICalculos.Entidades.CategoriasServicios", b =>
                 {
                     b.Navigation("TipoDeServicios");
-                });
-
-            modelBuilder.Entity("APICalculos.Entidades.Cliente", b =>
-                {
-                    b.Navigation("HistorialClientes");
                 });
 
             modelBuilder.Entity("APICalculos.Entidades.Rol", b =>

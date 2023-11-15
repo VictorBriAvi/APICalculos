@@ -1,6 +1,7 @@
 ﻿using APICalculos.DTOs;
 using APICalculos.Entidades;
 using AutoMapper;
+using System.Data;
 
 namespace APICalculos.Servicios
 {
@@ -14,13 +15,18 @@ namespace APICalculos.Servicios
             CreateMap<Cliente, ClienteDTO>();
             CreateMap<ClienteCreacionDTO, Cliente>();
 
+            CreateMap<HistorialClientes, HistorialClienteDTO>()
+                .ForMember(dto => dto.NombreCompletoCliente, ent => ent.MapFrom(prop => prop.Cliente.NombreCompletoCliente));
+            CreateMap<HistorialClienteCreacionDTO, HistorialClientes>();
+
             CreateMap<Empleado, EmpleadoDTO>();
             CreateMap<EmpleadoCreacionDTO, Empleado>();
 
             CreateMap<TipoDePago, TipoDePagoDTO>();
             CreateMap<TipoDePagoCreacionDTO, TipoDePago>();
 
-            CreateMap<TipoDeServicio, TipoDeServicioDTO>();
+            CreateMap<TipoDeServicio, TipoDeServicioDTO>()
+                .ForMember(dto => dto.NombreCategoriaServicio, ent => ent.MapFrom(prop => prop.CategoriasServicios.NombreCategoriaServicio));
             CreateMap<TipoDeServicioCreacionDTO, TipoDeServicio>();
 
             CreateMap<Servicio, ServicioDTO>()
@@ -41,6 +47,18 @@ namespace APICalculos.Servicios
 
             CreateMap<UsuarioRol, UsuarioRolCreacionDTO>();
             CreateMap<UsuarioRolCreacionDTO, UsuarioRol>();
+
+            CreateMap<Gastos, GastosDTO>()
+                .ForMember(dto => dto.NombreTipoDeGastos, ent => ent.MapFrom(prop => prop.TiposDeGastos.NombreTipoDeGastos));
+            CreateMap<GastosCreacionDTO, Gastos>();
+
+            CreateMap<TiposDeGastos, TiposDeGastosDTO>();
+            CreateMap<TipoDeGastosCreacionDTO, TiposDeGastos>();
+
+            CreateMap<CategoriasServicios, CategoriasServiciosDTO>();
+            CreateMap<CategoriasServiciosCreacionDTO, CategoriasServicios>();
+            
+                
 
 
 

@@ -9,6 +9,6 @@ namespace APICalculos.DTOs
         public int ClienteId { get; set; }
         public int EmpleadoId { get; set; }
         public int TipoDePagoId { get; set; }
-
+        public DateTime FechaIngresoServicio { get; set; }
     }
 }

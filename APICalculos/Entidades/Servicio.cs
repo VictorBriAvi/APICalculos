@@ -12,6 +12,7 @@
         public int TipoDePagoId { get; set; }
         public TipoDePago TipoDePago { get; set; }
         public decimal ValorServicio { get; set; }
+        public DateTime FechaIngresoServicio { get; set; }
 
     }
 }

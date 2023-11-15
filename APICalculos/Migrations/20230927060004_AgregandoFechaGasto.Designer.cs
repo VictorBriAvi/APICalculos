@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APICalculos.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20230707054333_actualizado")]
-    partial class actualizado
+    [Migration("20230927060004_AgregandoFechaGasto")]
+    partial class AgregandoFechaGasto
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -80,6 +80,37 @@ namespace APICalculos.Migrations
                     b.ToTable("Empleados");
                 });
 
+            modelBuilder.Entity("APICalculos.Entidades.Gastos", b =>
+                {
+                    b.Property<int>("GastosId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("GastosId"), 1L, 1);
+
+                    b.Property<string>("DescripcionGastos")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("FechaGastos")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("FechaIngresoGastos")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("PrecioGasto")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TipoDeGastosId")
+                        .HasColumnType("int");
+
+                    b.HasKey("GastosId");
+
+                    b.HasIndex("TipoDeGastosId");
+
+                    b.ToTable("Gastos");
+                });
+
             modelBuilder.Entity("APICalculos.Entidades.Producto", b =>
                 {
                     b.Property<int>("ProductoId")
@@ -143,6 +174,9 @@ namespace APICalculos.Migrations
                     b.Property<int>("EmpleadoId")
                         .HasColumnType("int");
 
+                    b.Property<DateTime>("FechaIngresoServicio")
+                        .HasColumnType("date");
+
                     b.Property<int>("TipoDePagoId")
                         .HasColumnType("int");
 
@@ -197,6 +231,22 @@ namespace APICalculos.Migrations
                     b.ToTable("TipoDeServicios");
                 });
 
+            modelBuilder.Entity("APICalculos.Entidades.TiposDeGastos", b =>
+                {
+                    b.Property<int>("TipoDeGastosId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TipoDeGastosId"), 1L, 1);
+
+                    b.Property<string>("NombreTipoDeGastos")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TipoDeGastosId");
+
+                    b.ToTable("TiposDeGastos");
+                });
+
             modelBuilder.Entity("APICalculos.Entidades.Usuario", b =>
                 {
                     b.Property<int>("UsuarioId")
@@ -243,6 +293,17 @@ namespace APICalculos.Migrations
                     b.HasIndex("RolId");
 
                     b.ToTable("UsuarioRoles");
+                });
+
+            modelBuilder.Entity("APICalculos.Entidades.Gastos", b =>
+                {
+                    b.HasOne("APICalculos.Entidades.TiposDeGastos", "TiposDeGastos")
+                        .WithMany("Gastos")
+                        .HasForeignKey("TipoDeGastosId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("TiposDeGastos");
                 });
 
             modelBuilder.Entity("APICalculos.Entidades.Servicio", b =>
@@ -302,6 +363,11 @@ namespace APICalculos.Migrations
             modelBuilder.Entity("APICalculos.Entidades.Rol", b =>
                 {
                     b.Navigation("RolesUsuario");
+                });
+
+            modelBuilder.Entity("APICalculos.Entidades.TiposDeGastos", b =>
+                {
+                    b.Navigation("Gastos");
                 });
 
             modelBuilder.Entity("APICalculos.Entidades.Usuario", b =>

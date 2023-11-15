@@ -72,9 +72,9 @@ namespace APICalculos.Controllers
             //var clienteExiste = await _context.Clientes.FindAsync(servicioCreacionDTO.ClienteId);
             var empleadoExiste = await _context.Empleados.FindAsync(servicioCreacionDTO.EmpleadoId);
             var tipoDeServicioExiste = await _context.TipoDeServicios.FindAsync(servicioCreacionDTO.TipoDeServicioId);
-            var tipoDePago = await _context.TipoDePagos.FindAsync(servicioCreacionDTO.TipoDePagoId);
+            var tipoDePagoExiste = await _context.TipoDePagos.FindAsync(servicioCreacionDTO.TipoDePagoId);
 
-            if (tipoDePago == null)
+            if (tipoDePagoExiste == null)
             {
                 return BadRequest("El tipo de pago no existe");
             }
@@ -104,13 +104,35 @@ namespace APICalculos.Controllers
             if (servicioDB != null)
             {
 
+                // Comprueba si el valor de TipoDeServicioId es diferente de 0 antes de asignarlo.
+                if (servicioCreacionDTO.TipoDeServicioId != 0)
+                {
+                    servicioDB.TipoDeServicioId = servicioCreacionDTO.TipoDeServicioId;
+                }
 
-                servicioDB.TipoDeServicioId = servicioCreacionDTO.TipoDeServicioId;
-                servicioDB.ClienteId = servicioCreacionDTO.ClienteId;
-                servicioDB.EmpleadoId = servicioCreacionDTO.EmpleadoId;
-                servicioDB.TipoDePagoId = servicioCreacionDTO.TipoDePagoId;
+                // Comprueba si el valor de ClienteId es diferente de 0 antes de asignarlo.
+                if (servicioCreacionDTO.ClienteId != 0)
+                {
+                    servicioDB.ClienteId = servicioCreacionDTO.ClienteId;
+                }
 
+                // Comprueba si el valor de EmpleadoId es diferente de 0 antes de asignarlo.
+                if (servicioCreacionDTO.EmpleadoId != 0)
+                {
+                    servicioDB.EmpleadoId = servicioCreacionDTO.EmpleadoId;
+                }
 
+                // Comprueba si el valor de TipoDePagoId es diferente de 0 antes de asignarlo.
+                if (servicioCreacionDTO.TipoDePagoId != 0)
+                {
+                    servicioDB.TipoDePagoId = servicioCreacionDTO.TipoDePagoId;
+                }
+
+                // Comprueba si el valor de ValorServicio es diferente de 0 antes de asignarlo.
+                if (servicioCreacionDTO.ValorServicio != 0)
+                {
+                    servicioDB.ValorServicio = servicioCreacionDTO.ValorServicio;
+                }
                 await _context.SaveChangesAsync();
                 var mensaje = "Se modificó correctamente.";
                 return Ok(mensaje);

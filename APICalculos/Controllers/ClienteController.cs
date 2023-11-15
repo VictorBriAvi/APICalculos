@@ -49,7 +49,6 @@ namespace APICalculos.Controllers
                 ClienteId = clienteId.ClienteId,
                 NombreCompletoCliente = clienteId.NombreCompletoCliente,
                 NumeroDocumento = clienteId.NumeroDocumento,
-                Historial = clienteId.Historial,
                 FechaNacimiento = clienteId.FechaNacimiento,
             };
 
@@ -73,8 +72,7 @@ namespace APICalculos.Controllers
             {
                 ClienteId = clienteCodigo.ClienteId,
                 NombreCompletoCliente = clienteCodigo.NombreCompletoCliente,
-               
-                Historial = clienteCodigo.Historial
+    
             };
 
             return Ok(clienteDTO);
@@ -146,10 +144,7 @@ namespace APICalculos.Controllers
             {
                 clienteDB.NumeroDocumento = clienteCreacionDTO.NumeroDocumento;
             }
-            if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Historial))
-            {
-                clienteDB.Historial = clienteCreacionDTO.Historial;
-            }
+
 
             if (clienteCreacionDTO.FechaNacimiento != DateTime.MinValue)
             {
