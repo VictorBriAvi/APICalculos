@@ -66,6 +66,70 @@ namespace APICalculos.Controllers
 
         }
 
+        [HttpGet("buscarServicioPorFecha/{fecha}")]
+        public async Task<ActionResult<IEnumerable<ServicioDTO>>>GetServicioByFecha(DateTime fecha)
+        {
+            var serviciosPorFecha = await _context.Servicios
+                .Include(s => s.Empleado)
+                .Include(s => s.Cliente)
+                .Include(s => s.TipoDePago)
+                .Include(s => s.TipoDeServicio)
+                .Where(s => s.FechaIngresoServicio.Date == fecha.Date) // Filtra por la fecha recibida
+                .ToListAsync();
+
+            if (serviciosPorFecha.Count == 0)
+            {
+                var mensajeError = $"No se encontraron servicios para la fecha '{fecha:yyyy-MM-dd}'.";
+                return StatusCode((int)HttpStatusCode.NotFound, mensajeError);
+            }
+
+            var serviciosDTOs = serviciosPorFecha.Select(s => new ServicioDTO
+            {
+                ServicioId = s.ServicioId,
+                NombreCompletoEmpleado = s.Empleado.NombreCompletoEmpleado,
+                NombreCompletoCliente = s.Cliente.NombreCompletoCliente,
+                NombreTipoDePago = s.TipoDePago.NombreTipoDePago,
+                NombreServicio = s.TipoDeServicio.NombreServicio,
+                ValorServicio = s.ValorServicio,
+                FechaIngresoServicio = s.FechaIngresoServicio
+                // Agrega más propiedades según tus necesidades
+            });
+
+            return Ok(serviciosDTOs);
+        }
+
+        [HttpGet("buscarServicioPorRangoFecha/{fechaInicio}/{fechaFin}")]
+        public async Task<ActionResult<IEnumerable<ServicioDTO>>> GetServicioByRangoFecha( DateTime fechaInicio,  DateTime fechaFin)
+        {
+            var serviciosPorRangoFecha = await _context.Servicios
+                .Include(s => s.Empleado)
+                .Include(s => s.Cliente)
+                .Include(s => s.TipoDePago)
+                .Include(s => s.TipoDeServicio)
+                .Where(s => s.FechaIngresoServicio.Date >= fechaInicio.Date && s.FechaIngresoServicio.Date <= fechaFin.Date) // Filtra por el rango de fechas recibido
+                .ToListAsync();
+
+            if (serviciosPorRangoFecha.Count == 0)
+            {
+                var mensajeError = $"No se encontraron servicios para el rango de fechas entre '{fechaInicio:yyyy-MM-dd}' y '{fechaFin:yyyy-MM-dd}'.";
+                return StatusCode((int)HttpStatusCode.NotFound, mensajeError);
+            }
+
+            var serviciosDTOs = serviciosPorRangoFecha.Select(s => new ServicioDTO
+            {
+                ServicioId = s.ServicioId,
+                NombreCompletoEmpleado = s.Empleado.NombreCompletoEmpleado,
+                NombreCompletoCliente = s.Cliente.NombreCompletoCliente,
+                NombreTipoDePago = s.TipoDePago.NombreTipoDePago,
+                NombreServicio = s.TipoDeServicio.NombreServicio,
+                ValorServicio = s.ValorServicio,
+                FechaIngresoServicio = s.FechaIngresoServicio
+                // Agrega más propiedades según tus necesidades
+            });
+
+            return Ok(serviciosDTOs);
+        }
+
         [HttpPost]
         public async Task<ActionResult<Servicio>> Post(ServicioCreacionDTO servicioCreacionDTO)
         {

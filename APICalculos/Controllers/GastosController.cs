@@ -5,6 +5,7 @@ using AutoMapper.QueryableExtensions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using System.Net;
 
 namespace APICalculos.Controllers
@@ -51,12 +52,13 @@ namespace APICalculos.Controllers
 
             return Ok(gastosDTO);
         }
-        [HttpGet("buscarGastosPorFecha")]
-        public async Task<ActionResult<IEnumerable<GastosDTO>>> GetGastosPorFecha([FromQuery] DateTime fecha)
+        [HttpGet("buscarGastosPorFecha/{fecha}")]
+        public async Task<ActionResult<IEnumerable<GastosDTO>>> GetGastosPorFecha( DateTime fecha)
         {
             var gastosPorFecha = await _dbContext.Gastos
             .Include(s => s.TiposDeGastos)
             .Where(g => g.FechaGastos.Date == fecha.Date)
+            .ProjectTo<GastosDTO>(_mapper.ConfigurationProvider)
             .ToListAsync();
 
             if (gastosPorFecha.Count == 0)
@@ -65,16 +67,27 @@ namespace APICalculos.Controllers
                 return StatusCode((int)HttpStatusCode.NotFound, mensajeError);
             }
 
-            var gastosDTOs = gastosPorFecha.Select(g => new GastosDTO
-            {
-                GastosId = g.GastosId,
-                DescripcionGastos = g.DescripcionGastos,
-                NombreTipoDeGastos = g.TiposDeGastos.NombreTipoDeGastos,
-                FechaGastos = g.FechaGastos,
-                PrecioGasto = g.PrecioGasto
-            });
 
-            return Ok(gastosDTOs);
+
+            return Ok(gastosPorFecha);
+        }
+
+        [HttpGet("buscarGastosPorRangoFecha/{fechaInicio}/{fechaFin}")]
+        public async Task<ActionResult<IEnumerable<GastosDTO>>> GetGastosPorRangoFecha( DateTime fechaInicio,  DateTime fechaFin)
+        {
+            var gastosPorRangoFecha = await _dbContext.Gastos
+                .Include(s => s.TiposDeGastos)
+                .Where(g => g.FechaGastos.Date >= fechaInicio.Date && g.FechaGastos.Date <= fechaFin.Date)
+                .ProjectTo<GastosDTO>(_mapper.ConfigurationProvider)
+                .ToListAsync();
+
+            if (gastosPorRangoFecha.Count == 0)
+            {
+                var mensajeError = $"No se encontraron gastos para el rango de fechas entre '{fechaInicio:yyyy-MM-dd}' y '{fechaFin:yyyy-MM-dd}'.";
+                return StatusCode((int)HttpStatusCode.NotFound, mensajeError);
+            }
+
+            return Ok(gastosPorRangoFecha);
         }
 
         [HttpPost]
@@ -86,6 +99,8 @@ namespace APICalculos.Controllers
             {
                 return BadRequest("El tipo de gasto no existe");
             }
+
+
             var gasto = _mapper.Map<Gastos>(gastosCreacionDTO);
             _dbContext.Add(gasto);
             await _dbContext.SaveChangesAsync();
