@@ -85,7 +85,7 @@ namespace APICalculos.Controllers
             var ExisteNombreDeTipoDePago = await _context.TipoDePagos.AnyAsync(g => g.NombreTipoDePago.Replace(" ", "").Trim() == tipoDePagoCreacionDTO.NombreTipoDePago.Replace(" ", "").Trim());
 
 
-            var tipoDePagoDB = await _context.Empleados.AsTracking().FirstOrDefaultAsync(a => a.EmpleadoId == id);
+            var tipoDePagoDB = await _context.TipoDePagos.AsTracking().FirstOrDefaultAsync(a => a.TipoDePagoId == id);
 
             if (string.IsNullOrWhiteSpace(tipoDePagoCreacionDTO.NombreTipoDePago))
             {

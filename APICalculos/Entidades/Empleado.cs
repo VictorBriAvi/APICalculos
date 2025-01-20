@@ -7,6 +7,7 @@
         public string DocumentoNacional { get; set; }
         public DateTime FechaNacimiento { get; set; }
 
+        public ICollection<DetalleVenta> DetalleVentas { get; set; }
 
     }
 }

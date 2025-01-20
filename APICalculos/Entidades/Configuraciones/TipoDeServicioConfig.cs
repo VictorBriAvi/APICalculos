@@ -17,6 +17,10 @@ namespace APICalculos.Entidades.Configuraciones
                 .HasMaxLength(100);
 
 
+            builder.HasOne(ts => ts.CategoriasServicios)
+                .WithMany()
+                .HasForeignKey(ts => ts.CategoriasServiciosId);
+
         }
     }
 }

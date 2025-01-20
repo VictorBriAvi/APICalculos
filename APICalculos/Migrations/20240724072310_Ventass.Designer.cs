@@ -4,6 +4,7 @@ using APICalculos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APICalculos.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240724072310_Ventass")]
+    partial class Ventass
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -74,8 +76,8 @@ namespace APICalculos.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DetalleVentaId"), 1L, 1);
 
-                    b.Property<int>("EmpleadoId")
-                        .HasColumnType("int");
+                    b.Property<decimal>("Precio")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TipoDeServicioId")
                         .HasColumnType("int");
@@ -84,8 +86,6 @@ namespace APICalculos.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("DetalleVentaId");
-
-                    b.HasIndex("EmpleadoId");
 
                     b.HasIndex("TipoDeServicioId");
 
@@ -393,6 +393,9 @@ namespace APICalculos.Migrations
                     b.Property<int>("TipoDePagoId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("ValorTotal")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("VentaId");
 
                     b.HasIndex("ClienteId");
@@ -404,12 +407,6 @@ namespace APICalculos.Migrations
 
             modelBuilder.Entity("APICalculos.Entidades.DetalleVenta", b =>
                 {
-                    b.HasOne("APICalculos.Entidades.Empleado", "Empleado")
-                        .WithMany("DetalleVentas")
-                        .HasForeignKey("EmpleadoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("APICalculos.Entidades.TipoDeServicio", "TipoDeServicio")
                         .WithMany("DetalleVentas")
                         .HasForeignKey("TipoDeServicioId")
@@ -421,8 +418,6 @@ namespace APICalculos.Migrations
                         .HasForeignKey("VentaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Empleado");
 
                     b.Navigation("TipoDeServicio");
 
@@ -549,11 +544,6 @@ namespace APICalculos.Migrations
                     b.Navigation("HistorialClientes");
 
                     b.Navigation("Ventas");
-                });
-
-            modelBuilder.Entity("APICalculos.Entidades.Empleado", b =>
-                {
-                    b.Navigation("DetalleVentas");
                 });
 
             modelBuilder.Entity("APICalculos.Entidades.Rol", b =>

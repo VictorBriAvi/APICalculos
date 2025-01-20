@@ -25,10 +25,14 @@ namespace APICalculos.Controllers
         }
 
         [HttpGet]
-        public async Task<List<ClienteDTO>> GetProjectTo()
+        public async Task<List<ClienteDTO>> ObtenerClientes()
         {
-            return await _context.Clientes
+       
+
+            return await _context.Clientes.OrderByDescending(c => c.ClienteId)
                 .ProjectTo<ClienteDTO>(_mapper.ConfigurationProvider).ToListAsync();
+
+
 
         }
 
@@ -129,12 +133,12 @@ namespace APICalculos.Controllers
             var clienteDB = await _context.Clientes.AsTracking().FirstOrDefaultAsync(a => a.ClienteId == id);
 
 
-            if (existeNombreCliente)
-            {
-                var texto = $"El nombre del cliente ya existe";
-                return BadRequest(texto);
-            }
-
+            //if (existeNombreCliente)
+            //{
+            //    var texto = $"El nombre del cliente ya existe";
+            //    return BadRequest(texto);
+            //}
+    
 
             if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.NombreCompletoCliente))
             {

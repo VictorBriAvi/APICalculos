@@ -37,6 +37,8 @@ namespace APICalculos
         public DbSet<UsuarioRol> UsuarioRoles { get; set; }
         public DbSet<Gastos> Gastos { get; set; }
         public DbSet<TiposDeGastos> TiposDeGastos { get; set; }
+        public DbSet<Venta> Ventas { get; set; }
+        public DbSet<DetalleVenta>  DetalleVentas { get; set; }
   
         
 

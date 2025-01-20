@@ -49,8 +49,8 @@ namespace APICalculos.Controllers
 
                 }
 
-            var tipoDeServicioDTO = new TipoDeServicioDTO
-            {
+                var tipoDeServicioDTO = new TipoDeServicioDTO
+                {
                 TipoDeServicioId = tipoDeServicioId.TipoDeServicioId,
                 NombreServicio = tipoDeServicioId.NombreServicio,
                 PrecioServicio = tipoDeServicioId.PrecioServicio,
@@ -62,7 +62,34 @@ namespace APICalculos.Controllers
 
             }
 
-            [HttpPost]
+        [HttpGet("buscarPorNombre/{nombreServicio}")]
+        public async Task<ActionResult<IEnumerable<TipoDeServicioDTO>>> BuscarPorNombre(string nombreServicio)
+        {
+            var nombreSinEspacios = nombreServicio.Replace(" ", "").ToLower();
+
+            var tiposDeServicio = await _context.TipoDeServicios
+                .Include(s => s.CategoriasServicios)
+                .Where(g => g.NombreServicio.Replace(" ", "").ToLower().Contains(nombreSinEspacios))
+                .Select(tipoDeServicio => new TipoDeServicioDTO
+                {
+                    TipoDeServicioId = tipoDeServicio.TipoDeServicioId,
+                    NombreServicio = tipoDeServicio.NombreServicio,
+                    PrecioServicio = tipoDeServicio.PrecioServicio,
+                    NombreCategoriaServicio = tipoDeServicio.CategoriasServicios.NombreCategoriaServicio
+                })
+                .ToListAsync();
+
+            if (!tiposDeServicio.Any())
+            {
+                var mensajeError = $"No se encontró ningún producto con el nombre '{nombreServicio}'.";
+                return StatusCode((int)HttpStatusCode.NotFound, mensajeError);
+            }
+
+            return Ok(tiposDeServicio);
+        }
+
+
+        [HttpPost]
             public async Task<ActionResult<TipoDeServicio>> Post(TipoDeServicioCreacionDTO tipoDeServicioCreacionDTO)
             {
                 var existeNombreServicio = await _context.TipoDeServicios.AnyAsync(g => g.NombreServicio.Replace(" ", "").Trim() == tipoDeServicioCreacionDTO.NombreServicio.Replace(" ", "").Trim());

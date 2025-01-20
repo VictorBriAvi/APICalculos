@@ -13,7 +13,7 @@ namespace APICalculos.DTOs
         }
 
         public string  NombreCategoriaServicio { get; set; }
-        public int CategoriaDeServicioId { get; set; }
+
 
     }
 }

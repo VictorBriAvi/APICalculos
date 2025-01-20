@@ -57,13 +57,28 @@ namespace APICalculos.Servicios
 
             CreateMap<CategoriasServicios, CategoriasServiciosDTO>();
             CreateMap<CategoriasServiciosCreacionDTO, CategoriasServicios>();
+
+            CreateMap<Venta, VentaDTO>()
+                .ForMember(dto => dto.NombreCliente, opt => opt.MapFrom(v => v.NombreCliente))
+                .ForMember(dto => dto.NombreTipoDePago, opt => opt.MapFrom(v => v.NombreTipoDePago))
+                .ForMember(dto => dto.ValorTotal, opt => opt.MapFrom(v => v.ValorTotal))
+                .ForMember(dto => dto.Detalle, opt => opt.MapFrom(v => v.Detalle));
+
+            CreateMap<Venta, ClienteYTipoDePagoDTO>()
+                .ForMember(dto => dto.ClienteId, opt => opt.MapFrom(v => v.ClienteId))
+                .ForMember(dto => dto.TipoDePagoId, opt => opt.MapFrom(v => v.TipoDePagoId));
+
+            CreateMap<VentaCreacionDTO, Venta>();
+
+            CreateMap<DetalleVenta, DetalleVentaDTO>()
+                .ForMember(dto => dto.NombreClienteVenta, ent => ent.MapFrom(prop => prop.Venta.Cliente.NombreCompletoCliente))
+                .ForMember(dto => dto.NombreTipoDeServicioVenta, ent => ent.MapFrom(prop => prop.TipoDeServicio.NombreServicio))
+                .ForMember(dto => dto.PrecioTipoDeServicio, ent => ent.MapFrom(prop => prop.TipoDeServicio.PrecioServicio))
+                .ForMember(dto => dto.NombreEmpleadoVenta, ent => ent.MapFrom(prop => prop.Empleado.NombreCompletoEmpleado));
+  
+
+            CreateMap<DetalleVentaCreacionDTO, DetalleVenta>();
             
-                
-
-
-
-
-
         }
     }
 }

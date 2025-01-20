@@ -102,6 +102,8 @@ namespace APICalculos.Controllers
 
 
             var gasto = _mapper.Map<Gastos>(gastosCreacionDTO);
+            gasto.FechaGastos = DateTime.Now;
+
             _dbContext.Add(gasto);
             await _dbContext.SaveChangesAsync();
             var mensaje = "Se agrego correctamente un nuevo gasto :D";
@@ -125,19 +127,14 @@ namespace APICalculos.Controllers
                 {
                     gastoDB.TipoDeGastosId = gastosCreacionDTO.TipoDeGastosId;
                 }
-
-                // Comprueba si el valor de FechaGastos es diferente de la fecha predeterminada antes de asignarlo.
-                if (gastosCreacionDTO.FechaGastos != default(DateTime))
-                {
-                    gastoDB.FechaGastos = gastosCreacionDTO.FechaGastos;
-                }
-
                 // Comprueba si el valor de PrecioGasto es diferente de 0 antes de asignarlo.
                 if (gastosCreacionDTO.PrecioGasto != 0)
                 {
                     gastoDB.PrecioGasto = gastosCreacionDTO.PrecioGasto;
                 }
 
+
+                gastoDB.FechaGastos = gastoDB.FechaGastos;
 
                 await _dbContext.SaveChangesAsync();
                 var mensaje = "Se modifico el gasto correctamente";

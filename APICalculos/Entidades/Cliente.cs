@@ -8,6 +8,7 @@
         public DateTime FechaNacimiento { get; set; }
 
         // Establezco una clave foranea para la relacion con historial clientes
+        public ICollection<Venta> Ventas { get; set; }
         public ICollection<HistorialClientes> HistorialClientes { get; set; }
 
     }
