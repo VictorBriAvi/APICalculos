@@ -94,23 +94,23 @@ namespace APICalculos.Controllers
         public async Task<ActionResult> Put(EmpleadoCreacionDTO empleadoCreacionDTO, int id)
         {
 
-            var existeNombreEmpleado = await _context.Empleados.AnyAsync(g => g.NombreCompletoEmpleado.Replace(" ", "").Trim() == empleadoCreacionDTO.NombreCompletoEmpleado.Replace(" ", "").Trim());
+            //var existeNombreEmpleado = await _context.Empleados.AnyAsync(g => g.NombreCompletoEmpleado.Replace(" ", "").Trim() == empleadoCreacionDTO.NombreCompletoEmpleado.Replace(" ", "").Trim());
 
-            var existeDocumentoEmpleado = await _context.Empleados.AnyAsync(g => g.DocumentoNacional.Replace(" ", "").Trim() == empleadoCreacionDTO.DocumentoNacional.Replace(" ", "").Trim());
+            //var existeDocumentoEmpleado = await _context.Empleados.AnyAsync(g => g.DocumentoNacional.Replace(" ", "").Trim() == empleadoCreacionDTO.DocumentoNacional.Replace(" ", "").Trim());
 
             var empleadoDB = await _context.Empleados.AsTracking().FirstOrDefaultAsync(a => a.EmpleadoId == id);
 
 
-            if (existeNombreEmpleado)
-            {
-                var texto = $"Este codigo ya esta existente";
-                return BadRequest(texto);
-            }
-            if (existeDocumentoEmpleado)
-            {
-                var texto = $"Este documento ya esta existente";
-                return BadRequest(texto);
-            }
+            //if (existeNombreEmpleado)
+            //{
+            //    var texto = $"Este codigo ya esta existente";
+            //    return BadRequest(texto);
+            //}
+            //if (existeDocumentoEmpleado)
+            //{
+            //    var texto = $"Este documento ya esta existente";
+            //    return BadRequest(texto);
+            //}
 
             if (empleadoDB is null)
             {
