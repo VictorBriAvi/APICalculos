@@ -1,0 +1,93 @@
+﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.Interfaces;
+using APICalculos.Domain.Entidades;
+using APICalculos.Infrastructure.UnitOfWork;
+using AutoMapper;
+
+namespace APICalculos.Application.Services
+{
+    public class ServiceTypeService : IServiceTypeService
+    {
+        private readonly IServiceTypeRepository _serviceTypeRepository;
+        private readonly IMapper _mapper;
+        private readonly IUnitOfWork _unitOfWork;
+
+        public ServiceTypeService(IServiceTypeRepository serviceTypeRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        {
+            _serviceTypeRepository = serviceTypeRepository;
+            _mapper = mapper;
+            _unitOfWork = unitOfWork;
+        }
+
+        public async Task<List<ServiceTypeDTO>> GetAllServicesTypesAsync()
+        {
+            var servicesTypes = await _serviceTypeRepository.GetAllAsync();
+            return _mapper.Map<List<ServiceTypeDTO>>(servicesTypes);
+        }
+
+        public async Task<ServiceTypeDTO> GetServiceTypeForId(int id)
+        {
+            var serviceType = await _serviceTypeRepository.GetByIdAsync(id);
+            if (serviceType == null)
+            {
+                return null;
+            }
+            return _mapper.Map<ServiceTypeDTO>(serviceType);
+        }
+
+        public async Task<ServiceTypeDTO> AddServiceTypeAsync(ServiceTypeCreationDTO serviceTypeCreationDTO)
+        {
+            if (string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Name))
+            {
+                throw new ArgumentException("El nombre de tipo de servicio no puede estar vacio ");
+            }
+
+            var existName = await _serviceTypeRepository.ExistsByNameAsync(serviceTypeCreationDTO.Name);
+            if (existName)
+            {
+                throw new InvalidOperationException("EL nombre del cliente ya existe");
+            }
+
+            var serviceType = _mapper.Map<ServiceType>(serviceTypeCreationDTO);
+
+            await _unitOfWork.ServiceTypes.AddAsync(serviceType);
+
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<ServiceTypeDTO>(serviceType);
+               
+        }
+
+        public async Task UpdateServiceTypeAsync(int id, ServiceTypeCreationDTO serviceTypeCreationDTO)
+        {
+            var serviceTypeDB = await _serviceTypeRepository.GetByIdAsync(id);
+            if (serviceTypeDB == null)
+                throw new KeyNotFoundException("Tipo de servico no encontrado");
+        
+            if(!string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Name))
+                serviceTypeDB.Name = serviceTypeCreationDTO.Name;
+
+            if (!string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Price.ToString()))
+                serviceTypeDB.Price = serviceTypeCreationDTO.Price;
+
+            if (serviceTypeCreationDTO.ServiceCategorieId > 0)
+                serviceTypeDB.ServiceCategorieId = serviceTypeCreationDTO.ServiceCategorieId;
+
+            _serviceTypeRepository.Update(serviceTypeDB);
+            await _unitOfWork.SaveChangesAsync();
+        }
+
+        public async Task DeleteServiceTypeAsync(int Id)
+        {
+            var serviceTypeDB = await _serviceTypeRepository.GetByIdAsync(Id);
+
+            if (serviceTypeDB == null)
+            {
+                throw new KeyNotFoundException("Tipo de servicio no encontrado");
+            }
+
+            _serviceTypeRepository.Remove(serviceTypeDB);
+            await _unitOfWork.SaveChangesAsync();
+        }
+    }
+}

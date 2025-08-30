@@ -4,6 +4,7 @@ using APICalculos.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APICalculos.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231008223717_AgregadoStockProducto")]
+    partial class AgregadoStockProducto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -22,7 +24,7 @@ namespace APICalculos.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.CategoriasServicios", b =>
+            modelBuilder.Entity("APICalculos.Entidades.CategoriasServicios", b =>
                 {
                     b.Property<int>("CategoriasServiciosId")
                         .ValueGeneratedOnAdd()
@@ -37,90 +39,62 @@ namespace APICalculos.Migrations
 
                     b.HasKey("CategoriasServiciosId");
 
-                    b.ToTable("CategoriasServicios", (string)null);
+                    b.ToTable("CategoriasServicios");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Client", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Cliente", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("ClienteId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ClienteId"), 1L, 1);
 
-                    b.Property<DateTime>("DateBirth")
+                    b.Property<DateTime>("FechaNacimiento")
                         .HasColumnType("date");
 
-                    b.Property<string>("IdentityDocument")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Name")
+                    b.Property<string>("NombreCompletoCliente")
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Clients", (string)null);
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.DetalleVenta", b =>
-                {
-                    b.Property<int>("DetalleVentaId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DetalleVentaId"), 1L, 1);
-
-                    b.Property<int>("EmpleadoId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TipoDeServicioId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("VentaId")
-                        .HasColumnType("int");
-
-                    b.HasKey("DetalleVentaId");
-
-                    b.HasIndex("EmpleadoId");
-
-                    b.HasIndex("TipoDeServicioId");
-
-                    b.HasIndex("VentaId");
-
-                    b.ToTable("DetalleVentas", (string)null);
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Employee", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
-
-                    b.Property<DateTime>("DateBirth")
-                        .HasColumnType("date");
-
-                    b.Property<string>("IdentityDocument")
+                    b.Property<string>("NumeroDocumento")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Name")
+                    b.HasKey("ClienteId");
+
+                    b.ToTable("Clientes");
+                });
+
+            modelBuilder.Entity("APICalculos.Entidades.Empleado", b =>
+                {
+                    b.Property<int>("EmpleadoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmpleadoId"), 1L, 1);
+
+                    b.Property<string>("DocumentoNacional")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("FechaNacimiento")
+                        .HasColumnType("date");
+
+                    b.Property<string>("NombreCompletoEmpleado")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("Id");
+                    b.HasKey("EmpleadoId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Empleados");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Gastos", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Gastos", b =>
                 {
                     b.Property<int>("GastosId")
                         .ValueGeneratedOnAdd()
@@ -145,10 +119,10 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("TipoDeGastosId");
 
-                    b.ToTable("Gastos", (string)null);
+                    b.ToTable("Gastos");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.HistorialClientes", b =>
+            modelBuilder.Entity("APICalculos.Entidades.HistorialClientes", b =>
                 {
                     b.Property<int>("HistorialClientesId")
                         .ValueGeneratedOnAdd()
@@ -172,10 +146,10 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("HistorialClientes", (string)null);
+                    b.ToTable("HistorialClientes");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Producto", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Producto", b =>
                 {
                     b.Property<int>("ProductoId")
                         .ValueGeneratedOnAdd()
@@ -206,10 +180,10 @@ namespace APICalculos.Migrations
 
                     b.HasKey("ProductoId");
 
-                    b.ToTable("Productos", (string)null);
+                    b.ToTable("Productos");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Rol", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Rol", b =>
                 {
                     b.Property<int>("RolId")
                         .ValueGeneratedOnAdd()
@@ -224,10 +198,10 @@ namespace APICalculos.Migrations
 
                     b.HasKey("RolId");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Servicio", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Servicio", b =>
                 {
                     b.Property<int>("ServicioId")
                         .ValueGeneratedOnAdd()
@@ -263,10 +237,10 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("TipoDeServicioId");
 
-                    b.ToTable("Servicios", (string)null);
+                    b.ToTable("Servicios");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.TipoDePago", b =>
+            modelBuilder.Entity("APICalculos.Entidades.TipoDePago", b =>
                 {
                     b.Property<int>("TipoDePagoId")
                         .ValueGeneratedOnAdd()
@@ -279,10 +253,10 @@ namespace APICalculos.Migrations
 
                     b.HasKey("TipoDePagoId");
 
-                    b.ToTable("TipoDePagos", (string)null);
+                    b.ToTable("TipoDePagos");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.TipoDeServicio", b =>
+            modelBuilder.Entity("APICalculos.Entidades.TipoDeServicio", b =>
                 {
                     b.Property<int>("TipoDeServicioId")
                         .ValueGeneratedOnAdd()
@@ -291,9 +265,6 @@ namespace APICalculos.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TipoDeServicioId"), 1L, 1);
 
                     b.Property<int>("CategoriasServiciosId")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("CategoriasServiciosId1")
                         .HasColumnType("int");
 
                     b.Property<string>("NombreServicio")
@@ -307,12 +278,10 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("CategoriasServiciosId");
 
-                    b.HasIndex("CategoriasServiciosId1");
-
-                    b.ToTable("TipoDeServicios", (string)null);
+                    b.ToTable("TipoDeServicios");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.TiposDeGastos", b =>
+            modelBuilder.Entity("APICalculos.Entidades.TiposDeGastos", b =>
                 {
                     b.Property<int>("TipoDeGastosId")
                         .ValueGeneratedOnAdd()
@@ -325,10 +294,10 @@ namespace APICalculos.Migrations
 
                     b.HasKey("TipoDeGastosId");
 
-                    b.ToTable("TiposDeGastos", (string)null);
+                    b.ToTable("TiposDeGastos");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Usuario", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Usuario", b =>
                 {
                     b.Property<int>("UsuarioId")
                         .ValueGeneratedOnAdd()
@@ -358,10 +327,10 @@ namespace APICalculos.Migrations
 
                     b.HasKey("UsuarioId");
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Usuarios");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.UsuarioRol", b =>
+            modelBuilder.Entity("APICalculos.Entidades.UsuarioRol", b =>
                 {
                     b.Property<int>("UsuarioId")
                         .HasColumnType("int");
@@ -373,65 +342,12 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("RolId");
 
-                    b.ToTable("UsuarioRoles", (string)null);
+                    b.ToTable("UsuarioRoles");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Venta", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Gastos", b =>
                 {
-                    b.Property<int>("VentaId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VentaId"), 1L, 1);
-
-                    b.Property<int>("ClienteId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FechaVenta")
-                        .HasColumnType("date");
-
-                    b.Property<int>("TipoDePagoId")
-                        .HasColumnType("int");
-
-                    b.HasKey("VentaId");
-
-                    b.HasIndex("ClienteId");
-
-                    b.HasIndex("TipoDePagoId");
-
-                    b.ToTable("Ventas", (string)null);
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.DetalleVenta", b =>
-                {
-                    b.HasOne("APICalculos.Domain.Entidades.Employee", "Empleado")
-                        .WithMany("DetalleVentas")
-                        .HasForeignKey("EmpleadoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("APICalculos.Domain.Entidades.TipoDeServicio", "TipoDeServicio")
-                        .WithMany("DetalleVentas")
-                        .HasForeignKey("TipoDeServicioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("APICalculos.Domain.Entidades.Venta", "Venta")
-                        .WithMany("Detalle")
-                        .HasForeignKey("VentaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Empleado");
-
-                    b.Navigation("TipoDeServicio");
-
-                    b.Navigation("Venta");
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Gastos", b =>
-                {
-                    b.HasOne("APICalculos.Domain.Entidades.TiposDeGastos", "TiposDeGastos")
+                    b.HasOne("APICalculos.Entidades.TiposDeGastos", "TiposDeGastos")
                         .WithMany("Gastos")
                         .HasForeignKey("TipoDeGastosId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -440,9 +356,9 @@ namespace APICalculos.Migrations
                     b.Navigation("TiposDeGastos");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.HistorialClientes", b =>
+            modelBuilder.Entity("APICalculos.Entidades.HistorialClientes", b =>
                 {
-                    b.HasOne("APICalculos.Domain.Entidades.Client", "Cliente")
+                    b.HasOne("APICalculos.Entidades.Cliente", "Cliente")
                         .WithMany("HistorialClientes")
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -451,27 +367,27 @@ namespace APICalculos.Migrations
                     b.Navigation("Cliente");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Servicio", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Servicio", b =>
                 {
-                    b.HasOne("APICalculos.Domain.Entidades.Client", "Cliente")
+                    b.HasOne("APICalculos.Entidades.Cliente", "Cliente")
                         .WithMany()
                         .HasForeignKey("ClienteId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("APICalculos.Domain.Entidades.Employee", "Empleado")
+                    b.HasOne("APICalculos.Entidades.Empleado", "Empleado")
                         .WithMany()
                         .HasForeignKey("EmpleadoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("APICalculos.Domain.Entidades.TipoDePago", "TipoDePago")
+                    b.HasOne("APICalculos.Entidades.TipoDePago", "TipoDePago")
                         .WithMany()
                         .HasForeignKey("TipoDePagoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("APICalculos.Domain.Entidades.TipoDeServicio", "TipoDeServicio")
+                    b.HasOne("APICalculos.Entidades.TipoDeServicio", "TipoDeServicio")
                         .WithMany()
                         .HasForeignKey("TipoDeServicioId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -486,30 +402,26 @@ namespace APICalculos.Migrations
                     b.Navigation("TipoDeServicio");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.TipoDeServicio", b =>
+            modelBuilder.Entity("APICalculos.Entidades.TipoDeServicio", b =>
                 {
-                    b.HasOne("APICalculos.Domain.Entidades.CategoriasServicios", "CategoriasServicios")
-                        .WithMany()
+                    b.HasOne("APICalculos.Entidades.CategoriasServicios", "CategoriasServicios")
+                        .WithMany("TipoDeServicios")
                         .HasForeignKey("CategoriasServiciosId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("APICalculos.Domain.Entidades.CategoriasServicios", null)
-                        .WithMany("TipoDeServicios")
-                        .HasForeignKey("CategoriasServiciosId1");
-
                     b.Navigation("CategoriasServicios");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.UsuarioRol", b =>
+            modelBuilder.Entity("APICalculos.Entidades.UsuarioRol", b =>
                 {
-                    b.HasOne("APICalculos.Domain.Entidades.Rol", "Rol")
+                    b.HasOne("APICalculos.Entidades.Rol", "Rol")
                         .WithMany("RolesUsuario")
                         .HasForeignKey("RolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("APICalculos.Domain.Entidades.Usuario", "Usuario")
+                    b.HasOne("APICalculos.Entidades.Usuario", "Usuario")
                         .WithMany("UsuarioRoles")
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -520,65 +432,29 @@ namespace APICalculos.Migrations
                     b.Navigation("Usuario");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Venta", b =>
-                {
-                    b.HasOne("APICalculos.Domain.Entidades.Client", "Client")
-                        .WithMany("Ventas")
-                        .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("APICalculos.Domain.Entidades.TipoDePago", "TipoDePago")
-                        .WithMany()
-                        .HasForeignKey("TipoDePagoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Client");
-
-                    b.Navigation("TipoDePago");
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.CategoriasServicios", b =>
+            modelBuilder.Entity("APICalculos.Entidades.CategoriasServicios", b =>
                 {
                     b.Navigation("TipoDeServicios");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Client", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Cliente", b =>
                 {
                     b.Navigation("HistorialClientes");
-
-                    b.Navigation("Ventas");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Employee", b =>
-                {
-                    b.Navigation("DetalleVentas");
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Rol", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Rol", b =>
                 {
                     b.Navigation("RolesUsuario");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.TipoDeServicio", b =>
-                {
-                    b.Navigation("DetalleVentas");
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.TiposDeGastos", b =>
+            modelBuilder.Entity("APICalculos.Entidades.TiposDeGastos", b =>
                 {
                     b.Navigation("Gastos");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Usuario", b =>
+            modelBuilder.Entity("APICalculos.Entidades.Usuario", b =>
                 {
                     b.Navigation("UsuarioRoles");
-                });
-
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Venta", b =>
-                {
-                    b.Navigation("Detalle");
                 });
 #pragma warning restore 612, 618
         }

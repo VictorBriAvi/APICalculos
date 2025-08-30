@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.16" />
@@ -18,5 +19,24 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.3" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.31.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="API\Properties\" />
+    <Folder Include="Application\Validators\" />
+    <Folder Include="Domain\Enums\" />
+    <Folder Include="Domain\Exceptions\" />
+    <Folder Include="Domain\ValueObjects\" />
+    <Folder Include="Infrastructure\Extensions\" />
+  </ItemGroup>
+
+	<ItemGroup>
+		<Content Update="appsettings.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+		<Content Update="appsettings.Development.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
 
 </Project>

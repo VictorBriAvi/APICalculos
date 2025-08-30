@@ -4,6 +4,7 @@ using APICalculos.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace APICalculos.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    partial class MyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250809160213_actualizacionClietne")]
+    partial class actualizacionClietne
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -37,7 +39,7 @@ namespace APICalculos.Migrations
 
                     b.HasKey("CategoriasServiciosId");
 
-                    b.ToTable("CategoriasServicios", (string)null);
+                    b.ToTable("CategoriasServicios");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Client", b =>
@@ -63,7 +65,7 @@ namespace APICalculos.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Clients", (string)null);
+                    b.ToTable("Clientes");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.DetalleVenta", b =>
@@ -91,33 +93,33 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("VentaId");
 
-                    b.ToTable("DetalleVentas", (string)null);
+                    b.ToTable("DetalleVentas");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Employee", b =>
+            modelBuilder.Entity("APICalculos.Domain.Entidades.Empleado", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("EmpleadoId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("EmpleadoId"), 1L, 1);
 
-                    b.Property<DateTime>("DateBirth")
-                        .HasColumnType("date");
-
-                    b.Property<string>("IdentityDocument")
+                    b.Property<string>("DocumentoNacional")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Name")
+                    b.Property<DateTime>("FechaNacimiento")
+                        .HasColumnType("date");
+
+                    b.Property<string>("NombreCompletoEmpleado")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("Id");
+                    b.HasKey("EmpleadoId");
 
-                    b.ToTable("Employees", (string)null);
+                    b.ToTable("Empleados");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Gastos", b =>
@@ -145,7 +147,7 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("TipoDeGastosId");
 
-                    b.ToTable("Gastos", (string)null);
+                    b.ToTable("Gastos");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.HistorialClientes", b =>
@@ -172,7 +174,7 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("ClienteId");
 
-                    b.ToTable("HistorialClientes", (string)null);
+                    b.ToTable("HistorialClientes");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Producto", b =>
@@ -206,7 +208,7 @@ namespace APICalculos.Migrations
 
                     b.HasKey("ProductoId");
 
-                    b.ToTable("Productos", (string)null);
+                    b.ToTable("Productos");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Rol", b =>
@@ -224,7 +226,7 @@ namespace APICalculos.Migrations
 
                     b.HasKey("RolId");
 
-                    b.ToTable("Roles", (string)null);
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Servicio", b =>
@@ -263,7 +265,7 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("TipoDeServicioId");
 
-                    b.ToTable("Servicios", (string)null);
+                    b.ToTable("Servicios");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.TipoDePago", b =>
@@ -279,7 +281,7 @@ namespace APICalculos.Migrations
 
                     b.HasKey("TipoDePagoId");
 
-                    b.ToTable("TipoDePagos", (string)null);
+                    b.ToTable("TipoDePagos");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.TipoDeServicio", b =>
@@ -309,7 +311,7 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("CategoriasServiciosId1");
 
-                    b.ToTable("TipoDeServicios", (string)null);
+                    b.ToTable("TipoDeServicios");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.TiposDeGastos", b =>
@@ -325,7 +327,7 @@ namespace APICalculos.Migrations
 
                     b.HasKey("TipoDeGastosId");
 
-                    b.ToTable("TiposDeGastos", (string)null);
+                    b.ToTable("TiposDeGastos");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Usuario", b =>
@@ -358,7 +360,7 @@ namespace APICalculos.Migrations
 
                     b.HasKey("UsuarioId");
 
-                    b.ToTable("Usuarios", (string)null);
+                    b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.UsuarioRol", b =>
@@ -373,7 +375,7 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("RolId");
 
-                    b.ToTable("UsuarioRoles", (string)null);
+                    b.ToTable("UsuarioRoles");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Venta", b =>
@@ -399,21 +401,21 @@ namespace APICalculos.Migrations
 
                     b.HasIndex("TipoDePagoId");
 
-                    b.ToTable("Ventas", (string)null);
+                    b.ToTable("Ventas");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.DetalleVenta", b =>
                 {
-                    b.HasOne("APICalculos.Domain.Entidades.Employee", "Empleado")
+                    b.HasOne("APICalculos.Domain.Entidades.Empleado", "Empleado")
                         .WithMany("DetalleVentas")
                         .HasForeignKey("EmpleadoId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("APICalculos.Domain.Entidades.TipoDeServicio", "TipoDeServicio")
                         .WithMany("DetalleVentas")
                         .HasForeignKey("TipoDeServicioId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("APICalculos.Domain.Entidades.Venta", "Venta")
@@ -459,7 +461,7 @@ namespace APICalculos.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("APICalculos.Domain.Entidades.Employee", "Empleado")
+                    b.HasOne("APICalculos.Domain.Entidades.Empleado", "Empleado")
                         .WithMany()
                         .HasForeignKey("EmpleadoId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -522,19 +524,19 @@ namespace APICalculos.Migrations
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Venta", b =>
                 {
-                    b.HasOne("APICalculos.Domain.Entidades.Client", "Client")
+                    b.HasOne("APICalculos.Domain.Entidades.Client", "Cliente")
                         .WithMany("Ventas")
                         .HasForeignKey("ClienteId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("APICalculos.Domain.Entidades.TipoDePago", "TipoDePago")
                         .WithMany()
                         .HasForeignKey("TipoDePagoId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Client");
+                    b.Navigation("Cliente");
 
                     b.Navigation("TipoDePago");
                 });
@@ -551,7 +553,7 @@ namespace APICalculos.Migrations
                     b.Navigation("Ventas");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Employee", b =>
+            modelBuilder.Entity("APICalculos.Domain.Entidades.Empleado", b =>
                 {
                     b.Navigation("DetalleVentas");
                 });
