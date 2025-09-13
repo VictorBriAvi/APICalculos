@@ -6,41 +6,41 @@ using Microsoft.AspNetCore.Mvc;
 namespace APICalculos.API.Controllers
 {
     [ApiController]
-    [Route("api/serviceType")]
-    public class ServiceTypeController : ControllerBase
+    [Route("api/customerHistory")]
+    public class CustomerHistoryController : ControllerBase
     {
-        private readonly IServiceTypeService _serviceTypeService;
+        private readonly ICustomerHistoryService _customerHistoryService;
 
-        public ServiceTypeController(IServiceTypeService serviceTypeService)
+        public CustomerHistoryController(ICustomerHistoryService customerHistoryService)
         {
-            _serviceTypeService = serviceTypeService;
+            _customerHistoryService = customerHistoryService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PaymentTypeDTO>>> GetAllServiceTypeAsync()
+        public async Task<ActionResult<List<CustomerHistoryDTO>>> GetAllCustomerHistoryAsync()
         {
-            var serviceTypeDto = await _serviceTypeService.GetAllServicesTypesAsync();
-            return Ok(serviceTypeDto);
+            var customerHistoriesDto = await _customerHistoryService.GetAllCustomerHistoriesAsync();
+            return Ok(customerHistoriesDto);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetServiceTypeForId(int id)
+        public async Task<IActionResult> GetCustomerHistoryForId(int id)
         {
-            var serviceTypeDto = await _serviceTypeService.GetServiceTypeForId(id);
+            var customerHistoryDto = await _customerHistoryService.GetCustomerHistoryForId(id);
 
-            if (serviceTypeDto == null)
+            if (customerHistoryDto == null)
                 return NotFound($"No se encontro el tipo de servicio con el ID {id}");
 
-            return Ok(serviceTypeDto);
+            return Ok(customerHistoryDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(ServiceTypeCreationDTO serviceTypeCreationDTO)
+        public async Task<IActionResult> Post(CustomerHistoryCreationDTO customerHistoryCreationDTO)
         {
             try
             {
-                var serviceTypeDto = await _serviceTypeService.AddServiceTypeAsync(serviceTypeCreationDTO);
-                return Ok(serviceTypeDto);
+                var customerHistoryDto = await _customerHistoryService.AddCustomerHistoryAsync(customerHistoryCreationDTO);
+                return Ok(customerHistoryDto);
             }
             catch (ArgumentException ex)
             {
@@ -54,11 +54,11 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, ServiceTypeCreationDTO serviceTypeCreationDTO)
+        public async Task<IActionResult> Put(int id, CustomerHistoryCreationDTO customerHistoryCreationDTO)
         {
             try
             {
-                await _serviceTypeService.UpdateServiceTypeAsync(id, serviceTypeCreationDTO);
+                await _customerHistoryService.UpdateCustomerHistoryAsync(id, customerHistoryCreationDTO);
                 return Ok("Se modifico exitosamente");
             }
             catch (KeyNotFoundException)
@@ -73,7 +73,7 @@ namespace APICalculos.API.Controllers
         {
             try
             {
-                await _serviceTypeService.DeleteServiceTypeAsync(id);
+                await _customerHistoryService.DeleteCustomerHistoriesAsync(id);
                 return Ok("Se ha eliminado el tipo de servicio");
             }
             catch (KeyNotFoundException)

@@ -12,9 +12,9 @@ namespace APICalculos.Infrastructure.Data.Configurations
             .WithOne(v => v.Client)
             .HasForeignKey(v => v.ClienteId);
 
-            builder.HasMany(c => c.HistorialClientes)
-            .WithOne(h => h.Cliente)
-            .HasForeignKey(h => h.ClienteId);
+            builder.HasMany(c => c.CustomerHistories)
+            .WithOne(h => h.Client)
+            .HasForeignKey(h => h.ClientId);
 
             builder.Property(prop => prop.Name)
                 .HasMaxLength(300)

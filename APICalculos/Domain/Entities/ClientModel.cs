@@ -8,7 +8,7 @@
         public DateTime DateBirth { get; set; }
    
         public ICollection<Venta> Ventas { get; set; }
-        public ICollection<HistorialClientes> HistorialClientes { get; set; }
+        public ICollection<CustomerHistory> CustomerHistories { get; set; }
 
     }
 }

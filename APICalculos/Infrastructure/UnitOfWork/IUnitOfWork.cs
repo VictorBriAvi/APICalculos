@@ -10,6 +10,8 @@ namespace APICalculos.Infrastructure.UnitOfWork
         IServiceCategoriesRepository ServiceCategories { get; }
         IExpenseTypeRepository ExpenseType { get; }
         IServiceTypeRepository ServiceTypes { get; }
+        ICustomerHistoryRepository CustomerHistory { get; }
+        IExpensesRepository Expenses { get; }
         Task<int> SaveChangesAsync();
     }
 }

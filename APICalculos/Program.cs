@@ -52,6 +52,10 @@ builder.Services.AddScoped<IExpenseTypeRepository, ExpenseTypeRepository>();
 builder.Services.AddScoped<IExpenseTypeService, ExpenseTypeService>();
 builder.Services.AddScoped<IServiceTypeRepository, ServiceTypeRepository>();
 builder.Services.AddScoped<IServiceTypeService, ServiceTypeService>();
+builder.Services.AddScoped<ICustomerHistoryRepository, CustomerHistoryRepository>();
+builder.Services.AddScoped<ICustomerHistoryService, CustomerHistoryService>();
+builder.Services.AddScoped<IExpensesRepository, ExpensesRepository>();
+builder.Services.AddScoped<IExpenseService, ExpenseService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

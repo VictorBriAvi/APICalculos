@@ -6,41 +6,41 @@ using Microsoft.AspNetCore.Mvc;
 namespace APICalculos.API.Controllers
 {
     [ApiController]
-    [Route("api/serviceType")]
-    public class ServiceTypeController : ControllerBase
+    [Route("api/Expense")]
+    public class ExpenseController :  ControllerBase
     {
-        private readonly IServiceTypeService _serviceTypeService;
+        private readonly IExpenseService _expenseService;
 
-        public ServiceTypeController(IServiceTypeService serviceTypeService)
+        public ExpenseController(IExpenseService expenseService)
         {
-            _serviceTypeService = serviceTypeService;
+            _expenseService = expenseService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PaymentTypeDTO>>> GetAllServiceTypeAsync()
+        public async Task<ActionResult<List<ExpenseDTO>>> GetAll()
         {
-            var serviceTypeDto = await _serviceTypeService.GetAllServicesTypesAsync();
-            return Ok(serviceTypeDto);
+            var expenseDto = await _expenseService.GetAllExpenseAsync();
+            return Ok(expenseDto);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetServiceTypeForId(int id)
+        public async Task<IActionResult> GetForId(int id)
         {
-            var serviceTypeDto = await _serviceTypeService.GetServiceTypeForId(id);
+            var expenseDto = await _expenseService.GetExpenseForIdAsync(id);
 
-            if (serviceTypeDto == null)
+            if (expenseDto == null)
                 return NotFound($"No se encontro el tipo de servicio con el ID {id}");
 
-            return Ok(serviceTypeDto);
+            return Ok(expenseDto);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(ServiceTypeCreationDTO serviceTypeCreationDTO)
+        public async Task<IActionResult> Post(ExpenseCreationDTO expenseCreationDTO)
         {
             try
             {
-                var serviceTypeDto = await _serviceTypeService.AddServiceTypeAsync(serviceTypeCreationDTO);
-                return Ok(serviceTypeDto);
+                var expenseDto = await _expenseService.AddExpensesAsync(expenseCreationDTO);
+                return Ok(expenseDto);
             }
             catch (ArgumentException ex)
             {
@@ -54,11 +54,11 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, ServiceTypeCreationDTO serviceTypeCreationDTO)
+        public async Task<IActionResult> Put(int id, ExpenseCreationDTO expenseCreationDTO)
         {
             try
             {
-                await _serviceTypeService.UpdateServiceTypeAsync(id, serviceTypeCreationDTO);
+                await _expenseService.UpdateExpenseAsync(id, expenseCreationDTO);
                 return Ok("Se modifico exitosamente");
             }
             catch (KeyNotFoundException)
@@ -73,7 +73,7 @@ namespace APICalculos.API.Controllers
         {
             try
             {
-                await _serviceTypeService.DeleteServiceTypeAsync(id);
+                await _expenseService.DeleteExpenseAsync(id);
                 return Ok("Se ha eliminado el tipo de servicio");
             }
             catch (KeyNotFoundException)
@@ -81,6 +81,5 @@ namespace APICalculos.API.Controllers
                 return NotFound("Tipo de servicio no encontrado");
             }
         }
-
     }
 }
