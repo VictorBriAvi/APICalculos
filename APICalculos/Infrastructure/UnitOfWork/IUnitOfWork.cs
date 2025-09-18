@@ -12,6 +12,8 @@ namespace APICalculos.Infrastructure.UnitOfWork
         IServiceTypeRepository ServiceTypes { get; }
         ICustomerHistoryRepository CustomerHistory { get; }
         IExpensesRepository Expenses { get; }
+        ISaleDetailRepository SaleDetail { get; }
+        ISaleRepository Sale { get; }
         Task<int> SaveChangesAsync();
     }
 }

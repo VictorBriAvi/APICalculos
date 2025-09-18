@@ -7,6 +7,6 @@
         public decimal Price { get; set; }
         public DateTime ExpenseDate { get; set; }
         public int ExpenseTypeId { get; set; }
-        public ExpenseType ExpenseTypes { get; set; }
+        public ExpenseType ExpenseType { get; set; }
     }
 }

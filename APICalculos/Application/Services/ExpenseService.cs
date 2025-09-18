@@ -63,6 +63,7 @@ namespace APICalculos.Application.Services
             if (expenseCreationDTO.ExpenseTypeId > 0)
                 expenseDB.ExpenseTypeId = expenseCreationDTO.ExpenseTypeId;
 
+
             _expensesRepository.Update(expenseDB);
             await _unitOfWork.SaveChangesAsync();
         }

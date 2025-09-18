@@ -14,27 +14,27 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<EmployeeModel>> GetAllAsync()
+        public async Task<IEnumerable<Employee>> GetAllAsync()
         {
             return await _dbContext.Employees.AsNoTracking().OrderByDescending(x => x.Id).ToListAsync();
         }
         
-        public async Task<EmployeeModel> GetByIdAsync(int id)
+        public async Task<Employee> GetByIdAsync(int id)
         {
             return await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task AddAsync(EmployeeModel employee)
+        public async Task AddAsync(Employee employee)
         {
             await _dbContext.Employees.AddAsync(employee);
         }
 
-        public void Remove(EmployeeModel employee)
+        public void Remove(Employee employee)
         {
             _dbContext.Employees.Remove(employee);
         }
 
-        public void Update(EmployeeModel employee)
+        public void Update(Employee employee)
         {
             _dbContext.Employees.Update(employee);
         }

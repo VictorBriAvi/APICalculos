@@ -50,8 +50,9 @@ namespace APICalculos.Application.Services
                 throw new InvalidOperationException("El nombre del cliente ya existe");
             }
 
-            var employee = _mapper.Map<EmployeeModel>(employeeCreationDTO);employee.DateBirth = DateTime.ParseExact(
-    employeeCreationDTO.ParseDateBirth,
+            var employee = _mapper.Map<Employee>(employeeCreationDTO);
+            
+            employee.DateBirth = DateTime.ParseExact(employeeCreationDTO.ParseDateBirth,
     "dd/MM/yyyy HH:mm:ss",
     CultureInfo.InvariantCulture,
     DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal

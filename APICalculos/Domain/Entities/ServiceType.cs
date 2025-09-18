@@ -7,7 +7,7 @@
         public int ServiceCategorieId { get; set; }
         public decimal Price { get; set; }
         public ServiceCategorie ServiceCategorie { get; set; }
-        public ICollection<DetalleVenta> DetalleVentas { get; set; }
+        public ICollection<SaleDetail> SaleDetail { get; set; }
 
     
     }

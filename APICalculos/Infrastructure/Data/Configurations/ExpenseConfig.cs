@@ -8,14 +8,15 @@ namespace APICalculos.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Expense> builder)
         {
-            builder.HasOne(ur => ur.ExpenseTypes)
-                .WithMany(g => g.Expense)
-                .HasForeignKey(g => g.Id);
+            builder.HasOne(e => e.ExpenseType)
+                .WithMany(et => et.Expenses)
+                .HasForeignKey(e => e.ExpenseTypeId); 
 
             builder.Property(prop => prop.Description)
                 .HasMaxLength(300);
 
 
-        }               
+
+        }
     }
 }

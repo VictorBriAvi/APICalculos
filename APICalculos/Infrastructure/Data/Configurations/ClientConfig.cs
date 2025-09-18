@@ -8,9 +8,9 @@ namespace APICalculos.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<ClientModel> builder)
         {
-            builder.HasMany(c => c.Ventas)
+            builder.HasMany(c => c.Sale)
             .WithOne(v => v.Client)
-            .HasForeignKey(v => v.ClienteId);
+            .HasForeignKey(v => v.ClientId);
 
             builder.HasMany(c => c.CustomerHistories)
             .WithOne(h => h.Client)

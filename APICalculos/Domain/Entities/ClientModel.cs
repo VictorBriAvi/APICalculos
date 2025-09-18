@@ -7,7 +7,7 @@
         public string IdentityDocument { get; set; }
         public DateTime DateBirth { get; set; }
    
-        public ICollection<Venta> Ventas { get; set; }
+        public ICollection<Sale> Sale { get; set; }
         public ICollection<CustomerHistory> CustomerHistories { get; set; }
 
     }

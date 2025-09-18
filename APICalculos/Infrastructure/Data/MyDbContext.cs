@@ -27,7 +27,7 @@ namespace APICalculos.Infrastructure.Data
         public DbSet<Producto> Productos { get; set; }
         public DbSet<ClientModel> Clients { get; set; }
         public DbSet<CustomerHistory> CustomerHistories { get; set; }
-        public DbSet<EmployeeModel> Employees { get; set; }
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<Servicio> Servicios { get; set; }
         public DbSet<PaymentType> PaymentTypes { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
@@ -37,7 +37,7 @@ namespace APICalculos.Infrastructure.Data
         public DbSet<UsuarioRol> UsuarioRoles { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<ExpenseType> ExpenseTypes { get; set; }
-        public DbSet<Venta> Ventas { get; set; }
-        public DbSet<DetalleVenta>  DetalleVentas { get; set; }
+        public DbSet<Sale> Sales { get; set; }
+        public DbSet<SaleDetail>  SaleDetails { get; set; }
     }
 }

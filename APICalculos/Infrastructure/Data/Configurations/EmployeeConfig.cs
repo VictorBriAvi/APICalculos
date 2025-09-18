@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace APICalculos.Infrastructure.Data.Configurations
 {
-    public class EmployeeConfig : IEntityTypeConfiguration<EmployeeModel>
+    public class EmployeeConfig : IEntityTypeConfiguration<Employee>
     {
-        public void Configure(EntityTypeBuilder<EmployeeModel> builder)
+        public void Configure(EntityTypeBuilder<Employee> builder)
         {
             builder.Property(prop => prop.Name)
                 .HasMaxLength(100)

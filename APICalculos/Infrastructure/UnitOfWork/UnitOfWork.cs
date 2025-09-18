@@ -14,7 +14,9 @@ namespace APICalculos.Infrastructure.UnitOfWork
         public IServiceTypeRepository ServiceTypes { get; }
         public ICustomerHistoryRepository CustomerHistory { get; }
         public IExpensesRepository Expenses { get; }
-        public UnitOfWork(MyDbContext context, IClientRepository clientRepository, IEmployeeRepository employees, IPaymentTypeRepository paymentType, IServiceCategoriesRepository serviceCategories, IExpenseTypeRepository expenseType, IServiceTypeRepository serviceType, ICustomerHistoryRepository customerHistory, IExpensesRepository expenses)
+        public ISaleDetailRepository SaleDetail { get; }
+        public ISaleRepository Sale { get; }
+        public UnitOfWork(MyDbContext context, IClientRepository clientRepository, IEmployeeRepository employees, IPaymentTypeRepository paymentType, IServiceCategoriesRepository serviceCategories, IExpenseTypeRepository expenseType, IServiceTypeRepository serviceType, ICustomerHistoryRepository customerHistory, IExpensesRepository expenses, ISaleDetailRepository saleDetail, ISaleRepository sale)
         {
             _context = context;
             Clients = clientRepository;
@@ -25,6 +27,8 @@ namespace APICalculos.Infrastructure.UnitOfWork
             ServiceTypes = serviceType;
             CustomerHistory = customerHistory;
             Expenses = expenses;
+            SaleDetail = saleDetail;
+            Sale = sale;
         }
 
         public async Task<int> SaveChangesAsync()

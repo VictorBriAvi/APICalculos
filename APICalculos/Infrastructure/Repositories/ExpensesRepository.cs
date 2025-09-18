@@ -16,12 +16,12 @@ namespace APICalculos.Infrastructure.Repositories
 
         public async Task<IEnumerable<Expense>> GetAllAsync()
         {
-            return await _dbContext.Expenses.Include(st => st.ExpenseTypes).AsNoTracking().OrderByDescending(st => st.Id).ToListAsync();
+            return await _dbContext.Expenses.Include(st => st.ExpenseType).AsNoTracking().OrderByDescending(st => st.Id).ToListAsync();
         }
 
         public async Task<Expense> GetByIdAsync(int id)
         {
-            return await _dbContext.Expenses.Include(st => st.ExpenseTypes).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Expenses.Include(st => st.ExpenseType).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task AddAsync(Expense expense)
