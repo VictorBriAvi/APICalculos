@@ -17,13 +17,13 @@ namespace APICalculos.Infrastructure.Repositories
         }
 
 
-        public async Task<IEnumerable<ClientModel>> GetAllAsync()
+        public async Task<IEnumerable<Client>> GetAllAsync()
         {
             return await _dbContext.Clients.AsNoTracking().OrderByDescending(c => c.Id).ToListAsync();
         }
 
 
-        public async Task<ClientModel?> GetByIdAsync(int id)
+        public async Task<Client?> GetByIdAsync(int id)
         {
             return await _dbContext.Clients
                 .AsNoTracking()
@@ -31,23 +31,23 @@ namespace APICalculos.Infrastructure.Repositories
         }
 
 
-        public async Task<ClientModel?> GetByDocumentoAsync(string doc)
+        public async Task<Client?> GetByDocumentoAsync(string doc)
         {
             return await _dbContext.Clients
                 .FirstOrDefaultAsync(c => c.Name == doc);
         }
 
-        public async Task AddAsync(ClientModel cliente)
+        public async Task AddAsync(Client cliente)
         {
             await _dbContext.Clients.AddAsync(cliente);
         }
 
-        public void Remove(ClientModel cliente)
+        public void Remove(Client cliente)
         {
             _dbContext.Clients.Remove(cliente);
         }
 
-        public void Update(ClientModel cliente)
+        public void Update(Client cliente)
         {
             _dbContext.Clients.Update(cliente); 
         }

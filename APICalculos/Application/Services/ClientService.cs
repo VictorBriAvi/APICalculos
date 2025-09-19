@@ -53,7 +53,7 @@ namespace APICalculos.Application.Services
             if (existeDocumento)
                 throw new InvalidOperationException("El documento ya está registrado");
 
-            var cliente = _mapper.Map<ClientModel>(clienteCreacionDTO);
+            var cliente = _mapper.Map<Client>(clienteCreacionDTO);
 
             cliente.DateBirth = DateTime.SpecifyKind(DateTime.ParseExact(clienteCreacionDTO.ParsedDateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture),DateTimeKind.Local).ToUniversalTime();
 

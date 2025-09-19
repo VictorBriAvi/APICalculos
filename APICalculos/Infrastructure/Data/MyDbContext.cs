@@ -25,7 +25,7 @@ namespace APICalculos.Infrastructure.Data
         }
 
         public DbSet<Producto> Productos { get; set; }
-        public DbSet<ClientModel> Clients { get; set; }
+        public DbSet<Client> Clients { get; set; }
         public DbSet<CustomerHistory> CustomerHistories { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Servicio> Servicios { get; set; }

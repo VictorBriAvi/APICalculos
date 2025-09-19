@@ -12,8 +12,8 @@ namespace APICalculos.Application.Mapping
             CreateMap<Producto, ProductoDTO>();
             CreateMap<ProductoCreacionDTO, Producto>();
 
-            CreateMap<ClientModel, ClientDTO>();
-            CreateMap<ClientCreationDTO, ClientModel>();
+            CreateMap<Client, ClientDTO>();
+            CreateMap<ClientCreationDTO, Client>();
 
             CreateMap<CustomerHistory, CustomerHistoryDTO>()
                 .ForMember(dto => dto.ClientName, ent => ent.MapFrom(prop => prop.Client.Name));
@@ -72,7 +72,6 @@ namespace APICalculos.Application.Mapping
             CreateMap<SaleCreationDTO, Sale>();
 
             CreateMap<SaleDetail, SaleDetailDTO>()
-                .ForMember(dto => dto.NameClientSale, ent => ent.MapFrom(prop => prop.Sale.Client.Name))
                 .ForMember(dto => dto.NameServiceTypeSale, ent => ent.MapFrom(prop => prop.ServiceType.Name))
                 //////.ForMember(dto => dto.PriceServiceType, ent => ent.MapFrom(prop => prop.Price.Price))
                 .ForMember(dto => dto.NameEmployeeSale, ent => ent.MapFrom(prop => prop.Employee.Name));
@@ -91,20 +90,22 @@ namespace APICalculos.Application.Mapping
                                         //.ForMember(dto => dto.PriceTotal,
                                         //           opt => opt.MapFrom(v => v.SaleDetail.Sum(d => d.price)))
                                         .ForMember(dto => dto.SaleDetail,
-                                                   opt => opt.MapFrom(v => v.SaleDetail));
+                                                   opt => opt.MapFrom(v => v.SaleDetail))
+                                         .ForMember(dest => dest.SaleDetail, opt => opt.MapFrom(src => src.SaleDetail));
+
 
             CreateMap<SaleDetail, SaleDetailDTO>()
                                                     .ForMember(dto => dto.Id,
                                                                opt => opt.MapFrom(d => d.Id))
                                                     // Nombre del cliente que compró: navegamos por la venta
-                                                    .ForMember(dto => dto.NameClientSale,
-                                                               opt => opt.MapFrom(d => d.Sale.Client.Name))
+
                                                     .ForMember(dto => dto.NameServiceTypeSale,
                                                                opt => opt.MapFrom(d => d.ServiceType.Name))
                                                     //.ForMember(dto => dto.PriceServiceType,
                                                     //           opt => opt.MapFrom(d => d.price))  // tu propiedad calculada
                                                     .ForMember(dto => dto.NameEmployeeSale,
                                                                opt => opt.MapFrom(d => d.Employee.Name));
+              
 
 
             CreateMap<SaleDetailCreationDTO, SaleDetail>();

@@ -53,8 +53,8 @@ namespace APICalculos.Application.Services
             if (saleDetailDB == null)
                 throw new KeyNotFoundException("Detalle Venta no encontrado");
 
-            if (saleDetailCreationDTO.Id > 0)
-                saleDetailDB.Id = saleDetailCreationDTO.Id;
+            if (saleDetailCreationDTO.SaleId > 0)
+                saleDetailDB.SaleId = saleDetailCreationDTO.SaleId;
 
             if (saleDetailCreationDTO.ServiceTypeId > 0)
                 saleDetailDB.ServiceTypeId = saleDetailCreationDTO.ServiceTypeId;

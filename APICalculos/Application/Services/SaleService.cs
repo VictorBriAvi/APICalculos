@@ -4,6 +4,7 @@ using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using System.Globalization;
 
 namespace APICalculos.Application.Services
 {
@@ -57,9 +58,9 @@ namespace APICalculos.Application.Services
             if (saleCreationDTO.PaymentTypeId > 0)
                 saleDB.PaymentTypeId = saleCreationDTO.PaymentTypeId;
 
-            if (!string.IsNullOrWhiteSpace(saleCreationDTO.SaleDate))
-                saleDB.DateSale = DateTime.Parse(saleCreationDTO.SaleDate);
-        
+            if (saleCreationDTO.DateSale != default)
+                saleDB.DateSale = saleCreationDTO.DateSale;
+
             _saleRepository.Update(saleDB);
             await _unitOfWork.SaveChangesAsync();
         }

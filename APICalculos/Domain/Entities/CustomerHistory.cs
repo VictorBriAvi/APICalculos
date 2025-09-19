@@ -8,7 +8,7 @@
         public string Description { get; set; }
         public DateTime  DateHistory{ get; set; }
         public int ClientId { get; set; }
-        public ClientModel Client { get; set;}
+        public Client Client { get; set;}
 
     }
 }

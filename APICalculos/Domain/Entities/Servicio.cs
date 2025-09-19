@@ -14,7 +14,7 @@
 
         public PaymentType TipoDePago { get; set; }
         public Employee Empleado { get; set; }
-        public ClientModel Cliente { get; set; }
+        public Client Cliente { get; set; }
         public ServiceType TipoDeServicio { get; set; }
     }
 }

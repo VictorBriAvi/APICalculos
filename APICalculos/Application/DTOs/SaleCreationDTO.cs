@@ -4,6 +4,6 @@
     {
         public int ClientId { get; set; }
         public int PaymentTypeId { get; set; }
-        public string SaleDate { get; set; }
+        public DateTime DateSale { get; set; }
     }
 }

@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace APICalculos.Infrastructure.Data.Configurations
 {
-    public class ClientConfig : IEntityTypeConfiguration<ClientModel>
+    public class ClientConfig : IEntityTypeConfiguration<Client>
     {
-        public void Configure(EntityTypeBuilder<ClientModel> builder)
+        public void Configure(EntityTypeBuilder<Client> builder)
         {
             builder.HasMany(c => c.Sale)
             .WithOne(v => v.Client)

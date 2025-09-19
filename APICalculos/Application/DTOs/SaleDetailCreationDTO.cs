@@ -2,9 +2,13 @@
 {
     public class SaleDetailCreationDTO
     {
-        public int Id { get; set; }
+        public int SaleId { get; set; }
         public int ServiceTypeId { get; set; }
         public int EmployeeId { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal Discount {  get; set; }
+        public decimal AdditionalCharge { get; set; }
+        public List<SaleDetailDTO> SaleDetail { get; set; } 
 
     }
 }
