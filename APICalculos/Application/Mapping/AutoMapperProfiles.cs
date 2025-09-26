@@ -26,7 +26,7 @@ namespace APICalculos.Application.Mapping
             CreateMap<PaymentTypeCreationDTO, PaymentType>();
 
             CreateMap<ServiceType, ServiceTypeDTO>()
-                .ForMember(dto => dto.ServiceCategorieName, ent => ent.MapFrom(prop => prop.ServiceCategorie.Name));
+                .ForMember(dto => dto.ServiceCategorieName, ent => ent.MapFrom(prop => prop.ServiceCategories.Name));
             CreateMap<ServiceTypeCreationDTO, ServiceType>();
 
             CreateMap<Servicio, ServicioDTO>()

@@ -1,22 +1,26 @@
 ﻿using APICalculos.Application.DTOs;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
+using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace APICalculos.Application.Services
 {
     public class ServiceTypeService : IServiceTypeService
     {
         private readonly IServiceTypeRepository _serviceTypeRepository;
+        private readonly IServiceCategoriesService _serviceCategoriesService;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ServiceTypeService(IServiceTypeRepository serviceTypeRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public ServiceTypeService(IServiceTypeRepository serviceTypeRepository, IMapper mapper, IUnitOfWork unitOfWork, IServiceCategoriesService serviceCategoriesService)
         {
             _serviceTypeRepository = serviceTypeRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _serviceCategoriesService = serviceCategoriesService;
         }
 
         public async Task<List<ServiceTypeDTO>> GetAllServicesTypesAsync()
@@ -62,20 +66,25 @@ namespace APICalculos.Application.Services
         {
             var serviceTypeDB = await _serviceTypeRepository.GetByIdAsync(id);
             if (serviceTypeDB == null)
-                throw new KeyNotFoundException("Tipo de servico no encontrado");
-        
-            if(!string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Name))
+                throw new KeyNotFoundException("Tipo de servicio no encontrado");
+
+            if (!string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Name))
                 serviceTypeDB.Name = serviceTypeCreationDTO.Name;
 
-            if (!string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Price.ToString()))
+            if (serviceTypeCreationDTO.Price > 0) // sin ToString()
                 serviceTypeDB.Price = serviceTypeCreationDTO.Price;
 
-            if (serviceTypeCreationDTO.ServiceCategorieId > 0)
+            if (serviceTypeCreationDTO.ServiceCategorieId != 0)
+            {
+                // Desasociamos la navegación para que EF tome solo la FK
+                serviceTypeDB.ServiceCategories = null;
                 serviceTypeDB.ServiceCategorieId = serviceTypeCreationDTO.ServiceCategorieId;
+            }
 
             _serviceTypeRepository.Update(serviceTypeDB);
             await _unitOfWork.SaveChangesAsync();
         }
+
 
         public async Task DeleteServiceTypeAsync(int Id)
         {

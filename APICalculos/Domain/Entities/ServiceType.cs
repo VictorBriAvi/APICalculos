@@ -6,7 +6,7 @@
         public string Name { get; set; }
         public int ServiceCategorieId { get; set; }
         public decimal Price { get; set; }
-        public ServiceCategorie ServiceCategorie { get; set; }
+        public ServiceCategorie ServiceCategories { get; set; }
         public ICollection<SaleDetail> SaleDetail { get; set; }
 
     

@@ -17,7 +17,7 @@ namespace APICalculos.Infrastructure.Repositories
         public async Task<IEnumerable<ServiceType>> GetAllAsync()
         {
             return await _dbContext.ServiceTypes
-                 .Include(st => st.ServiceCategorie) 
+                 .Include(st => st.ServiceCategories) 
                  .AsNoTracking()
                  .OrderByDescending(x => x.Id)
                  .ToListAsync();
@@ -25,7 +25,7 @@ namespace APICalculos.Infrastructure.Repositories
 
         public async Task<ServiceType> GetByIdAsync(int Id)
         {
-            return await _dbContext.ServiceTypes.Include(st => st.ServiceCategorie).AsNoTracking().FirstOrDefaultAsync(x => x.Id == Id);
+            return await _dbContext.ServiceTypes.Include(st => st.ServiceCategories).AsNoTracking().FirstOrDefaultAsync(x => x.Id == Id);
         }
 
         public async Task AddAsync(ServiceType serviceType)

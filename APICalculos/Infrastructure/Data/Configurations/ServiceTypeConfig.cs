@@ -9,7 +9,7 @@ namespace APICalculos.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<ServiceType> builder)
         {
 
-            builder.HasOne(st => st.ServiceCategorie)
+            builder.HasOne(st => st.ServiceCategories)
                    .WithMany(sc => sc.ServiceTypes)   // propiedad de navegación en ServiceCategorie
                    .HasForeignKey(st => st.ServiceCategorieId)
                    .OnDelete(DeleteBehavior.Restrict); // o la política que prefieras

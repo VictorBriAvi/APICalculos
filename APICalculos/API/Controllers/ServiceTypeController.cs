@@ -17,14 +17,14 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PaymentTypeDTO>>> GetAllServiceTypeAsync()
+        public async Task<ActionResult<List<ServiceTypeDTO>>> GetAllServiceTypeAsync()
         {
             var serviceTypeDto = await _serviceTypeService.GetAllServicesTypesAsync();
             return Ok(serviceTypeDto);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetServiceTypeForId(int id)
+        public async Task<IActionResult> GetServiceTypeForId(int id) 
         {
             var serviceTypeDto = await _serviceTypeService.GetServiceTypeForId(id);
 
@@ -35,7 +35,7 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(ServiceTypeCreationDTO serviceTypeCreationDTO)
+        public async Task<IActionResult> Post([FromBody] ServiceTypeCreationDTO serviceTypeCreationDTO)
         {
             try
             {
