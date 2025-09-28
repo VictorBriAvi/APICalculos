@@ -9,6 +9,8 @@ namespace APICalculos.Application.DTOs
         public string IdentityDocument { get; set; }
         [JsonIgnore]
         public DateTime DateBirth { get; set; }
-        public string ParseDateBirth => DateBirth.ToString("dd-MM-yyyy");
+        public string EmployeeDateBirth => DateBirth.ToString("dd-MM-yyyy");
+
+     
     }
 }

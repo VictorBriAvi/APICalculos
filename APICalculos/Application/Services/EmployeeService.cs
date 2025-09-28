@@ -51,12 +51,6 @@ namespace APICalculos.Application.Services
             }
 
             var employee = _mapper.Map<Employee>(employeeCreationDTO);
-            
-            employee.DateBirth = DateTime.ParseExact(employeeCreationDTO.ParseDateBirth,
-    "dd/MM/yyyy HH:mm:ss",
-    CultureInfo.InvariantCulture,
-    DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal
-);
 
             await _unitOfWork.Employees.AddAsync(employee);
             await _unitOfWork.SaveChangesAsync();
@@ -67,6 +61,9 @@ namespace APICalculos.Application.Services
         {
             var employeeDB = await _employeeRepository.GetByIdAsync(id);
 
+
+            if (employeeDB == null)
+                throw new KeyNotFoundException("Colaborador no encontrado");
             // Actualiza solo si vienen datos válidos
             if (!string.IsNullOrWhiteSpace(employeeCreationDTO.Name))
                 employeeDB.Name = employeeCreationDTO.Name;
@@ -74,8 +71,8 @@ namespace APICalculos.Application.Services
             if (!string.IsNullOrWhiteSpace(employeeCreationDTO.IdentityDocument))
                 employeeDB.IdentityDocument = employeeCreationDTO.IdentityDocument;
 
-            if (!string.IsNullOrWhiteSpace(employeeCreationDTO.ParseDateBirth))
-                employeeDB.DateBirth = DateTime.Parse(employeeCreationDTO.ParseDateBirth);
+            if (employeeCreationDTO.DateBirth != default)
+                employeeDB.DateBirth = employeeCreationDTO.DateBirth;
 
             _employeeRepository.Update(employeeDB);
             await _unitOfWork.SaveChangesAsync();

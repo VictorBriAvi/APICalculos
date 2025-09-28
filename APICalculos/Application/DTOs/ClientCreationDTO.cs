@@ -4,6 +4,6 @@
     {
         public string Name { get; set; }
         public string IdentityDocument { get; set; }
-        public string ParsedDateOfBirth { get; set; }
+        public DateTime DateBirth { get; set; }
     }
 }

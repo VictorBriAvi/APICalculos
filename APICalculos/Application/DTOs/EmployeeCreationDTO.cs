@@ -4,7 +4,7 @@
     {
         public string Name { get; set; }
         public string IdentityDocument { get; set; }
-        public string ParseDateBirth { get; set; }
+        public DateTime DateBirth { get; set; }
 
     }
 }

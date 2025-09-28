@@ -55,12 +55,8 @@ namespace APICalculos.Application.Services
 
             var cliente = _mapper.Map<Client>(clienteCreacionDTO);
 
-            cliente.DateBirth = DateTime.SpecifyKind(DateTime.ParseExact(clienteCreacionDTO.ParsedDateOfBirth, "yyyy-MM-dd", CultureInfo.InvariantCulture),DateTimeKind.Local).ToUniversalTime();
-
             await _unitOfWork.Clients.AddAsync(cliente);
-
             await _unitOfWork.SaveChangesAsync();
-
             return _mapper.Map<ClientDTO>(cliente);
         }
 
@@ -78,8 +74,8 @@ namespace APICalculos.Application.Services
             if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.IdentityDocument))
                 clienteDB.IdentityDocument = clienteCreacionDTO.IdentityDocument;
 
-            if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.ParsedDateOfBirth))
-                clienteDB.DateBirth = DateTime.Parse(clienteCreacionDTO.ParsedDateOfBirth);
+            if (clienteCreacionDTO.DateBirth != default)
+                clienteDB.DateBirth = clienteCreacionDTO.DateBirth;
 
             _clientRepository.Update(clienteDB);  
             await _unitOfWork.SaveChangesAsync();
