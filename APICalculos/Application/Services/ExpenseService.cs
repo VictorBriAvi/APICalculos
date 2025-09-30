@@ -38,6 +38,7 @@ namespace APICalculos.Application.Services
         public async Task<ExpenseDTO> AddExpensesAsync(ExpenseCreationDTO expenseCreationDTO)
         {
            var expense = _mapper.Map<Expense>(expenseCreationDTO);
+            expense.ExpenseDate = DateTime.UtcNow;
 
             await _unitOfWork.Expenses.AddAsync(expense);
 
@@ -60,9 +61,12 @@ namespace APICalculos.Application.Services
             if (!string.IsNullOrWhiteSpace(expenseCreationDTO.Price.ToString()))
                 expenseDB.Price = expenseCreationDTO.Price;
 
-            if (expenseCreationDTO.ExpenseTypeId > 0)
+            if (expenseCreationDTO.ExpenseTypeId != 0)
+            {
+                // Desasociamos la navegación para que EF tome solo la FK
+                expenseDB.ExpenseType= null;
                 expenseDB.ExpenseTypeId = expenseCreationDTO.ExpenseTypeId;
-
+            }
 
             _expensesRepository.Update(expenseDB);
             await _unitOfWork.SaveChangesAsync();

@@ -54,7 +54,7 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, CustomerHistoryCreationDTO customerHistoryCreationDTO)
+        public async Task<IActionResult> Put(int id, CustomerHistoryUpdateDTO customerHistoryCreationDTO)
         {
             try
             {

@@ -50,6 +50,7 @@ namespace APICalculos.Application.Services
             }
 
             var customerHistory = _mapper.Map<CustomerHistory>(customerHistoryCreationDTO);
+            customerHistory.DateHistory = DateTime.UtcNow;
 
             await _unitOfWork.CustomerHistory.AddAsync(customerHistory);
             await _unitOfWork.SaveChangesAsync();
@@ -57,7 +58,7 @@ namespace APICalculos.Application.Services
             return _mapper.Map<CustomerHistoryDTO>(customerHistory);
         }
 
-        public async Task UpdateCustomerHistoryAsync(int id, CustomerHistoryCreationDTO customerHistoryCreationDTO)
+        public async Task UpdateCustomerHistoryAsync(int id, CustomerHistoryUpdateDTO dto)
         {
             var customerHistoryDB = await _customerHistoryRepository.GetByIdAsync(id);
 
@@ -66,28 +67,31 @@ namespace APICalculos.Application.Services
                 throw new KeyNotFoundException("Historial Cliente no encontrado");
             }
 
-            if (!string.IsNullOrWhiteSpace(customerHistoryCreationDTO.Title))
+            // Solo actualizo lo que sí se puede modificar
+            if (!string.IsNullOrWhiteSpace(dto.Title))
             {
-                customerHistoryDB.Title = customerHistoryCreationDTO.Title;
+                customerHistoryDB.Title = dto.Title;
             }
 
-            if (!string.IsNullOrWhiteSpace(customerHistoryCreationDTO.Description))
+            if (!string.IsNullOrWhiteSpace(dto.Description))
             {
-                customerHistoryDB.Description = customerHistoryCreationDTO.Description;
+                customerHistoryDB.Description = dto.Description;
             }
 
-            if (!string.IsNullOrWhiteSpace(customerHistoryCreationDTO.ParseDateHistory))
+            if (dto.ClientId != 0)
             {
-                customerHistoryDB.DateHistory = DateTime.Parse(customerHistoryCreationDTO.ParseDateHistory);
+                // Desasociamos la navegación para que EF tome solo la FK
+                customerHistoryDB.Client = null;
+                customerHistoryDB.ClientId= dto.ClientId;
             }
-            if (customerHistoryCreationDTO.ClientId > 0)
-            {
-                customerHistoryDB.ClientId = customerHistoryCreationDTO.ClientId;
-            }
+
+            // ⚠️ Importante: NO tocamos customerHistoryDB.DateHistory
+            // Ese campo representa la fecha de creación y nunca debe cambiar.
 
             _customerHistoryRepository.Update(customerHistoryDB);
             await _unitOfWork.SaveChangesAsync();
         }
+
 
         public async Task DeleteCustomerHistoriesAsync(int id)
         {

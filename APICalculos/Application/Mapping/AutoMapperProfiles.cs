@@ -18,6 +18,10 @@ namespace APICalculos.Application.Mapping
             CreateMap<CustomerHistory, CustomerHistoryDTO>()
                 .ForMember(dto => dto.ClientName, ent => ent.MapFrom(prop => prop.Client.Name));
             CreateMap<CustomerHistoryCreationDTO, CustomerHistory>();
+                
+                
+            CreateMap<CustomerHistoryUpdateDTO, CustomerHistory>()
+                .ForMember(dest => dest.DateHistory, opt => opt.Ignore());
 
             CreateMap<Employee, EmployeeDTO>();
             CreateMap<EmployeeCreationDTO, Employee>();
