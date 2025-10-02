@@ -38,7 +38,7 @@ namespace APICalculos.Application.Services
         public async Task<SaleDTO> AddSaleAsync(SaleCreationDTO saleCreationDTO)
         {
             var sale = _mapper.Map<Sale>(saleCreationDTO);
-            
+            sale.DateSale = DateTime.Now;
             await _unitOfWork.Sale.AddAsync(sale);
 
             await _unitOfWork.SaveChangesAsync();
@@ -57,9 +57,6 @@ namespace APICalculos.Application.Services
 
             if (saleCreationDTO.PaymentTypeId > 0)
                 saleDB.PaymentTypeId = saleCreationDTO.PaymentTypeId;
-
-            if (saleCreationDTO.DateSale != default)
-                saleDB.DateSale = saleCreationDTO.DateSale;
 
             _saleRepository.Update(saleDB);
             await _unitOfWork.SaveChangesAsync();

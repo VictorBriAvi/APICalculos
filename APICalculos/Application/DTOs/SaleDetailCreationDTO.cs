@@ -8,7 +8,6 @@
         public decimal UnitPrice { get; set; }
         public decimal Discount {  get; set; }
         public decimal AdditionalCharge { get; set; }
-        public List<SaleDetailDTO> SaleDetail { get; set; } 
 
     }
 }
