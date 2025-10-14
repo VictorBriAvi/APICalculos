@@ -9,12 +9,14 @@ namespace APICalculos.Application.Services
     public class SaleDetailService : ISaleDetailService
     {
         private readonly ISaleDetailRepository _saleDetailRepository;
+        private readonly IServiceTypeService _serviceTypeService;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SaleDetailService(ISaleDetailRepository saleDetailRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public SaleDetailService(ISaleDetailRepository saleDetailRepository, IMapper mapper, IUnitOfWork unitOfWork, IServiceTypeService serviceTypeService)
         {
             _saleDetailRepository = saleDetailRepository;
+            _serviceTypeService = serviceTypeService;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
@@ -49,18 +51,34 @@ namespace APICalculos.Application.Services
         public async Task UpdateSaleDetailAsync(int id, SaleDetailCreationDTO saleDetailCreationDTO)
         {
             var saleDetailDB = await _saleDetailRepository.GetByIdAsync(id);
-
             if (saleDetailDB == null)
                 throw new KeyNotFoundException("Detalle Venta no encontrado");
 
-            if (saleDetailCreationDTO.SaleId > 0)
-                saleDetailDB.SaleId = saleDetailCreationDTO.SaleId;
+            // Actualizar ServiceType solo si se envió un cambio
+            if (saleDetailCreationDTO.ServiceTypeId > 0 && saleDetailCreationDTO.ServiceTypeId != saleDetailDB.ServiceTypeId)
+            {
+                var serviceTypeDB = await _serviceTypeService.GetServiceTypeForId(saleDetailCreationDTO.ServiceTypeId);
+                if (serviceTypeDB == null)
+                    throw new KeyNotFoundException("Tipo de servicio no encontrado");
 
-            if (saleDetailCreationDTO.ServiceTypeId > 0)
-                saleDetailDB.ServiceTypeId = saleDetailCreationDTO.ServiceTypeId;
+                saleDetailDB.ServiceType = null; // desasocia navegación
+                saleDetailDB.ServiceTypeId = serviceTypeDB.Id;
+                saleDetailDB.UnitPrice = serviceTypeDB.Price; // actualizar precio
+            }
 
-            if (saleDetailCreationDTO.EmployeeId > 0)
+            // Actualizar Employee solo si se envió un cambio
+            if (saleDetailCreationDTO.EmployeeId > 0 && saleDetailCreationDTO.EmployeeId != saleDetailDB.EmployeeId)
+            {
+                saleDetailDB.Employee = null;
                 saleDetailDB.EmployeeId = saleDetailCreationDTO.EmployeeId;
+            }
+
+            // Ediciones parciales de valores numéricos
+            if (saleDetailCreationDTO.DiscountPercent >= 0)
+                saleDetailDB.DiscountPercent = saleDetailCreationDTO.DiscountPercent;
+
+            if (saleDetailCreationDTO.AdditionalCharge >= 0)
+                saleDetailDB.AdditionalCharge = saleDetailCreationDTO.AdditionalCharge;
 
             _saleDetailRepository.Update(saleDetailDB);
             await _unitOfWork.SaveChangesAsync();

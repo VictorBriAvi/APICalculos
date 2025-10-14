@@ -98,6 +98,7 @@ namespace APICalculos.Application.Mapping
                                          .ForMember(dest => dest.SaleDetail, opt => opt.MapFrom(src => src.SaleDetail));
 
 
+
             CreateMap<SaleDetail, SaleDetailDTO>()
                                                     .ForMember(dto => dto.Id,
                                                                opt => opt.MapFrom(d => d.Id))
@@ -112,8 +113,17 @@ namespace APICalculos.Application.Mapping
               
 
 
+            CreateMap<SaleDetailCreationDTO, SaleDetail>()
+                .ForMember(dest => dest.SaleId, opt => opt.Ignore());
+
+
+            CreateMap<SaleCreationDTO, Sale>()
+                .ForMember(dest => dest.SaleDetail, opt => opt.MapFrom(src => src.SaleDetails))
+                .ForMember(dest => dest.DateSale, opt => opt.Ignore());
+
+
             CreateMap<SaleDetailCreationDTO, SaleDetail>();
-            
+
         }
     }
 }

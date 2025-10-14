@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace APICalculos.Infrastructure.Data.Configurations
 {
-    public class DetalleVentaConfig : IEntityTypeConfiguration<SaleDetail>
+    public class SaleDetailConfig : IEntityTypeConfiguration<SaleDetail>
     {
         public void Configure(EntityTypeBuilder<SaleDetail> builder)
         {
@@ -13,8 +13,9 @@ namespace APICalculos.Infrastructure.Data.Configurations
             // Relación con Venta: Cascade, borra los detalles si se borra la venta
             builder.HasOne(dv => dv.Sale)
                 .WithMany(v => v.SaleDetail)
-                .HasForeignKey(dv => dv.Id)
+                .HasForeignKey(dv => dv.SaleId)
                 .OnDelete(DeleteBehavior.Cascade);
+
 
             // Relación con TipoDeServicio: Restrict, no se puede borrar un servicio usado
             builder.HasOne(dv => dv.ServiceType)

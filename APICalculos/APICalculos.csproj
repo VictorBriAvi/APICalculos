@@ -27,6 +27,7 @@
     <Folder Include="Domain\Exceptions\" />
     <Folder Include="Domain\ValueObjects\" />
     <Folder Include="Infrastructure\Extensions\" />
+    <Folder Include="Infrastructure\Migrations\" />
   </ItemGroup>
 
 	<ItemGroup>

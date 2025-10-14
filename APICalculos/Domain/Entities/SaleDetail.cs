@@ -8,8 +8,10 @@
         public int EmployeeId { get; set; }
 
         public decimal UnitPrice { get; set; }
-        public decimal Discount { get; set; }
+        public decimal DiscountPercent { get; set; }
         public decimal AdditionalCharge { get; set; }
+
+        public bool IsDeleted { get; set; } = false;
 
         public Sale Sale { get; set; }
         public ServiceType ServiceType { get; set; }

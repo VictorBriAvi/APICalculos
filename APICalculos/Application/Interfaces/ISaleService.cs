@@ -7,6 +7,7 @@ namespace APICalculos.Application.Interfaces
         Task<List<SaleDTO>> GetAllSaleAsync();
         Task<SaleDTO> GetSaleForId(int id);
         Task<SaleDTO> AddSaleAsync(SaleCreationDTO saleCreationDTO);
+        Task<SaleDTO> AddSaleWithDetailsAsync(SaleCreationDTO saleCreationDTO);
         Task UpdateSaleAsync(int id, SaleCreationDTO saleCreationDTO);
         Task DeleteSaleAsync(int Id);
     }

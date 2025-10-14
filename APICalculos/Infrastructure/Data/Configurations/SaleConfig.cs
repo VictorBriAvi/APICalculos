@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace APICalculos.Infrastructure.Data.Configurations
 {
-    public class VentaConfig : IEntityTypeConfiguration<Sale>
+    public class SaleConfig : IEntityTypeConfiguration<Sale>
     {
         public void Configure(EntityTypeBuilder<Sale> builder)
         {

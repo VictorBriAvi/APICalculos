@@ -22,6 +22,9 @@ namespace APICalculos.Infrastructure.Data
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            modelBuilder.Entity<Sale>().HasQueryFilter(s => !s.IsDeleted);
+            modelBuilder.Entity<SaleDetail>().HasQueryFilter(d => !d.IsDeleted);
         }
 
         public DbSet<Producto> Productos { get; set; }

@@ -46,6 +46,23 @@ namespace APICalculos.Application.Services
             return _mapper.Map<SaleDTO>(sale);
         }
 
+        public async Task<SaleDTO> AddSaleWithDetailsAsync(SaleCreationDTO saleCreationDTO)
+        {
+            // Mapear la venta
+            var sale = _mapper.Map<Sale>(saleCreationDTO);
+            sale.DateSale = DateTime.Now;
+            sale.CalculateTotal();
+
+            // Los detalles se agregan automáticamente por la relación
+            await _unitOfWork.Sale.AddAsync(sale);
+
+            // Guardar todo junto
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<SaleDTO>(sale);
+        }
+
+
         public async Task UpdateSaleAsync(int id, SaleCreationDTO saleCreationDTO)
         {
             var saleDB = await _saleRepository.GetByIdAsync(id);

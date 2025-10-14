@@ -38,8 +38,9 @@ namespace APICalculos.API.Controllers
         public async Task<IActionResult> Post(SaleCreationDTO saleCreationDTO)
         {
             try
-            {
-                var saleDTO = await _saleService.AddSaleAsync(saleCreationDTO);
+            {   //REVISAR
+                // Llamamos al nuevo método que guarda venta + detalles
+                var saleDTO = await _saleService.AddSaleWithDetailsAsync(saleCreationDTO);
                 return Ok(saleDTO);
             }
             catch (ArgumentException ex)
@@ -51,6 +52,8 @@ namespace APICalculos.API.Controllers
                 return Conflict(ex.Message);
             }
         }
+
+          
 
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, SaleCreationDTO saleCreationDTO)
