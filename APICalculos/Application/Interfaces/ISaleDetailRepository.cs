@@ -6,6 +6,8 @@ namespace APICalculos.Application.Interfaces
     {
         Task<IEnumerable<SaleDetail>> GetAllAsync();
         Task<SaleDetail> GetByIdAsync(int id);
+        Task<List<SaleDetail>> GetBySaleIdAsync(int saleId);
+
         Task AddAsync(SaleDetail saleDetail);
         void Update(SaleDetail saleDetail);
         void Remove(SaleDetail saleDetail);

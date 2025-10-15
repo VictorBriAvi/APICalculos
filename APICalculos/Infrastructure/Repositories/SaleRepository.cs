@@ -35,7 +35,7 @@ namespace APICalculos.Infrastructure.Repositories
                 .Include(st => st.SaleDetail).ThenInclude(x => x.Employee)
                 .Include(st => st.Client)
                 .Include(st => st.PaymentType)
-                .AsNoTracking()
+                //.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 

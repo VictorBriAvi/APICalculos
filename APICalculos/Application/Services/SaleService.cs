@@ -75,6 +75,11 @@ namespace APICalculos.Application.Services
             if (saleCreationDTO.PaymentTypeId > 0)
                 saleDB.PaymentTypeId = saleCreationDTO.PaymentTypeId;
 
+            if (saleCreationDTO.TotalAmount != 0)
+            {
+                saleDB.TotalAmount = saleCreationDTO.TotalAmount;
+            }
+
             _saleRepository.Update(saleDB);
             await _unitOfWork.SaveChangesAsync();
         }
