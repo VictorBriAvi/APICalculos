@@ -6,6 +6,7 @@
         public string Name { get; set; }
         public string IdentityDocument { get; set; }
         public DateTime DateBirth { get; set; }
+        public int PaymentPercentage { get; set; }
         public ICollection<SaleDetail> SaleDetail { get; set; }
 
     }

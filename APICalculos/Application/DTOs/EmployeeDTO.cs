@@ -9,6 +9,7 @@ namespace APICalculos.Application.DTOs
         public string IdentityDocument { get; set; }
         [JsonIgnore]
         public DateTime DateBirth { get; set; }
+        public int PaymentPercentage { get; set; }
         public string EmployeeDateBirth => DateBirth.ToString("dd-MM-yyyy");
 
      

@@ -6,6 +6,7 @@ using APICalculos.Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -68,6 +69,9 @@ builder.Services.AddDbContext<MyDbContext>(options =>
     options.UseSqlServer(connectionString);
     //options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
+//builder.Services.AddDbContext<MyDbContext>(options =>
+//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("NuevoPolitica", app =>
