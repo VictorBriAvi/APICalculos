@@ -2,6 +2,7 @@
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace APICalculos.Infrastructure.Repositories

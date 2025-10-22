@@ -2,6 +2,7 @@
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace APICalculos.Infrastructure.Repositories
 {
@@ -21,6 +22,15 @@ namespace APICalculos.Infrastructure.Repositories
                  .AsNoTracking()
                  .OrderByDescending(x => x.Id)
                  .ToListAsync();
+        }
+
+        public async Task<IEnumerable<ServiceType>> SearchAsync(Expression<Func<ServiceType, bool>> predicate)
+        {
+            return await _dbContext.ServiceTypes
+                .Include(s => s.ServiceCategories)
+                .AsNoTracking()
+                .Where(predicate)
+                .ToListAsync();
         }
 
         public async Task<ServiceType> GetByIdAsync(int Id)

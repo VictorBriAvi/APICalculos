@@ -5,6 +5,7 @@ using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.Linq.Expressions;
 
 namespace APICalculos.Application.Services
 {
@@ -38,6 +39,22 @@ namespace APICalculos.Application.Services
             }
             return _mapper.Map<ServiceTypeDTO>(serviceType);
         }
+
+        public async Task<List<ServiceTypeDTO>> SearchServicesAsync(int? categoryId = null)
+        {
+            // En el futuro: podrías agregar más filtros (precio, nombre, etc.)
+            Expression<Func<ServiceType, bool>> filter = s => true;
+
+            if (categoryId.HasValue)
+            {
+                filter = s => s.ServiceCategorieId == categoryId.Value;
+            }
+
+            var results = await _serviceTypeRepository.SearchAsync(filter);
+
+            return _mapper.Map<List<ServiceTypeDTO>>(results);
+        }
+
 
         public async Task<ServiceTypeDTO> AddServiceTypeAsync(ServiceTypeCreationDTO serviceTypeCreationDTO)
         {

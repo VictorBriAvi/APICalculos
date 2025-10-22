@@ -23,6 +23,14 @@ namespace APICalculos.API.Controllers
             return Ok(serviceTypeDto);
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> SearchServices([FromQuery] int? categoryId)
+        {
+            var result = await _serviceTypeService.SearchServicesAsync(categoryId);
+            return Ok(result);
+        }
+
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetServiceTypeForId(int id) 
         {

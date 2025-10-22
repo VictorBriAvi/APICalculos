@@ -1,4 +1,5 @@
 ﻿using APICalculos.Domain.Entidades;
+using System.Linq.Expressions;
 
 namespace APICalculos.Application.Interfaces
 {
