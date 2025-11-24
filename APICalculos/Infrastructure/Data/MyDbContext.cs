@@ -1,4 +1,5 @@
 ﻿using APICalculos.Domain.Entidades;
+using APICalculos.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using System.Reflection;
 
@@ -42,5 +43,6 @@ namespace APICalculos.Infrastructure.Data
         public DbSet<ExpenseType> ExpenseTypes { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleDetail>  SaleDetails { get; set; }
+        public DbSet<SalePayment> SalePayments { get; set; }
     }
 }

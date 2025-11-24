@@ -17,31 +17,39 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<SaleDTO>>> GetAllSaleAsync()
+        public async Task<ActionResult<IEnumerable<SaleDTO>>> GetAllAsync()
         {
-            var saleDto = await _saleService.GetAllSaleAsync();
-            return Ok(saleDto);
+            var sales = await _saleService.GetAllSaleAsync();
+            return Ok(sales);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetSaleForId(int id)
+        public async Task<IActionResult> GetByIdAsync(int id)
         {
-            var saleDto = await _saleService.GetSaleForId(id);
+            var sale = await _saleService.GetSaleForId(id);
+            if (sale == null)
+                return NotFound($"No se encontró la venta con ID {id}");
 
-            if (saleDto == null)
-                return NotFound($"No se encontro la venta con el ID {id}");
-
-            return Ok(saleDto);
+            return Ok(sale);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(SaleCreationDTO saleCreationDTO)
+        public async Task<IActionResult> CreateAsync([FromBody] SaleCreationDTO saleCreationDTO)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            if (saleCreationDTO.ClientId <= 0)
+                return BadRequest("Debe especificar un cliente válido.");
+
+            //if (saleCreationDTO.PaymentTypeId <= 0)
+            //    return BadRequest("Debe especificar un tipo de pago válido.");
+
             try
-            {   //REVISAR
-                // Llamamos al nuevo método que guarda venta + detalles
-                var saleDTO = await _saleService.AddSaleWithDetailsAsync(saleCreationDTO);
-                return Ok(saleDTO);
+            {
+                var createdSale = await _saleService.AddSaleWithDetailsAsync(saleCreationDTO);
+
+                return Ok(createdSale);
             }
             catch (ArgumentException ex)
             {
@@ -51,36 +59,42 @@ namespace APICalculos.API.Controllers
             {
                 return Conflict(ex.Message);
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+            }
         }
 
-          
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, SaleCreationDTO saleCreationDTO)
+        public async Task<IActionResult> UpdateAsync(int id, [FromBody] SaleCreationDTO saleCreationDTO)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             try
             {
                 await _saleService.UpdateSaleAsync(id, saleCreationDTO);
-                return Ok("Se modifico exitosamente");
+                return Ok($"La venta con ID {id} fue actualizada correctamente.");
             }
             catch (KeyNotFoundException)
             {
-
-                return NotFound("Tipo de servicio no encontrado");
+                return NotFound($"No se encontró la venta con ID {id}");
             }
         }
 
+
         [HttpDelete("{id:int}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> DeleteAsync(int id)
         {
             try
             {
                 await _saleService.DeleteSaleAsync(id);
-                return Ok("Se ha eliminado la venta");
+                return Ok($"La venta con ID {id} fue eliminada correctamente.");
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("venta no encontrado");
+                return NotFound($"No se encontró la venta con ID {id}");
             }
         }
     }

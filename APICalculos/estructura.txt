@@ -1,0 +1,165 @@
+﻿APICalculos/
+├─ .config/
+│  └─ dotnet-tools.json
+├─ API/
+│  ├─ Controllers/
+│  │  ├─ AutenticacionController.cs
+│  │  ├─ ClientController.cs
+│  │  ├─ CustomerHistoryController.cs
+│  │  ├─ EmployeeController.cs
+│  │  ├─ ExpenseController.cs
+│  │  ├─ ExpenseTypeController.cs
+│  │  ├─ PaymentTypeController.cs
+│  │  ├─ ProductoController.cs
+│  │  ├─ RolController.cs
+│  │  ├─ SaleController.cs
+│  │  ├─ SaleDetailController.cs
+│  │  ├─ ServiceCategoriesController.cs
+│  │  ├─ ServiceTypeController.cs
+│  │  ├─ ServicioController.cs
+│  │  ├─ UsuarioController.cs
+│  │  └─ UsuarioRolController.cs
+│  └─ Properties/
+├─ Application/
+│  ├─ DTOs/
+│  │  ├─ ClientCreationDTO.cs
+│  │  ├─ ClientDTO.cs
+│  │  ├─ ClienteYTipoDePagoDTO.cs
+│  │  ├─ CustomerHistoryCreationDTO.cs
+│  │  ├─ CustomerHistoryDTO.cs
+│  │  ├─ CustomerHistoryUpdateDTO.cs
+│  │  ├─ EmployeeCreationDTO.cs
+│  │  ├─ EmployeeDTO.cs
+│  │  ├─ ExpenseCreationDTO.cs
+│  │  ├─ ExpenseDTO.cs
+│  │  ├─ ExpenseTypeCreationDTO.cs
+│  │  ├─ ExpenseTypeDTO.cs
+│  │  ├─ PaymentTypeCreationDTO.cs
+│  │  ├─ PaymentTypeDTO.cs
+│  │  ├─ ProductoCreacionDTO.cs
+│  │  ├─ ProductoDTO.cs
+│  │  ├─ RolCreacionDTO.cs
+│  │  ├─ RolDTO.cs
+│  │  ├─ SaleCreationDTO.cs
+│  │  ├─ SaleDetailCreationDTO.cs
+│  │  ├─ SaleDetailDTO.cs
+│  │  ├─ SaleDTO.cs
+│  │  ├─ ServiceCategoriesCreationDTO.cs
+│  │  ├─ ServiceCategoriesDTO.cs
+│  │  ├─ ServiceTypeCreationDTO.cs
+│  │  ├─ ServiceTypeDTO.cs
+│  │  ├─ ServicioCreacionDTO.cs
+│  │  ├─ ServicioDTO.cs
+│  │  ├─ UsuarioCreacionDTO.cs
+│  │  ├─ UsuarioDTO.cs
+│  │  ├─ UsuarioRolCreacionDTO.cs
+│  │  └─ ValidarUsuarioDTO.cs
+│  ├─ Interfaces/
+│  │  ├─ IClientRepository.cs
+│  │  ├─ IClientService.cs
+│  │  ├─ ICustomerHistoryRepository.cs
+│  │  ├─ ICustomerHistoryService.cs
+│  │  ├─ IEmployeeRepository.cs
+│  │  ├─ IEmployeeService.cs
+│  │  ├─ IExpenseService.cs
+│  │  ├─ IExpensesRepository.cs
+│  │  ├─ IExpenseTypeRepository.cs
+│  │  ├─ IExpenseTypeService.cs
+│  │  ├─ IPaymentTypeRepository.cs
+│  │  ├─ IPaymentTypeService.cs
+│  │  ├─ ISaleDetailRepository.cs
+│  │  ├─ ISaleDetailService.cs
+│  │  ├─ ISaleRepository.cs
+│  │  ├─ ISaleService.cs
+│  │  ├─ IServiceCategoriesRepository.cs
+│  │  ├─ IServiceCategoriesService.cs
+│  │  ├─ IServiceTypeRepository.cs
+│  │  └─ IServiceTypeService.cs
+│  ├─ Mapping/
+│  │  └─ AutoMapperProfiles.cs
+│  ├─ Services/
+│  │  ├─ ClientService.cs
+│  │  ├─ CustomerHistoryService.cs
+│  │  ├─ EmployeeService.cs
+│  │  ├─ ExpenseService.cs
+│  │  ├─ ExpenseTypeService.cs
+│  │  ├─ PaymentTypeService.cs
+│  │  ├─ SaleDetailService.cs
+│  │  ├─ SaleService.cs
+│  │  ├─ ServiceCategoriesService.cs
+│  │  └─ ServiceTypeService.cs
+│  └─ Validators/
+├─ Domain/
+│  ├─ Entities/
+│  │  ├─ Client.cs
+│  │  ├─ CustomerHistory.cs
+│  │  ├─ Employee.cs
+│  │  ├─ Expense.cs
+│  │  ├─ ExpenseType.cs
+│  │  ├─ PaymentType.cs
+│  │  ├─ Producto.cs
+│  │  ├─ Rol.cs
+│  │  ├─ Sale.cs
+│  │  ├─ SaleDetail.cs
+│  │  ├─ ServiceCategorie.cs
+│  │  ├─ ServiceType.cs
+│  │  ├─ Servicio.cs
+│  │  ├─ Usuario.cs
+│  │  └─ UsuarioRol.cs
+│  ├─ Enums/
+│  ├─ Exceptions/
+│  └─ ValueObjects/
+├─ Infrastructure/
+│  ├─ Data/
+│  │  ├─ Configurations/
+│  │  │  ├─ ClientConfig.cs
+│  │  │  ├─ EmployeeConfig.cs
+│  │  │  ├─ ExpenseConfig.cs
+│  │  │  ├─ ExpenseTypeConfig.cs
+│  │  │  ├─ ProductoConfig.cs
+│  │  │  ├─ RolConfig.cs
+│  │  │  ├─ SaleConfig.cs
+│  │  │  ├─ SaleDetailConfig.cs
+│  │  │  ├─ ServiceCategoriesConfig.cs
+│  │  │  ├─ ServiceTypeConfig.cs
+│  │  │  ├─ ServicioConfig.cs
+│  │  │  ├─ UsuarioConfig.cs
+│  │  │  └─ UsuarioRolConfig.cs
+│  │  └─ MyDbContext.cs
+│  ├─ Extensions/
+│  ├─ Migrations/
+│  ├─ Repositories/
+│  │  ├─ ClientRepository.cs
+│  │  ├─ CustomerHistoryRepository.cs
+│  │  ├─ EmployeeRepository.cs
+│  │  ├─ ExpensesRepository.cs
+│  │  ├─ ExpenseTypeRepository.cs
+│  │  ├─ PaymentTypeRepository.cs
+│  │  ├─ SaleDetailRepository.cs
+│  │  ├─ SaleRepository.cs
+│  │  ├─ ServiceCategoriesRepository.cs
+│  │  └─ ServiceTypeRepository.cs
+│  └─ UnitOfWork/
+│     ├─ IUnitOfWork.cs
+│     └─ UnitOfWork.cs
+├─ Migrations/
+│  ├─ 20251011153202_InitialSales.cs
+│  ├─ 20251011153202_InitialSales.Designer.cs
+│  ├─ 20251017012135_clientPaymentPorcent.cs
+│  ├─ 20251017012135_clientPaymentPorcent.Designer.cs
+│  ├─ 20251017012416_employeePaymentPorcent.cs
+│  ├─ 20251017012416_employeePaymentPorcent.Designer.cs
+│  └─ MyDbContextModelSnapshot.cs
+├─ bin/
+├─ obj/
+├─ Properties/
+│  ├─ PublishProfiles/
+│  │  ├─ FTPProfile.pubxml
+│  │  └─ FTPProfile.pubxml.user
+│  └─ launchSettings.json
+├─ APICalculos.csproj
+├─ APICalculos.csproj.user
+├─ appsettings.json
+├─ appsettings.Development.json
+├─ Program.cs
+└─ estructura.txt

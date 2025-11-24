@@ -21,7 +21,8 @@ namespace APICalculos.Infrastructure.Repositories
                 .Include(st => st.SaleDetail).ThenInclude(x => x.ServiceType)
                 .Include(st => st.SaleDetail).ThenInclude(x => x.Employee)
                 .Include(st => st.Client)
-                .Include(st => st.PaymentType)
+                .Include(st => st.Payments)
+                    .ThenInclude(p => p.PaymentType)
                 .AsNoTracking()
                 .OrderByDescending(x => x.Id)
                 .ToListAsync();
@@ -34,7 +35,8 @@ namespace APICalculos.Infrastructure.Repositories
                 .Include(st => st.SaleDetail).ThenInclude(x => x.ServiceType)
                 .Include(st => st.SaleDetail).ThenInclude(x => x.Employee)
                 .Include(st => st.Client)
-                .Include(st => st.PaymentType)
+                .Include(st => st.Payments)
+                    .ThenInclude(p => p.PaymentType)
                 //.AsNoTracking()
                 .FirstOrDefaultAsync(x => x.Id == id);
         }

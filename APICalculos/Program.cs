@@ -2,6 +2,7 @@ using APICalculos.Application.Interfaces;
 using APICalculos.Application.Services;
 using APICalculos.Infrastructure.Data;
 using APICalculos.Infrastructure.Repositories;
+using APICalculos.Infrastructure.Repositories.Reports;
 using APICalculos.Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -61,6 +62,8 @@ builder.Services.AddScoped<ISaleDetailRepository, SaleDetailRepository>();
 builder.Services.AddScoped<ISaleDetailService, SaleDetailService>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<ISaleService, SaleService>();
+builder.Services.AddScoped<IFinancialReportRepository, FinancialReportRepository>();
+builder.Services.AddScoped<IFinancialReportService, FinancialReportService>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 

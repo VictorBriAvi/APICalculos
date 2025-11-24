@@ -1,5 +1,6 @@
 ﻿using APICalculos.Application.DTOs;
 using APICalculos.Domain.Entidades;
+using APICalculos.Domain.Entities;
 using AutoMapper;
 using System.Data;
 
@@ -65,13 +66,13 @@ namespace APICalculos.Application.Mapping
 
             CreateMap<Sale, SaleDTO>()
                 .ForMember(dto => dto.NameClient, opt => opt.MapFrom(v => v.Client.Name))
-                .ForMember(dto => dto.NamePaymentType, opt => opt.MapFrom(v => v.PaymentType.Name))
+                .ForMember(dto => dto.Payments, opt => opt.MapFrom(v => v.Payments))
                 //.ForMember(dto => dto.PriceTotal, opt => opt.MapFrom(v => v.))
                 .ForMember(dto => dto.SaleDetail, opt => opt.MapFrom(v => v.SaleDetail));
 
             CreateMap<Sale, ClienteYTipoDePagoDTO>()
-                .ForMember(dto => dto.ClienteId, opt => opt.MapFrom(v => v.ClientId))
-                .ForMember(dto => dto.TipoDePagoId, opt => opt.MapFrom(v => v.PaymentTypeId));
+                .ForMember(dto => dto.ClienteId, opt => opt.MapFrom(v => v.ClientId));
+
 
             CreateMap<SaleCreationDTO, Sale>();
 
@@ -81,21 +82,20 @@ namespace APICalculos.Application.Mapping
                 .ForMember(dto => dto.NameEmployeeSale, ent => ent.MapFrom(prop => prop.Employee.Name));
 
 
+
             CreateMap<Sale, SaleDTO>()
-                                        .ForMember(dto => dto.Id,
-                                                   opt => opt.MapFrom(v => v.Id))
-                                        .ForMember(dto => dto.NameClient,
-                                                   opt => opt.MapFrom(v => v.Client.Name))
-                                        .ForMember(dto => dto.NamePaymentType,
-                                                   opt => opt.MapFrom(v => v.PaymentType.Name))
-                                        .ForMember(dto => dto.DateSale,
-                                                   opt => opt.MapFrom(v => v.DateSale))
-                                        // Al no haber Cantidad, simplemente sumamos Precio de cada detalle
-                                        //.ForMember(dto => dto.PriceTotal,
-                                        //           opt => opt.MapFrom(v => v.SaleDetail.Sum(d => d.price)))
-                                        .ForMember(dto => dto.SaleDetail,
-                                                   opt => opt.MapFrom(v => v.SaleDetail))
-                                         .ForMember(dest => dest.SaleDetail, opt => opt.MapFrom(src => src.SaleDetail));
+                .ForMember(dto => dto.Id, opt => opt.MapFrom(v => v.Id))
+                .ForMember(dto => dto.ClientId, opt => opt.MapFrom(v => v.ClientId))
+                .ForMember(dto => dto.NameClient, opt => opt.MapFrom(v => v.Client.Name))
+                .ForMember(dto => dto.TotalAmount, opt => opt.MapFrom(v => v.TotalAmount))
+                .ForMember(dto => dto.DateSale, opt => opt.MapFrom(v => v.DateSale))
+                .ForMember(dto => dto.IsDeleted, opt => opt.MapFrom(v => v.IsDeleted))
+                .ForMember(dto => dto.SaleDetail, opt => opt.MapFrom(v => v.SaleDetail))
+                .ForMember(dto => dto.Payments, opt => opt.MapFrom(v => v.Payments))
+                // resumen concatenado: "Efectivo, Tarjeta"
+                .ForMember(dto => dto.NamePaymentType, opt => opt.MapFrom(v => v.Payments != null && v.Payments.Any() ? string.Join(", ", v.Payments.Select(p => p.PaymentType.Name))  : string.Empty));
+
+
 
 
 
@@ -123,6 +123,13 @@ namespace APICalculos.Application.Mapping
 
 
             CreateMap<SaleDetailCreationDTO, SaleDetail>();
+
+            CreateMap<SalePayment, SalePaymentDTO>()
+                .ForMember(dto => dto.PaymentTypeName, opt => opt.MapFrom(p => p.PaymentType.Name));
+
+            CreateMap<SalePaymentDTO, SalePayment>();
+
+
 
         }
     }
