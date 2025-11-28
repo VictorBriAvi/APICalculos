@@ -13,9 +13,6 @@ namespace APICalculos.Infrastructure.Data.Configurations
             builder.Property(prop => prop.Name)
             .HasMaxLength(100)
             .IsRequired();
-
-
-
         }
     }
 }

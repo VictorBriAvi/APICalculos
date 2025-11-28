@@ -80,6 +80,10 @@ namespace APICalculos.API.Controllers
             {
                 return NotFound("Tipo de gasto no encontrado");
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
     }
 }

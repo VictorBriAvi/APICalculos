@@ -4,6 +4,8 @@ using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace APICalculos.Application.Services
@@ -39,7 +41,6 @@ namespace APICalculos.Application.Services
 
         public async Task<ClientDTO> AddAsync(ClientCreationDTO clienteCreacionDTO)
         {
-            // Validaciones básicas, si querés también pueden ir en un Validator aparte
             if (string.IsNullOrWhiteSpace(clienteCreacionDTO.Name))
                 throw new ArgumentException("El nombre no puede estar vacío");
 
@@ -67,7 +68,6 @@ namespace APICalculos.Application.Services
             if (clienteDB == null)
                 throw new KeyNotFoundException("Cliente no encontrado");
 
-            // Actualiza solo si vienen datos válidos
             if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Name))
                 clienteDB.Name = clienteCreacionDTO.Name;
 
@@ -88,8 +88,15 @@ namespace APICalculos.Application.Services
             if (clienteDB == null)
                 throw new KeyNotFoundException("Cliente no encontrado");
 
-            _clientRepository.Remove(clienteDB);
-            await _unitOfWork.SaveChangesAsync();
+            try
+            {
+                _clientRepository.Remove(clienteDB);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            {
+                throw new InvalidOperationException("No se puede eliminar este cliente porque está asociado a una venta.");
+            }
         }
 
 

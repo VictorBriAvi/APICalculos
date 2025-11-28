@@ -1,8 +1,11 @@
 ﻿using APICalculos.Application.DTOs;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
+using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace APICalculos.Application.Services
 {
@@ -75,14 +78,18 @@ namespace APICalculos.Application.Services
         public async Task DeleteExpenseAsync(int id)
         {
             var expenseDB = await _expensesRepository.GetByIdAsync(id);
-
             if (expenseDB == null)
-            {
-                throw new KeyNotFoundException("Gasto no encontrado");
-            }
+                throw new KeyNotFoundException("Tipo de pago no encontrado");
 
-            _expensesRepository.Remove(expenseDB);
-            await _unitOfWork.SaveChangesAsync();
+            try
+            {
+                _expensesRepository.Remove(expenseDB);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            {
+                throw new InvalidOperationException("No se puede eliminar este gasto porque está asociado a una venta.");
+            }
         }
     }
 }

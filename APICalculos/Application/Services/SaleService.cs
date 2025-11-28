@@ -28,6 +28,13 @@ namespace APICalculos.Application.Services
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
+        public async Task<List<SaleDTO>> GetSalesByTodayAsync()
+        {
+            var sales = await _saleRepository.GetByTodayAsync();
+            return _mapper.Map<List<SaleDTO>>(sales);
+        }
+
+
         public async Task<SaleDTO> GetSaleForId(int id)
         {
             var sale = await _saleRepository.GetByIdAsync(id);

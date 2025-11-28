@@ -80,7 +80,12 @@ namespace APICalculos.API.Controllers
             {
                 return NotFound("Tipo de pago no encontrado");
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
+
 
     }
 }

@@ -88,6 +88,10 @@ namespace APICalculos.API.Controllers
             {
                 return NotFound("Tipo de servicio no encontrado");
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
 
     }

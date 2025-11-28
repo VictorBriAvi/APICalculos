@@ -91,9 +91,9 @@ namespace APICalculos.Application.Mapping
                 .ForMember(dto => dto.DateSale, opt => opt.MapFrom(v => v.DateSale))
                 .ForMember(dto => dto.IsDeleted, opt => opt.MapFrom(v => v.IsDeleted))
                 .ForMember(dto => dto.SaleDetail, opt => opt.MapFrom(v => v.SaleDetail))
-                .ForMember(dto => dto.Payments, opt => opt.MapFrom(v => v.Payments))
+                .ForMember(dto => dto.Payments, opt => opt.MapFrom(v => v.Payments));
                 // resumen concatenado: "Efectivo, Tarjeta"
-                .ForMember(dto => dto.NamePaymentType, opt => opt.MapFrom(v => v.Payments != null && v.Payments.Any() ? string.Join(", ", v.Payments.Select(p => p.PaymentType.Name))  : string.Empty));
+                //.ForMember(dto => dto.NamePaymentType, opt => opt.MapFrom(v => v.Payments != null && v.Payments.Any() ? string.Join(", ", v.Payments.Select(p => p.PaymentType.Name))  : string.Empty));
 
 
 

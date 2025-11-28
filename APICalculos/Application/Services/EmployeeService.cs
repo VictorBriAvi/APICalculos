@@ -4,6 +4,8 @@ using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 
 namespace APICalculos.Application.Services
@@ -71,6 +73,9 @@ namespace APICalculos.Application.Services
             if (!string.IsNullOrWhiteSpace(employeeCreationDTO.IdentityDocument))
                 employeeDB.IdentityDocument = employeeCreationDTO.IdentityDocument;
 
+            if (!string.IsNullOrWhiteSpace(employeeCreationDTO.PaymentPercentage.ToString()))
+                employeeDB.PaymentPercentage = employeeCreationDTO.PaymentPercentage;
+
             if (employeeCreationDTO.DateBirth != default)
                 employeeDB.DateBirth = employeeCreationDTO.DateBirth;
 
@@ -84,8 +89,15 @@ namespace APICalculos.Application.Services
             if (clienteDB == null)
                 throw new KeyNotFoundException("Cliente no encontrado");
 
-            _employeeRepository.Remove(clienteDB);
-            await _unitOfWork.SaveChangesAsync();
+            try
+            {
+                _employeeRepository.Remove(clienteDB);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            {
+                throw new InvalidOperationException("No se puede eliminar este Colaborador porque está asociado a una venta.");
+            }
         }
     }
 }

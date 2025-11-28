@@ -3,6 +3,8 @@ using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace APICalculos.Application.Services
 {
@@ -75,8 +77,16 @@ namespace APICalculos.Application.Services
             if (paymentTypeDB == null)
                 throw new KeyNotFoundException("Tipo de pago no encontrado");
 
-            _paymentTypeRepository.Remove(paymentTypeDB);
-            await _unitOfWork.SaveChangesAsync();
+            try
+            {
+                _paymentTypeRepository.Remove(paymentTypeDB);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            {
+                throw new InvalidOperationException("No se puede eliminar este tipo de pago porque está asociado a una venta.");
+            }
         }
+
     }
 }

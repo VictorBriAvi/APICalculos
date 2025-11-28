@@ -15,8 +15,6 @@ namespace APICalculos.Application.DTOs
         public DateTime DateSale { get; set; }
         public bool IsDeleted { get; set; } = false;
 
-        public string NamePaymentType { get; set; }
-
         public List<SaleDetailDTO> SaleDetail { get; set; }
 
         // 👇 Nueva propiedad: lista de métodos de pago

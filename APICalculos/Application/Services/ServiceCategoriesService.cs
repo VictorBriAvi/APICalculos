@@ -3,6 +3,8 @@ using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 
 namespace APICalculos.Application.Services
 {
@@ -77,8 +79,16 @@ namespace APICalculos.Application.Services
             if (serviceCategorieDB == null)
                 throw new KeyNotFoundException("Servicio Categoria no encontrada");
 
-            _serviceCategoriesRepository.Remove(serviceCategorieDB);
-            await _unitOfWork.SaveChangesAsync();
+            try
+            {
+
+                _serviceCategoriesRepository.Remove(serviceCategorieDB);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            {
+                throw new InvalidOperationException("No se puede eliminar esta categoria del servicio porque está asociado a una venta.");
+            }
         }
     }
 }

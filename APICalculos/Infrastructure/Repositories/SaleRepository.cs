@@ -29,6 +29,22 @@ namespace APICalculos.Infrastructure.Repositories
 
         }
 
+        public async Task<IEnumerable<Sale>> GetByTodayAsync()
+        {
+            var today = DateTime.Today;
+
+            return await _dbContext.Sales
+                .Where(s => s.DateSale.Date == today)
+                .Include(st => st.SaleDetail).ThenInclude(x => x.ServiceType)
+                .Include(st => st.SaleDetail).ThenInclude(x => x.Employee)
+                .Include(st => st.Client)
+                .Include(st => st.Payments).ThenInclude(p => p.PaymentType)
+                .AsNoTracking()
+                .OrderByDescending(x => x.Id)
+                .ToListAsync();
+        }
+
+
         public async Task<Sale> GetByIdAsync(int id)
         {
             return await _dbContext.Sales

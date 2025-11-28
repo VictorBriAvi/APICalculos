@@ -10,7 +10,8 @@ namespace APICalculos.Infrastructure.Data.Configurations
         {
             builder.HasOne(e => e.ExpenseType)
                 .WithMany(et => et.Expenses)
-                .HasForeignKey(e => e.ExpenseTypeId); 
+                .HasForeignKey(e => e.ExpenseTypeId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(prop => prop.Description)
                 .HasMaxLength(300);

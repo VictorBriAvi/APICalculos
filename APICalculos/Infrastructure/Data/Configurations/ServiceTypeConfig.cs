@@ -12,7 +12,7 @@ namespace APICalculos.Infrastructure.Data.Configurations
             builder.HasOne(st => st.ServiceCategories)
                    .WithMany(sc => sc.ServiceTypes)   // propiedad de navegación en ServiceCategorie
                    .HasForeignKey(st => st.ServiceCategorieId)
-                   .OnDelete(DeleteBehavior.Restrict); // o la política que prefieras
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.Property(prop => prop.Name)
                    .HasMaxLength(100);

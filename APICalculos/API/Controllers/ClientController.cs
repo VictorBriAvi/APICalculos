@@ -76,7 +76,11 @@ namespace APICalculos.API.Controllers
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Cliente no encontrado");
+                return NotFound("Tipo de pago no encontrado");
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message); // 409
             }
         }
 

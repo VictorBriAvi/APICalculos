@@ -4,6 +4,8 @@ using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
 
@@ -108,12 +110,17 @@ namespace APICalculos.Application.Services
             var serviceTypeDB = await _serviceTypeRepository.GetByIdAsync(Id);
 
             if (serviceTypeDB == null)
-            {
                 throw new KeyNotFoundException("Tipo de servicio no encontrado");
-            }
 
-            _serviceTypeRepository.Remove(serviceTypeDB);
-            await _unitOfWork.SaveChangesAsync();
+            try
+            {
+                _serviceTypeRepository.Remove(serviceTypeDB);
+                await _unitOfWork.SaveChangesAsync();
+            }
+            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            {
+                throw new InvalidOperationException("No se puede eliminar este tipo de servicio porque está asociado a una venta.");
+            }
         }
     }
 }

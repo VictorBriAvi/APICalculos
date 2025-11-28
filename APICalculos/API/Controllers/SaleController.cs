@@ -23,6 +23,14 @@ namespace APICalculos.API.Controllers
             return Ok(sales);
         }
 
+        [HttpGet("today")]
+        public async Task<IActionResult> GetTodaySales()
+        {
+            var result = await _saleService.GetSalesByTodayAsync();
+            return Ok(result);
+        }
+
+
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdAsync(int id)
         {
@@ -41,9 +49,6 @@ namespace APICalculos.API.Controllers
 
             if (saleCreationDTO.ClientId <= 0)
                 return BadRequest("Debe especificar un cliente válido.");
-
-            //if (saleCreationDTO.PaymentTypeId <= 0)
-            //    return BadRequest("Debe especificar un tipo de pago válido.");
 
             try
             {
