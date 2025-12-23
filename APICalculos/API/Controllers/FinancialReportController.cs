@@ -88,5 +88,36 @@ namespace APICalculos.API.Controllers
             return Ok(report);
         }
 
+        [HttpGet("expenses-by-category")]
+        public async Task<IActionResult> GetExpensesByCategory([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        {
+            try
+            {
+                var result = await _financialReportService.GetExpensesByCategoryAsync(fromDate, toDate);
+
+                return Ok(new
+                {
+                    success = true,
+                    message = "Reporte de gastos por categoría obtenido correctamente",
+                    data = result
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { success = false, message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Error interno del servidor",
+                    error = ex.Message
+                });
+            }
+        }
+
+
+
     }
 }

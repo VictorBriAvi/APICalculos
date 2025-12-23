@@ -25,9 +25,7 @@ namespace APICalculos.Infrastructure.Repositories
 
         public async Task<Client?> GetByIdAsync(int id)
         {
-            return await _dbContext.Clients
-                .AsNoTracking()
-                .FirstOrDefaultAsync(c => c.Id == id);
+            return await _dbContext.Clients.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
         }
 
 

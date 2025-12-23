@@ -66,7 +66,6 @@ namespace APICalculos.Application.Services
 
             if (expenseCreationDTO.ExpenseTypeId != 0)
             {
-                // Desasociamos la navegación para que EF tome solo la FK
                 expenseDB.ExpenseType= null;
                 expenseDB.ExpenseTypeId = expenseCreationDTO.ExpenseTypeId;
             }

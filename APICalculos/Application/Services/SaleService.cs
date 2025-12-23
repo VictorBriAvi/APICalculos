@@ -28,9 +28,13 @@ namespace APICalculos.Application.Services
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
-        public async Task<List<SaleDTO>> GetSalesByTodayAsync()
+        public async Task<List<SaleDTO>> GetSalesByDateRangeAsync(DateTime fromDate, DateTime toDate)
         {
-            var sales = await _saleRepository.GetByTodayAsync();
+            if (fromDate > toDate)
+                throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
+            fromDate = fromDate.Date;
+            toDate = toDate.Date.AddDays(1).AddTicks(-1);
+            var sales = await _saleRepository.GetByDateRangeAsync(fromDate, toDate);
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
@@ -50,12 +54,8 @@ namespace APICalculos.Application.Services
             if (client == null)
                 throw new Exception($"El cliente con Id {saleCreationDTO.ClientId} no existe.");
 
-            //var paymentType = await _unitOfWork.PaymentType.GetByIdAsync(saleCreationDTO.PaymentTypeId);
-            //if (paymentType == null)
-            //    throw new Exception($"El tipo de pago con Id {saleCreationDTO.PaymentTypeId} no existe.");
-
             var sale = _mapper.Map<Sale>(saleCreationDTO);
-            sale.DateSale = DateTime.Now;
+            sale.DateSale = DateTime.UtcNow;
 
             await _unitOfWork.Sale.AddAsync(sale);
             await _unitOfWork.SaveChangesAsync();

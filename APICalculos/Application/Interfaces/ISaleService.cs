@@ -5,7 +5,7 @@ namespace APICalculos.Application.Interfaces
     public interface ISaleService
     {
         Task<List<SaleDTO>> GetAllSaleAsync();
-        Task<List<SaleDTO>> GetSalesByTodayAsync();
+        Task<List<SaleDTO>> GetSalesByDateRangeAsync(DateTime fromDate, DateTime toDate);
         Task<SaleDTO> GetSaleForId(int id);
         Task<SaleDTO> AddSaleAsync(SaleCreationDTO saleCreationDTO);
         Task<SaleDTO> AddSaleWithDetailsAsync(SaleCreationDTO saleCreationDTO);

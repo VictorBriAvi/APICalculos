@@ -23,28 +23,20 @@ namespace APICalculos.Application.Services
 
             var summary = await _financialReportRepository.GetFinancialSummaryAsync(fromDate, toDate);
 
-
-
             return summary;
         }
 
-        public async Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(
+            DateTime fromDate,
+            DateTime toDate)
         {
             if (fromDate > toDate)
                 throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
 
-            var report = await _financialReportRepository.GetDailyFinancialSummaryAsync(fromDate, toDate);
-
-            var finalReport = report.Select(r => new DailyFinancialDTO
-            {
-                Fecha = r.Fecha,
-                TotalVentas = r.TotalVentas,
-                TotalGastos = r.TotalGastos,
-                DiaSemana = r.Fecha.DayOfWeek
-            });
-
-            return report;
+            return await _financialReportRepository
+                .GetDailyFinancialSummaryAsync(fromDate, toDate);
         }
+
 
         public async Task<IEnumerable<EmployeeSalesSummaryDTO>> GetEmployeeSalesSummaryAsync(DateTime fromDate, DateTime toDate)
         {
@@ -59,10 +51,13 @@ namespace APICalculos.Application.Services
         {
             return await _financialReportRepository.GetSalesReportByPaymentTypeAsync(start, end);
         }
-
         public async Task<List<SalesByPaymentSummaryDTO>> GetSalesSummaryByPaymentTypeAsync(DateTime start, DateTime end)
         {
             return await _financialReportRepository.GetSalesSummaryByPaymentTypeAsync(start, end);
+        }
+        public Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+            return _financialReportRepository.GetExpensesByCategoryAsync(fromDate, toDate);
         }
 
 

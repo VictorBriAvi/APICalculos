@@ -55,11 +55,14 @@ namespace APICalculos.Infrastructure.Repositories.Reports
             };
         }
 
-        public async Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(
+            DateTime fromDate,
+            DateTime toDate)
         {
-            // 🔹 Query de ventas agrupadas por fecha
+            // 🔹 Ventas + pagos a colaboradores por día
             var salesByDate = await _dbContext.SaleDetails
                 .Include(sd => sd.Sale)
+                .Include(sd => sd.Employee)
                 .Where(sd => !sd.IsDeleted
                           && !sd.Sale.IsDeleted
                           && sd.Sale.DateSale >= fromDate
@@ -68,13 +71,21 @@ namespace APICalculos.Infrastructure.Repositories.Reports
                 .Select(g => new
                 {
                     Fecha = g.Key,
+
                     TotalVentas = g.Sum(sd =>
-                        (sd.UnitPrice + sd.AdditionalCharge) * (1 - (sd.DiscountPercent / 100m))
+                        (sd.UnitPrice + sd.AdditionalCharge) *
+                        (1 - (sd.DiscountPercent / 100m))
+                    ),
+
+                    TotalPagosColaboradores = g.Sum(sd =>
+                        ((sd.UnitPrice + sd.AdditionalCharge) *
+                        (1 - (sd.DiscountPercent / 100m))) *
+                        (sd.Employee.PaymentPercentage / 100m)
                     )
                 })
                 .ToListAsync();
 
-            // 🔹 Query de gastos agrupados por fecha
+            // 🔹 Gastos por día
             var expensesByDate = await _dbContext.Expenses
                 .Where(e => e.ExpenseDate >= fromDate && e.ExpenseDate <= toDate)
                 .GroupBy(e => e.ExpenseDate.Date)
@@ -85,24 +96,40 @@ namespace APICalculos.Infrastructure.Repositories.Reports
                 })
                 .ToListAsync();
 
-            // 🔹 Combinar ambas listas por fecha (tipo "full outer join" manual)
+            // 🔹 Todas las fechas involucradas
             var allDates = salesByDate.Select(s => s.Fecha)
                 .Union(expensesByDate.Select(e => e.Fecha))
                 .Distinct()
                 .OrderBy(d => d)
                 .ToList();
 
-            var result = allDates.Select(date => new DailyFinancialDTO
+            // 🔹 DTO final
+            var result = allDates.Select(date =>
             {
-                Fecha = date,
-                TotalVentas = salesByDate.FirstOrDefault(s => s.Fecha == date)?.TotalVentas ?? 0,
-                TotalGastos = expensesByDate.FirstOrDefault(e => e.Fecha == date)?.TotalGastos ?? 0,
+                var sales = salesByDate.FirstOrDefault(s => s.Fecha == date);
+                var expenses = expensesByDate.FirstOrDefault(e => e.Fecha == date);
+
+                var totalVentas = sales?.TotalVentas ?? 0;
+                var totalPagosColaboradores = sales?.TotalPagosColaboradores ?? 0;
+                var totalGastos = expenses?.TotalGastos ?? 0;
+
+                return new DailyFinancialDTO
+                {
+                    Fecha = date,
+                    TotalVentas = totalVentas,
+                    TotalGastos = totalGastos,
+                    TotalGanancia = totalVentas
+                                     - totalPagosColaboradores
+                                     - totalGastos,
+                    DiaSemana = date.DayOfWeek
+                };
             });
 
             return result;
         }
 
-        public async Task<IEnumerable<EmployeeSalesSummaryDTO>> GetEmployeeSalesSummaryAsync(DateTime fromDate, DateTime toDate)
+        public async Task<IEnumerable<EmployeeSalesSummaryDTO>> GetEmployeeSalesSummaryAsync(
+            DateTime fromDate, DateTime toDate)
         {
             return await _dbContext.SaleDetails
                 .Where(sd => !sd.IsDeleted
@@ -111,11 +138,13 @@ namespace APICalculos.Infrastructure.Repositories.Reports
                     && sd.Sale.DateSale <= toDate)
                 .GroupBy(sd => new
                 {
+                    sd.Employee.Id,
                     sd.Employee.Name,
                     sd.Employee.PaymentPercentage
                 })
                 .Select(g => new EmployeeSalesSummaryDTO
                 {
+                    EmpleadoId = g.Key.Id,
                     Empleado = g.Key.Name,
                     TotalVentas = g.Sum(sd =>
                         (sd.UnitPrice + sd.AdditionalCharge)
@@ -124,11 +153,23 @@ namespace APICalculos.Infrastructure.Repositories.Reports
                     TotalAPagar = g.Sum(sd =>
                         ((sd.UnitPrice + sd.AdditionalCharge)
                         * (1 - (sd.DiscountPercent / 100m)))
-                        * (g.Key.PaymentPercentage / 100m))
+                        * (g.Key.PaymentPercentage / 100m)),
+
+                    TotalServicios = g.Count(),
+
+                    ServiciosRealizados = g
+                        .GroupBy(sd => sd.ServiceType.Name)
+                        .Select(sg => new ServiceCountDTO
+                        {
+                            Servicio = sg.Key,
+                            Cantidad = sg.Count()
+                        })
+                        .ToList()
                 })
                 .OrderBy(x => x.Empleado)
                 .ToListAsync();
         }
+
 
         public async Task<List<SalesByPaymentReportDTO>> GetSalesReportByPaymentTypeAsync(DateTime startDate, DateTime endDate)
         {
@@ -164,6 +205,32 @@ namespace APICalculos.Infrastructure.Repositories.Reports
                               CantidadOperaciones = g.Count()
                           }).ToListAsync();
         }
+
+        public async Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(DateTime? fromDate = null, DateTime? toDate = null)
+        {
+
+            var query = _dbContext.Expenses
+                .Include(e => e.ExpenseType)
+                .AsQueryable();
+
+            if (fromDate.HasValue && toDate.HasValue)
+            {
+                query = query.Where(e => e.ExpenseDate >= fromDate && e.ExpenseDate <= toDate);
+            }
+
+            var result = await query
+                .GroupBy(e => e.ExpenseType.Name)
+                .Select(g => new ExpensesByCategoryDTO
+                {
+                    Categoria = g.Key,
+                    TotalGasto = g.Sum(e => e.Price)
+                })
+                .OrderBy(x => x.Categoria)
+                .ToListAsync();
+
+            return result;
+        }
+
 
 
     }

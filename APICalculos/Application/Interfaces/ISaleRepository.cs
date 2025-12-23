@@ -5,7 +5,7 @@ namespace APICalculos.Application.Interfaces
     public interface ISaleRepository
     {
         Task<IEnumerable<Sale>> GetAllAsync();
-        Task<IEnumerable<Sale>> GetByTodayAsync();
+        Task<IEnumerable<Sale>> GetByDateRangeAsync(DateTime fromDate, DateTime toDate);
         Task<Sale> GetByIdAsync(int id);
         Task AddAsync(Sale sale);
         void Update(Sale sale); 

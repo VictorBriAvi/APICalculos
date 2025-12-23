@@ -23,12 +23,15 @@ namespace APICalculos.API.Controllers
             return Ok(sales);
         }
 
-        [HttpGet("today")]
-        public async Task<IActionResult> GetTodaySales()
+        [HttpGet("by-date-range")]
+        public async Task<List<SaleDTO>> GetSalesByDateRangeAsync(
+            [FromQuery] DateTime fromDate,
+            [FromQuery] DateTime toDate)
         {
-            var result = await _saleService.GetSalesByTodayAsync();
-            return Ok(result);
+            return await _saleService.GetSalesByDateRangeAsync(fromDate, toDate);
         }
+
+
 
 
         [HttpGet("{id:int}")]
