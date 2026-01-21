@@ -11,6 +11,8 @@ namespace APICalculos.Application.Interfaces
         void Remove(Client cliente);
         Task<bool> ExistsByNombreAsync(string nombre);
         Task<bool> ExistsByDocumentoAsync(string documento);
-        void Update(Client cliente); 
+        void Update(Client cliente);
+
+        Task<List<Client>> SearchAsync(string query, int limit);
     }
 }

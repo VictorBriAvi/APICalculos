@@ -1,4 +1,5 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.Client;
+using APICalculos.Application.DTOs.Employee;
 using APICalculos.Application.Interfaces;
 using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -81,6 +82,13 @@ namespace APICalculos.API.Controllers
             {
                 return Conflict(ex.Message);
             }
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<ClientSearchDTO>>> SearchClients( [FromQuery] string query)
+        {
+            var result = await _employeeService.SearchEmployeeAsync(query);
+            return Ok(result);
         }
 
     }

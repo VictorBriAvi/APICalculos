@@ -11,7 +11,7 @@ namespace APICalculos.Application.Interfaces
         void Remove(Employee employee);
         void Update(Employee employee);
         Task<bool> ExistsByNameAsync(string name);
-
+        Task<List<Employee>> SearchAsync(string query, int limit);
 
     }
 }

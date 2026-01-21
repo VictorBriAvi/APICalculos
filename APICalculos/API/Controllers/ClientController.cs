@@ -1,4 +1,4 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.Interfaces;
 using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -84,6 +84,13 @@ namespace APICalculos.API.Controllers
             }
         }
 
+        [HttpGet("search")]
+        public async Task<ActionResult<List<ClientSearchDTO>>> SearchClients(
+    [FromQuery] string query)
+        {
+            var result = await _clientService.SearchClientsAsync(query);
+            return Ok(result);
+        }
 
     }
 }

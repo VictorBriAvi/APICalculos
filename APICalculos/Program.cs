@@ -65,6 +65,7 @@ builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<IFinancialReportRepository, FinancialReportRepository>();
 builder.Services.AddScoped<IFinancialReportService, FinancialReportService>();
 
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<MyDbContext>(options =>

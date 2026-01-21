@@ -17,6 +17,7 @@ namespace APICalculos.Application.DTOs
         public decimal UnitPrice { get; set; }
         public decimal DiscountPercent { get; set; }
         public decimal AdditionalCharge { get; set; }
+        public decimal TotalCalculated { get; set; }
         public bool IsDeleted { get; set; } = false;
     }
 }

@@ -1,4 +1,6 @@
 ﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Client;
+using APICalculos.Application.DTOs.Services;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
@@ -26,12 +28,13 @@ namespace APICalculos.Application.Services
             _serviceCategoriesService = serviceCategoriesService;
         }
 
-        public async Task<List<ServiceTypeDTO>> GetAllServicesTypesAsync()
+        public async Task<List<ServiceTypeDTO>> GetAllServiceTypesAsync(string? search)
         {
-            var servicesTypes = await _serviceTypeRepository.GetAllAsync();
-            return _mapper.Map<List<ServiceTypeDTO>>(servicesTypes);
-        }
+            var serviceTypes =
+                await _serviceTypeRepository.GetAllAsync(search);
 
+            return _mapper.Map<List<ServiceTypeDTO>>(serviceTypes);
+        }
         public async Task<ServiceTypeDTO> GetServiceTypeForId(int id)
         {
             var serviceType = await _serviceTypeRepository.GetByIdAsync(id);
@@ -122,5 +125,16 @@ namespace APICalculos.Application.Services
                 throw new InvalidOperationException("No se puede eliminar este tipo de servicio porque está asociado a una venta.");
             }
         }
+
+        public async Task<List<ServicesSearchDTO>> SearchServiceAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<ServicesSearchDTO>();
+
+            var clients = await _serviceTypeRepository.SearchAsync(query.Trim(), 15);
+
+            return _mapper.Map<List<ServicesSearchDTO>>(clients);
+        }
+
     }
 }

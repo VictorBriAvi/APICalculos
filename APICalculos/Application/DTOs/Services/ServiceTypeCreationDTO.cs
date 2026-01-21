@@ -1,6 +1,6 @@
 ﻿using APICalculos.Domain.Entidades;
 
-namespace APICalculos.Application.DTOs
+namespace APICalculos.Application.DTOs.Services
 {
     public class ServiceTypeCreationDTO
     {

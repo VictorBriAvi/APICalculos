@@ -64,5 +64,19 @@ namespace APICalculos.Infrastructure.Repositories
                 .AnyAsync(c => c.IdentityDocument.Replace(" ", "").Trim() == documentoNormalizado);
         }
 
+        public async Task<List<Client>> SearchAsync(string query, int limit)
+        {
+            return await _dbContext.Clients
+                .AsNoTracking()
+                .Where(c =>
+                    c.Name.Contains(query) ||
+                    c.IdentityDocument.Contains(query)
+                )
+                .OrderBy(c => c.Name)
+                .Take(limit)
+                .ToListAsync();
+        }
+
+
     }
 }

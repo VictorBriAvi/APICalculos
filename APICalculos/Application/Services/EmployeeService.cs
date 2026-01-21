@@ -1,4 +1,5 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.Client;
+using APICalculos.Application.DTOs.Employee;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
@@ -98,6 +99,16 @@ namespace APICalculos.Application.Services
             {
                 throw new InvalidOperationException("No se puede eliminar este Colaborador porque está asociado a una venta.");
             }
+        }
+
+        public async Task<List<EmployeeSearchDTO>> SearchEmployeeAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<EmployeeSearchDTO>();
+
+            var clients = await _employeeRepository.SearchAsync(query.Trim(), 15);
+
+            return _mapper.Map<List<EmployeeSearchDTO>>(clients);
         }
     }
 }

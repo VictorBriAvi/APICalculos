@@ -5,7 +5,7 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IServiceCategoriesRepository
     {
-        Task<IEnumerable<ServiceCategorie>> GetAllAsync();
+        Task<IEnumerable<ServiceCategorie>> GetAllAsync(string? search);
         Task<ServiceCategorie> GetByIdAsync(int id);
         Task AddAsync(ServiceCategorie serviceCategorie);
         void Update(ServiceCategorie serviceCategorie);

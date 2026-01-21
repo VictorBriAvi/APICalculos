@@ -1,4 +1,7 @@
 ﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Client;
+using APICalculos.Application.DTOs.Employee;
+using APICalculos.Application.DTOs.Services;
 using APICalculos.Domain.Entidades;
 using APICalculos.Domain.Entities;
 using AutoMapper;
@@ -130,7 +133,9 @@ namespace APICalculos.Application.Mapping
             CreateMap<SalePaymentDTO, SalePayment>();
 
 
-
+            CreateMap<Client, ClientSearchDTO>();
+            CreateMap<Employee, EmployeeSearchDTO>();
+            CreateMap<ServiceType, ServicesSearchDTO>();
         }
     }
 }

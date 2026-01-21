@@ -44,5 +44,11 @@ namespace APICalculos.Infrastructure.Repositories
             var nameEmployee = name.Replace(" ", "").Trim();
             return await _dbContext.Employees.AnyAsync(c => c.Name.Replace(" ", "").Trim() == nameEmployee);        
         }
+
+        public async Task<List<Employee>> SearchAsync(string query, int limit)
+        {
+            return await _dbContext.Employees.AsNoTracking().Where(c => c.Name.Contains(query) || c.IdentityDocument.Contains(query)).OrderBy(c => c.Name).Take(limit).ToListAsync();
+        }
+
     }
 }

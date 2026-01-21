@@ -1,4 +1,4 @@
-﻿namespace APICalculos.Application.DTOs
+﻿namespace APICalculos.Application.DTOs.Employee
 {
     public class EmployeeCreationDTO
     {

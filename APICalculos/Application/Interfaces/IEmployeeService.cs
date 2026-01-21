@@ -1,4 +1,4 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.Employee;
 
 namespace APICalculos.Application.Interfaces
 {
@@ -9,5 +9,6 @@ namespace APICalculos.Application.Interfaces
         Task<EmployeeDTO> AddEmployeeAsync(EmployeeCreationDTO clienteCreacionDTO);
         Task UpdateEmployeeAsync(int id, EmployeeCreationDTO clienteCreacionDTO);
         Task DeleteEmployeeAsync(int id);
+        Task<List<EmployeeSearchDTO>> SearchEmployeeAsync(string query);
     }
 }

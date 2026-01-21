@@ -21,11 +21,14 @@ namespace APICalculos.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ServiceCategoriesDTO>> GetAllServiceCategoriesAsync()
+        public async Task<List<ServiceCategoriesDTO>> GetAllServiceCategoriesAsync(string? search)
         {
-            var serviceCategories = await _serviceCategoriesRepository.GetAllAsync();
+            var serviceCategories =
+                await _serviceCategoriesRepository.GetAllAsync(search);
+
             return _mapper.Map<List<ServiceCategoriesDTO>>(serviceCategories);
         }
+
 
         public async Task<ServiceCategoriesDTO> GetServiceCategorieForId(int id)
         {

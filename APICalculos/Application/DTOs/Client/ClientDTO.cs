@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace APICalculos.Application.DTOs
+namespace APICalculos.Application.DTOs.Client
 {
     public class ClientDTO
     {

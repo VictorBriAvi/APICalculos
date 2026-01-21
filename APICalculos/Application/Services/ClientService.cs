@@ -1,4 +1,4 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
@@ -97,6 +97,16 @@ namespace APICalculos.Application.Services
             {
                 throw new InvalidOperationException("No se puede eliminar este cliente porque está asociado a una venta.");
             }
+        }
+
+        public async Task<List<ClientSearchDTO>> SearchClientsAsync(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return new List<ClientSearchDTO>();
+
+            var clients = await _clientRepository.SearchAsync(query.Trim(), 15);
+
+            return _mapper.Map<List<ClientSearchDTO>>(clients);
         }
 
 

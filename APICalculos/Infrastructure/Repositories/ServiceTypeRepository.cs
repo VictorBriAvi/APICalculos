@@ -15,14 +15,26 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<ServiceType>> GetAllAsync()
+        public async Task<IEnumerable<ServiceType>> GetAllAsync(string? search)
         {
-            return await _dbContext.ServiceTypes
-                 .Include(st => st.ServiceCategories) 
-                 .AsNoTracking()
-                 .OrderByDescending(x => x.Id)
-                 .ToListAsync();
+            IQueryable<ServiceType> query = _dbContext.ServiceTypes
+                .AsNoTracking()
+                .Include(s => s.ServiceCategories);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalizedSearch = search.Trim().ToLower();
+
+                query = query.Where(c =>
+                    c.Name.ToLower().Contains(normalizedSearch)
+                );
+            }
+
+            return await query
+                .OrderByDescending(x => x.Id)
+                .ToListAsync();
         }
+
 
         public async Task<IEnumerable<ServiceType>> SearchAsync(Expression<Func<ServiceType, bool>> predicate)
         {
@@ -58,5 +70,16 @@ namespace APICalculos.Infrastructure.Repositories
             var convertName = name.Replace(" ", "").Trim();
             return await _dbContext.ServiceTypes.AnyAsync(c => c.Name.Replace(" ", "").Trim() == convertName);
         }
+
+        public async Task<List<ServiceType>> SearchAsync(string query, int limit)
+        {
+            return await _dbContext.ServiceTypes
+                .AsNoTracking()
+                .Where(st => st.Name.Contains(query))
+                .OrderBy(st => st.Name)
+                .Take(limit)
+                .ToListAsync();
+        }
+
     }
 }

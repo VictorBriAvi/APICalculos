@@ -28,15 +28,91 @@ namespace APICalculos.Application.Services
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
-        public async Task<List<SaleDTO>> GetSalesByDateRangeAsync(DateTime fromDate, DateTime toDate)
+        public async Task<List<SaleDTO>> GetSalesByDateRangeAsync(DateTime fromDate,DateTime toDate)
         {
             if (fromDate > toDate)
                 throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
+
             fromDate = fromDate.Date;
             toDate = toDate.Date.AddDays(1).AddTicks(-1);
+
             var sales = await _saleRepository.GetByDateRangeAsync(fromDate, toDate);
-            return _mapper.Map<List<SaleDTO>>(sales);
+            var mappedSales = _mapper.Map<List<SaleDTO>>(sales);
+
+            // 🔹 Calcular totales por detalle
+            foreach (var sale in mappedSales)
+            {
+                foreach (var detail in sale.SaleDetail)
+                {
+                    var baseAmount = detail.UnitPrice + detail.AdditionalCharge;
+                    var discount = baseAmount * (detail.DiscountPercent / 100m);
+                    detail.TotalCalculated = baseAmount - discount;
+                }
+
+                sale.TotalAmount = sale.SaleDetail.Sum(d => d.TotalCalculated);
+            }
+
+            // 🔹 AGRUPAR POR FECHA
+            var groupedByDate = mappedSales
+                .GroupBy(s => s.DateSale.Date)
+                .Select(group => new SaleDTO
+                {
+                    // 👉 No tiene sentido un Id único acá
+                    Id = 0,
+
+                    DateSale = group.Key,
+
+                    NameClient = "Resumen diario",
+                    ClientId = 0,
+
+                    SaleDetail = group
+                        .SelectMany(s => s.SaleDetail)
+                        .ToList(),
+
+                    Payments = group
+                        .SelectMany(s => s.Payments)
+                        .ToList(),
+
+                    TotalAmount = group.Sum(s => s.TotalAmount),
+
+                    IsDeleted = false
+                })
+                .OrderByDescending(s => s.DateSale)
+                .ToList();
+
+            return groupedByDate;
         }
+
+
+        public async Task<List<SaleDTO>> GetSalesRangeDateAsync(DateTime fromDate, DateTime toDate)
+        {
+            if (fromDate > toDate)
+                throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
+
+            fromDate = fromDate.Date;
+            toDate = toDate.Date.AddDays(1).AddTicks(-1);
+
+            var sales = await _saleRepository.GetByDateRangeAsync(fromDate, toDate);
+            var mappedSales = _mapper.Map<List<SaleDTO>>(sales);
+
+            foreach (var sale in mappedSales)
+            {
+                foreach (var detail in sale.SaleDetail)
+                {
+                    var baseAmount = detail.UnitPrice + detail.AdditionalCharge;
+                    var discount = baseAmount * (detail.DiscountPercent / 100m);
+                    detail.TotalCalculated = baseAmount - discount;
+                }
+
+                sale.TotalAmount = sale.SaleDetail.Sum(d => d.TotalCalculated);
+            }
+
+            return mappedSales
+                .OrderByDescending(s => s.DateSale)
+                .ToList();
+        }
+
+
 
 
         public async Task<SaleDTO> GetSaleForId(int id)
@@ -49,7 +125,7 @@ namespace APICalculos.Application.Services
 
         public async Task<SaleDTO> AddSaleAsync(SaleCreationDTO saleCreationDTO)
         {
- 
+
             var client = await _unitOfWork.Clients.GetByIdAsync(saleCreationDTO.ClientId);
             if (client == null)
                 throw new Exception($"El cliente con Id {saleCreationDTO.ClientId} no existe.");
@@ -129,19 +205,7 @@ namespace APICalculos.Application.Services
                     });
                 }
             }
-            //else if (saleCreationDTO.PaymentTypeId > 0)
-            //{
-            //    // Compatibilidad con la versión anterior
-            //    saleDB.Payments.Clear();
-            //    saleDB.Payments.Add(new SalePayment
-            //    {
-            //        PaymentTypeId = saleCreationDTO.PaymentTypeId,
-            //        AmountPaid = saleCreationDTO.TotalAmount,
-            //        PaymentDate = DateTime.Now
-            //    });
-            //}
 
-            // 🔹 Total
             if (saleCreationDTO.TotalAmount > 0)
                 saleDB.TotalAmount = saleCreationDTO.TotalAmount;
             else

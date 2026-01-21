@@ -17,11 +17,13 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ServiceCategoriesDTO>>> GetServiceCategorieAsync()
+        public async Task<ActionResult<List<ServiceCategoriesDTO>>> GetServiceCategorieAsync([FromQuery] string? search)
         {
-            var serviceCategorieDto = await _serviceCategoriesService.GetAllServiceCategoriesAsync();
+            var serviceCategorieDto = await _serviceCategoriesService.GetAllServiceCategoriesAsync(search);
+
             return Ok(serviceCategorieDto);
         }
+
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetServiceCategorieForId(int id)

@@ -1,4 +1,6 @@
 ﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Client;
+using APICalculos.Application.DTOs.Services;
 using APICalculos.Application.Interfaces;
 using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,13 +19,13 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ServiceTypeDTO>>> GetAllServiceTypeAsync()
+        public async Task<ActionResult<List<ServiceTypeDTO>>> GetAllServiceTypeAsync([FromQuery] string? search)
         {
-            var serviceTypeDto = await _serviceTypeService.GetAllServicesTypesAsync();
+            var serviceTypeDto = await _serviceTypeService.GetAllServiceTypesAsync(search);
             return Ok(serviceTypeDto);
         }
 
-        [HttpGet("search")]
+        [HttpGet("search-Id")]
         public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> SearchServices([FromQuery] int? categoryId)
         {
             var result = await _serviceTypeService.SearchServicesAsync(categoryId);
@@ -92,6 +94,13 @@ namespace APICalculos.API.Controllers
             {
                 return Conflict(ex.Message);
             }
+        }
+
+        [HttpGet("search")]
+        public async Task<ActionResult<List<ServicesSearchDTO>>> SearchServices([FromQuery] string query)
+        {
+            var result = await _serviceTypeService.SearchServiceAsync(query);
+            return Ok(result);
         }
 
     }

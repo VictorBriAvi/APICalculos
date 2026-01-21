@@ -32,7 +32,18 @@ namespace APICalculos.API.Controllers
         }
 
 
+        [HttpGet("by-date-rangeComun")]
+        public async Task<ActionResult<List<SaleDTO>>> GetByDateRange(
+    [FromQuery] DateTime fromDate,
+    [FromQuery] DateTime toDate)
+        {
+            if (fromDate == default || toDate == default)
+                return BadRequest("Las fechas son obligatorias.");
 
+            var result = await _saleService.GetSalesRangeDateAsync(fromDate, toDate);
+
+            return Ok(result);
+        }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetByIdAsync(int id)
