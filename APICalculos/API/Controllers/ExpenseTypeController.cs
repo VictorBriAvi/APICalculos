@@ -16,11 +16,13 @@ namespace APICalculos.API.Controllers
             _expenseTypeService = expenseTypeService;
         }
 
+
         [HttpGet]
-        public async Task<ActionResult<List<ExpenseTypeDTO>>> GetExpenseTypeAsync()
+        public async Task<ActionResult<List<ExpenseTypeDTO>>> GetExpenseTypeAsync([FromQuery] string? search)
         {
-            var expenseTypeDto = await _expenseTypeService.GetAllExpensesTypesAsync();
-            return Ok(expenseTypeDto);
+            var ExpenseTypeDto = await _expenseTypeService.GetAllExpensesTypesAsync(search);
+
+            return Ok(ExpenseTypeDto);
         }
 
         [HttpGet("{id:int}")]

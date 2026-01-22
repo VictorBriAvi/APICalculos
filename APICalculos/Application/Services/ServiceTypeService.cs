@@ -28,13 +28,17 @@ namespace APICalculos.Application.Services
             _serviceCategoriesService = serviceCategoriesService;
         }
 
-        public async Task<List<ServiceTypeDTO>> GetAllServiceTypesAsync(string? search)
+        public async Task<List<ServiceTypeDTO>> GetAllServiceTypesAsync(
+            string? search,
+            int? serviceCategorieId
+        )
         {
             var serviceTypes =
-                await _serviceTypeRepository.GetAllAsync(search);
+                await _serviceTypeRepository.GetAllAsync(search, serviceCategorieId);
 
             return _mapper.Map<List<ServiceTypeDTO>>(serviceTypes);
         }
+
         public async Task<ServiceTypeDTO> GetServiceTypeForId(int id)
         {
             var serviceType = await _serviceTypeRepository.GetByIdAsync(id);
@@ -81,7 +85,7 @@ namespace APICalculos.Application.Services
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<ServiceTypeDTO>(serviceType);
-               
+
         }
 
         public async Task UpdateServiceTypeAsync(int id, ServiceTypeCreationDTO serviceTypeCreationDTO)

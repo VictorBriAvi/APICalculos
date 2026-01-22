@@ -4,7 +4,7 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IExpenseTypeRepository
     {
-        Task<IEnumerable<ExpenseType>> GetAllAsync();
+        Task<IEnumerable<ExpenseType>> GetAllAsync(string? search);
         Task<ExpenseType> GetByIdAsync(int id);
         Task AddAsync(ExpenseType expenseType);
         void Update(ExpenseType expenseType);

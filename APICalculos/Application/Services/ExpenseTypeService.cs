@@ -22,11 +22,14 @@ namespace APICalculos.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ExpenseTypeDTO>> GetAllExpensesTypesAsync()
+        public async Task<List<ExpenseTypeDTO>> GetAllExpensesTypesAsync(string? search)
         {
-            var expensesTypes = await _expenseTypeRepository.GetAllAsync();
-            return _mapper.Map<List<ExpenseTypeDTO>>(expensesTypes);
+            var serviceCategories =
+                await _expenseTypeRepository.GetAllAsync(search);
+
+            return _mapper.Map<List<ExpenseTypeDTO>>(serviceCategories);
         }
+
 
         public async Task<ExpenseTypeDTO> GetExpenseTypeForId(int id)
         {

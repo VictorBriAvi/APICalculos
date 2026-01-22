@@ -5,7 +5,10 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IServiceTypeService
     {
-        Task<List<ServiceTypeDTO>> GetAllServiceTypesAsync(string? search);
+        Task<List<ServiceTypeDTO>> GetAllServiceTypesAsync(
+                    string? search,
+                    int? serviceCategorieId
+                );
         Task<List<ServiceTypeDTO>> SearchServicesAsync(int? categoryId = null);
         Task<ServiceTypeDTO> GetServiceTypeForId(int id);
         Task<ServiceTypeDTO> AddServiceTypeAsync(ServiceTypeCreationDTO serviceTypeCreationDTO);

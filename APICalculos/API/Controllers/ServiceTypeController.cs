@@ -19,11 +19,17 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ServiceTypeDTO>>> GetAllServiceTypeAsync([FromQuery] string? search)
+        public async Task<ActionResult<List<ServiceTypeDTO>>> GetAllServiceTypeAsync(
+            [FromQuery] string? search,
+            [FromQuery] int? serviceCategorieId
+        )
         {
-            var serviceTypeDto = await _serviceTypeService.GetAllServiceTypesAsync(search);
+            var serviceTypeDto =
+                await _serviceTypeService.GetAllServiceTypesAsync(search, serviceCategorieId);
+
             return Ok(serviceTypeDto);
         }
+
 
         [HttpGet("search-Id")]
         public async Task<ActionResult<IEnumerable<ServiceTypeDTO>>> SearchServices([FromQuery] int? categoryId)

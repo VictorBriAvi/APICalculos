@@ -15,7 +15,10 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<ServiceType>> GetAllAsync(string? search)
+        public async Task<IEnumerable<ServiceType>> GetAllAsync(
+            string? search,
+            int? serviceCategorieId
+        )
         {
             IQueryable<ServiceType> query = _dbContext.ServiceTypes
                 .AsNoTracking()
@@ -25,8 +28,15 @@ namespace APICalculos.Infrastructure.Repositories
             {
                 var normalizedSearch = search.Trim().ToLower();
 
-                query = query.Where(c =>
-                    c.Name.ToLower().Contains(normalizedSearch)
+                query = query.Where(s =>
+                    s.Name.ToLower().Contains(normalizedSearch)
+                );
+            }
+
+            if (serviceCategorieId.HasValue)
+            {
+                query = query.Where(s =>
+                    s.ServiceCategorieId == serviceCategorieId.Value
                 );
             }
 
@@ -34,6 +44,7 @@ namespace APICalculos.Infrastructure.Repositories
                 .OrderByDescending(x => x.Id)
                 .ToListAsync();
         }
+
 
 
         public async Task<IEnumerable<ServiceType>> SearchAsync(Expression<Func<ServiceType, bool>> predicate)
