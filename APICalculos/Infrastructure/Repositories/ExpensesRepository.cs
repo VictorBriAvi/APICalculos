@@ -14,10 +14,42 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<Expense>> GetAllAsync()
+        public async Task<IEnumerable<Expense>> GetAllAsync(
+            string? search,
+            int? expenseTypeId,
+            DateTime? fromDate,
+            DateTime? toDate
+        )
         {
-            return await _dbContext.Expenses.Include(st => st.ExpenseType).AsNoTracking().OrderByDescending(st => st.Id).ToListAsync();
+            IQueryable<Expense> query = _dbContext.Expenses
+                .AsNoTracking()
+                .Include(e => e.ExpenseType);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalizedSearch = search.Trim().ToLower();
+
+                query = query.Where(e => e.Description.ToLower().Contains(normalizedSearch));
+            }
+
+            if (expenseTypeId.HasValue)
+            {
+                query = query.Where(e => e.ExpenseTypeId == expenseTypeId.Value);
+            }
+
+            if (fromDate.HasValue)
+            {
+                query = query.Where(e => e.ExpenseDate >= fromDate.Value);
+            }
+
+            if (toDate.HasValue)
+            {
+                query = query.Where(e => e.ExpenseDate <= toDate.Value);
+            }
+
+            return await query.OrderByDescending(e => e.ExpenseDate).ToListAsync();
         }
+
 
         public async Task<Expense> GetByIdAsync(int id)
         {

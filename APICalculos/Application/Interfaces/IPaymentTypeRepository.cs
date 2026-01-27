@@ -4,7 +4,7 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IPaymentTypeRepository
     {
-        Task<IEnumerable<PaymentType>> GetAllAsync();
+        Task<IEnumerable<PaymentType>> GetAllAsync(string? search);
         Task<PaymentType> GetByIdAsync(int id);
         Task AddAsync(PaymentType paymentType);
         void Remove(PaymentType paymentType);

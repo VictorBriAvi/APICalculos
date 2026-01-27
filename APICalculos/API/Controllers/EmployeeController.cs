@@ -1,4 +1,5 @@
-﻿using APICalculos.Application.DTOs.Client;
+﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.DTOs.Employee;
 using APICalculos.Application.Interfaces;
 using APICalculos.Application.Services;
@@ -18,10 +19,11 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<EmployeeDTO>>> GetAsync()
+        public async Task<ActionResult<List<EmployeeDTO>>> GetAsync([FromQuery] string? search)
         {
-            var employees = await _employeeService.GetAllEmployeesAsync();
-            return Ok(employees);
+            var employeeDTO = await _employeeService.GetAllEmployeesAsync(search);
+
+            return Ok(employeeDTO);
         }
 
         [HttpGet("{id:int}")]

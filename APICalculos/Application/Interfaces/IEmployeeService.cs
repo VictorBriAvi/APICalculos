@@ -4,7 +4,7 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IEmployeeService
     {
-        Task<List<EmployeeDTO>> GetAllEmployeesAsync();
+        Task<List<EmployeeDTO>> GetAllEmployeesAsync(string? search);
         Task<EmployeeDTO> GetEmployeeForIdAsync(int id);
         Task<EmployeeDTO> AddEmployeeAsync(EmployeeCreationDTO clienteCreacionDTO);
         Task UpdateEmployeeAsync(int id, EmployeeCreationDTO clienteCreacionDTO);

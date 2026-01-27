@@ -1,4 +1,5 @@
-﻿using APICalculos.Application.DTOs.Client;
+﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.DTOs.Employee;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
@@ -24,10 +25,12 @@ namespace APICalculos.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<EmployeeDTO>> GetAllEmployeesAsync()
+        public async Task<List<EmployeeDTO>> GetAllEmployeesAsync(string? search)
         {
-            var employes = await _employeeRepository.GetAllAsync();
-            return _mapper.Map<List<EmployeeDTO>>(employes);
+            var employees =
+                await _employeeRepository.GetAllAsync(search);
+
+            return _mapper.Map<List<EmployeeDTO>>(employees);
         }
 
         public async Task<EmployeeDTO> GetEmployeeForIdAsync(int id)

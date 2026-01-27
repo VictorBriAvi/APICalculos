@@ -1,6 +1,7 @@
 ﻿using APICalculos.Application.DTOs;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
+using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
@@ -21,11 +22,14 @@ namespace APICalculos.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<PaymentTypeDTO>> GetAllPaymenteTypesAsync()
+        public async Task<List<PaymentTypeDTO>> GetAllPaymentTypeAsync(string? search)
         {
-            var paymenteType = await _paymentTypeRepository.GetAllAsync();
-            return _mapper.Map<List<PaymentTypeDTO>>(paymenteType);
+            var paymentTypes =
+                await _paymentTypeRepository.GetAllAsync(search);
+
+            return _mapper.Map<List<PaymentTypeDTO>>(paymentTypes);
         }
+
 
         public async Task<PaymentTypeDTO> GetPaymentTypeForId(int id)
         {

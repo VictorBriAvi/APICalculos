@@ -17,11 +17,13 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PaymentTypeDTO>>> GetPaymentTypeAsync()
+        public async Task<ActionResult<List<PaymentTypeDTO>>> GetPaymentTypeAsync([FromQuery] string? search)
         {
-            var paymentTypeDto = await _paymentTypeService.GetAllPaymenteTypesAsync();
+            var paymentTypeDto = await _paymentTypeService.GetAllPaymentTypeAsync(search);
+
             return Ok(paymentTypeDto);
         }
+
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetPaymentTypeForId(int id)

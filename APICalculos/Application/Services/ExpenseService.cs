@@ -1,7 +1,6 @@
 ﻿using APICalculos.Application.DTOs;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
-using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
@@ -22,11 +21,26 @@ namespace APICalculos.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ExpenseDTO>> GetAllExpenseAsync()
+        public async Task<List<ExpenseDTO>> GetAllExpenseAsync(
+            string? search,
+            int? expenseTypeId,
+            DateTime? fromDate,
+            DateTime? toDate
+        )
         {
-            var expenses = await _expensesRepository.GetAllAsync();
+            if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
+                throw new ArgumentException("La fecha desde no puede ser mayor a la fecha hasta.");
+
+            var expenses = await _expensesRepository.GetAllAsync(
+                search,
+                expenseTypeId,
+                fromDate,
+                toDate
+            );
+
             return _mapper.Map<List<ExpenseDTO>>(expenses);
         }
+
 
         public async Task<ExpenseDTO> GetExpenseForIdAsync (int id)
         {
@@ -38,17 +52,22 @@ namespace APICalculos.Application.Services
             return _mapper.Map<ExpenseDTO>(expense);
         }
 
-        public async Task<ExpenseDTO> AddExpensesAsync(ExpenseCreationDTO expenseCreationDTO)
+        public async Task<ExpenseDTO> AddExpensesAsync(ExpenseCreationDTO dto)
         {
-           var expense = _mapper.Map<Expense>(expenseCreationDTO);
-            expense.ExpenseDate = DateTime.UtcNow;
+            if (dto.ExpenseDate == default)
+                throw new ArgumentException("La fecha del gasto es obligatoria.");
+
+            if (dto.ExpenseDate > DateTime.UtcNow)
+                throw new ArgumentException("La fecha del gasto no puede ser futura.");
+
+            var expense = _mapper.Map<Expense>(dto);
 
             await _unitOfWork.Expenses.AddAsync(expense);
-
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<ExpenseDTO>(expense);
         }
+
 
         public async Task UpdateExpenseAsync (int id, ExpenseCreationDTO expenseCreationDTO)
         {

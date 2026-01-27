@@ -14,10 +14,20 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<PaymentType>> GetAllAsync()
+        public async Task<IEnumerable<PaymentType>> GetAllAsync(string? search)
         {
-            return await _dbContext.PaymentTypes.AsNoTracking().OrderByDescending(x => x.Id).ToListAsync();
+            var query = _dbContext.PaymentTypes.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalizedSearch = search.Trim().ToLower();
+
+                query = query.Where(c => c.Name.ToLower().Contains(normalizedSearch));
+            }
+
+            return await query.OrderByDescending(x => x.Id).ToListAsync();
         }
+
 
         public async Task<PaymentType> GetByIdAsync(int id)
         {

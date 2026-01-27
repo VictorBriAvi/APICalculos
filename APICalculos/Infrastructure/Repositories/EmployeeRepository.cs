@@ -14,11 +14,20 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<Employee>> GetAllAsync()
+        public async Task<IEnumerable<Employee>> GetAllAsync(string? search)
         {
-            return await _dbContext.Employees.AsNoTracking().OrderByDescending(x => x.Id).ToListAsync();
+            var query = _dbContext.Employees.AsNoTracking();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalizedSearch = search.Trim().ToLower();
+
+                query = query.Where(c => c.Name.ToLower().Contains(normalizedSearch));
+            }
+
+            return await query.OrderByDescending(x => x.Id).ToListAsync();
         }
-        
+
         public async Task<Employee> GetByIdAsync(int id)
         {
             return await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
