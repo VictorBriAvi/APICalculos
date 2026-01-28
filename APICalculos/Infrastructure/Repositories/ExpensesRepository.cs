@@ -9,21 +9,14 @@ namespace APICalculos.Infrastructure.Repositories
     {
         private readonly MyDbContext _dbContext;
 
-        public ExpensesRepository(MyDbContext dbContext) 
+        public ExpensesRepository(MyDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<Expense>> GetAllAsync(
-            string? search,
-            int? expenseTypeId,
-            DateTime? fromDate,
-            DateTime? toDate
-        )
+        public async Task<IEnumerable<Expense>> GetAllAsync(string? search, int? expenseTypeId, DateTime? fromDate,DateTime? toDate)
         {
-            IQueryable<Expense> query = _dbContext.Expenses
-                .AsNoTracking()
-                .Include(e => e.ExpenseType);
+            IQueryable<Expense> query = _dbContext.Expenses.AsNoTracking().Include(e => e.ExpenseType).Include(e => e.PaymentType);
 
             if (!string.IsNullOrWhiteSpace(search))
             {

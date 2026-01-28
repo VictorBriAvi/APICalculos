@@ -6,6 +6,7 @@
         public decimal Price { get; set; }
         public int ExpenseTypeId { get; set; }
         public DateTime ExpenseDate { get; set; }
+        public int PaymentTypeId { get; set; }
 
     }
 }

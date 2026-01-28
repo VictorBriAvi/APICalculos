@@ -58,7 +58,10 @@ namespace APICalculos.Application.Mapping
             CreateMap<UsuarioRolCreacionDTO, UsuarioRol>();
 
             CreateMap<Expense, ExpenseDTO>()
-                .ForMember(dto => dto.NameExpenseType, ent => ent.MapFrom(prop => prop.ExpenseType.Name));
+                .ForMember(dto => dto.NameExpenseType, ent => ent.MapFrom(prop => prop.ExpenseType.Name))
+                .ForMember(d => d.NameExpenseType,o => o.MapFrom(s => s.ExpenseType.Name))
+                .ForMember(d => d.PaymentTypeName, o => o.MapFrom(s => s.PaymentType.Name));
+
             CreateMap<ExpenseCreationDTO, Expense>();
 
             CreateMap<ExpenseType, ExpenseTypeDTO>();

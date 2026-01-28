@@ -89,6 +89,12 @@ namespace APICalculos.Application.Services
                 expenseDB.ExpenseTypeId = expenseCreationDTO.ExpenseTypeId;
             }
 
+            if (expenseCreationDTO.PaymentTypeId != 0)
+            {
+                expenseDB.PaymentType= null;
+                expenseDB.PaymentTypeId = expenseCreationDTO.PaymentTypeId;
+            }
+
             _expensesRepository.Update(expenseDB);
             await _unitOfWork.SaveChangesAsync();
         }

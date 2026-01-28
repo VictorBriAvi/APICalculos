@@ -13,6 +13,9 @@ namespace APICalculos.Application.DTOs
         public DateTime ExpenseDate { get; set; }
         public string ExpensesDateStr => ExpenseDate.ToString("dd-MM-yyyy");
         public int ExpenseTypeId { get; set; }
+        public int PaymentTypeId { get; set; }
+        public string PaymentTypeName { get; set; }
+
 
     }
 }

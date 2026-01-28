@@ -13,6 +13,11 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .HasForeignKey(e => e.ExpenseTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(e => e.PaymentType)
+                    .WithMany()
+                    .HasForeignKey(e => e.PaymentTypeId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
             builder.Property(prop => prop.Description)
                 .HasMaxLength(300);
 
