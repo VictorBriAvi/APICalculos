@@ -1,4 +1,5 @@
 ﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Employee;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.UnitOfWork;
@@ -94,6 +95,10 @@ namespace APICalculos.Application.Services
                 expenseDB.PaymentType= null;
                 expenseDB.PaymentTypeId = expenseCreationDTO.PaymentTypeId;
             }
+
+            if (expenseCreationDTO.ExpenseDate != default)
+                expenseDB.ExpenseDate = expenseCreationDTO.ExpenseDate;
+
 
             _expensesRepository.Update(expenseDB);
             await _unitOfWork.SaveChangesAsync();
