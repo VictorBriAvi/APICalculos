@@ -17,7 +17,10 @@ namespace APICalculos.Application.Mapping
             CreateMap<ProductoCreacionDTO, Producto>();
 
             CreateMap<Client, ClientDTO>();
-            CreateMap<ClientCreationDTO, Client>();
+            CreateMap<ClientCreationDTO, Client>()
+                .ForMember(dest => dest.DateBirth,
+                    opt => opt.MapFrom(src => src.DateBirth));
+
 
             CreateMap<CustomerHistory, CustomerHistoryDTO>()
                 .ForMember(dto => dto.ClientName, ent => ent.MapFrom(prop => prop.Client.Name));
@@ -30,8 +33,8 @@ namespace APICalculos.Application.Mapping
             CreateMap<Employee, EmployeeDTO>();
             CreateMap<EmployeeCreationDTO, Employee>();
 
-            CreateMap<PaymentType, PaymentTypeDTO>();
-            CreateMap<PaymentTypeCreationDTO, PaymentType>();
+            CreateMap<PaymentTypes, PaymentTypeDTO>();
+            CreateMap<PaymentTypeCreationDTO, PaymentTypes>();
 
             CreateMap<ServiceType, ServiceTypeDTO>()
                 .ForMember(dto => dto.ServiceCategorieName, ent => ent.MapFrom(prop => prop.ServiceCategories.Name));
@@ -57,12 +60,12 @@ namespace APICalculos.Application.Mapping
             CreateMap<UsuarioRol, UsuarioRolCreacionDTO>();
             CreateMap<UsuarioRolCreacionDTO, UsuarioRol>();
 
-            CreateMap<Expense, ExpenseDTO>()
+            CreateMap<Expenses, ExpenseDTO>()
                 .ForMember(dto => dto.NameExpenseType, ent => ent.MapFrom(prop => prop.ExpenseType.Name))
                 .ForMember(d => d.NameExpenseType,o => o.MapFrom(s => s.ExpenseType.Name))
                 .ForMember(d => d.PaymentTypeName, o => o.MapFrom(s => s.PaymentType.Name));
 
-            CreateMap<ExpenseCreationDTO, Expense>();
+            CreateMap<ExpenseCreationDTO, Expenses>();
 
             CreateMap<ExpenseType, ExpenseTypeDTO>();
             CreateMap<ExpenseTypeCreationDTO, ExpenseType>();

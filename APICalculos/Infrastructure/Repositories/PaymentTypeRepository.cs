@@ -14,7 +14,7 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<PaymentType>> GetAllAsync(string? search)
+        public async Task<IEnumerable<PaymentTypes>> GetAllAsync(string? search)
         {
             var query = _dbContext.PaymentTypes.AsNoTracking();
 
@@ -29,20 +29,20 @@ namespace APICalculos.Infrastructure.Repositories
         }
 
 
-        public async Task<PaymentType> GetByIdAsync(int id)
+        public async Task<PaymentTypes> GetByIdAsync(int id)
         {
             return await _dbContext.PaymentTypes.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task AddAsync(PaymentType paymentType)
+        public async Task AddAsync(PaymentTypes paymentType)
         {
             await _dbContext.PaymentTypes.AddAsync(paymentType);
         }
-        public void Remove(PaymentType paymentType)
+        public void Remove(PaymentTypes paymentType)
         {
             _dbContext.PaymentTypes.Remove(paymentType);
         }
-        public void Update(PaymentType paymentType)
+        public void Update(PaymentTypes paymentType)
         {
             _dbContext.PaymentTypes.Update(paymentType);
         }

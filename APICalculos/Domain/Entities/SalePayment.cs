@@ -13,6 +13,6 @@ namespace APICalculos.Domain.Entities
         public DateTime PaymentDate { get; set; }
 
         public Sale Sale { get; set; }
-        public PaymentType PaymentType { get; set; }
+        public PaymentTypes PaymentType { get; set; }
     }
 }

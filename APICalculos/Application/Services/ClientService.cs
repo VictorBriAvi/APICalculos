@@ -1,4 +1,5 @@
-﻿using APICalculos.Application.DTOs.Client;
+﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Repositories;
@@ -23,10 +24,12 @@ namespace APICalculos.Application.Services
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ClientDTO>> GetAllClientsAsync()
+        public async Task<List<ClientDTO>> GetAllClientsAsync(string? search)
         {
-            var clientes = await _clientRepository.GetAllAsync();
-            return _mapper.Map<List<ClientDTO>>(clientes);
+            var clients =
+                await _clientRepository.GetAllAsync(search);
+
+            return _mapper.Map<List<ClientDTO>>(clients);
         }
 
         public async Task<ClientDTO?> GetClientForIdAsync(int id)
@@ -41,43 +44,72 @@ namespace APICalculos.Application.Services
 
         public async Task<ClientDTO> AddAsync(ClientCreationDTO clienteCreacionDTO)
         {
-            if (string.IsNullOrWhiteSpace(clienteCreacionDTO.Name))
-                throw new ArgumentException("El nombre no puede estar vacío");
+            // Regla principal
+            if (
+                string.IsNullOrWhiteSpace(clienteCreacionDTO.Name) &&
+                string.IsNullOrWhiteSpace(clienteCreacionDTO.Email) &&
+                string.IsNullOrWhiteSpace(clienteCreacionDTO.Phone)
+            )
+            {
+                throw new ArgumentException(
+                    "Debe ingresar al menos Nombre, Email o Teléfono"
+                );
+            }
 
-            var existeNombre = await _clientRepository.ExistsByNombreAsync(clienteCreacionDTO.Name);
-            if (existeNombre)
-                throw new InvalidOperationException("El nombre del cliente ya existe");
+            if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Name))
+            {
+                var existeNombre = await _clientRepository.ExistsByNombreAsync(clienteCreacionDTO.Name);
+                if (existeNombre)
+                    throw new InvalidOperationException("El nombre del cliente ya existe");
+            }
 
-            var existeDocumento = !string.IsNullOrWhiteSpace(clienteCreacionDTO.IdentityDocument) &&
-                await _clientRepository.ExistsByDocumentoAsync(clienteCreacionDTO.IdentityDocument);
+            if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Email))
+            {
+                var existeEmail = await _clientRepository.ExistsByEmailAsync(clienteCreacionDTO.Email);
+                if (existeEmail)
+                    throw new InvalidOperationException("El email ya está registrado");
+            }
 
-            if (existeDocumento)
-                throw new InvalidOperationException("El documento ya está registrado");
+            if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Phone))
+            {
+                var existePhone = await _clientRepository.ExistsByPhoneAsync(clienteCreacionDTO.Phone);
+                if (existePhone)
+                    throw new InvalidOperationException("El teléfono ya está registrado");
+            }
 
             var cliente = _mapper.Map<Client>(clienteCreacionDTO);
 
             await _unitOfWork.Clients.AddAsync(cliente);
             await _unitOfWork.SaveChangesAsync();
+
             return _mapper.Map<ClientDTO>(cliente);
         }
 
-        public async Task UpdateAsync(int id, ClientCreationDTO clienteCreacionDTO)
+
+        public async Task UpdateAsync(int id, ClientUpdateDTO clienteUpdateDTO)
         {
             var clienteDB = await _clientRepository.GetByIdAsync(id);
 
             if (clienteDB == null)
                 throw new KeyNotFoundException("Cliente no encontrado");
 
-            if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Name))
-                clienteDB.Name = clienteCreacionDTO.Name;
+            if (!string.IsNullOrWhiteSpace(clienteUpdateDTO.Name))
+                clienteDB.Name = clienteUpdateDTO.Name;
 
-            if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.IdentityDocument))
-                clienteDB.IdentityDocument = clienteCreacionDTO.IdentityDocument;
+            if (clienteUpdateDTO.IdentityDocument != null)
+                clienteDB.IdentityDocument = clienteUpdateDTO.IdentityDocument;
 
-            if (clienteCreacionDTO.DateBirth != default)
-                clienteDB.DateBirth = clienteCreacionDTO.DateBirth;
+            if (clienteUpdateDTO.Email != null)
+                clienteDB.Email = clienteUpdateDTO.Email;
 
-            _clientRepository.Update(clienteDB);  
+            if (clienteUpdateDTO.Phone != null)
+                clienteDB.Phone = clienteUpdateDTO.Phone;
+
+            // ✅ FECHA: correcto
+            if (clienteUpdateDTO.DateBirth.HasValue)
+                clienteDB.DateBirth = clienteUpdateDTO.DateBirth.Value;
+
+            _clientRepository.Update(clienteDB);
             await _unitOfWork.SaveChangesAsync();
         }
 

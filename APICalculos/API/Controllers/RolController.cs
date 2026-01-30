@@ -33,7 +33,7 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet("buscarRolPorId/{id:int}")]
-        public async Task<ActionResult<PaymentType>> BuscarRolId(int id)
+        public async Task<ActionResult<PaymentTypes>> BuscarRolId(int id)
         {
             var rolId = await _context.Roles.FirstOrDefaultAsync(g => g.RolId == id);
 

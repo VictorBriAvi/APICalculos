@@ -20,11 +20,6 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .HasMaxLength(300)
                 .IsRequired();
 
-            builder.Property(prop => prop.IdentityDocument)
-                .HasMaxLength(20)
-                .IsRequired();
-
-
         }
     }
 }

@@ -16,12 +16,19 @@ namespace APICalculos.Infrastructure.Repositories
 
         }
 
-
-        public async Task<IEnumerable<Client>> GetAllAsync()
+        public async Task<IEnumerable<Client>> GetAllAsync(string? search)
         {
-            return await _dbContext.Clients.AsNoTracking().OrderByDescending(c => c.Id).ToListAsync();
-        }
+            var query = _dbContext.Clients.AsNoTracking();
 
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var normalizedSearch = search.Trim().ToLower();
+
+                query = query.Where(c => c.Name.ToLower().Contains(normalizedSearch));
+            }
+
+            return await query.OrderByDescending(x => x.Id).ToListAsync();
+        }
 
         public async Task<Client?> GetByIdAsync(int id)
         {
@@ -63,6 +70,42 @@ namespace APICalculos.Infrastructure.Repositories
             return await _dbContext.Clients
                 .AnyAsync(c => c.IdentityDocument.Replace(" ", "").Trim() == documentoNormalizado);
         }
+
+        public async Task<bool> ExistsByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            var emailNormalizado = email.Trim().ToLower();
+
+            return await _dbContext.Clients
+                .AnyAsync(c =>
+                    c.Email != null &&
+                    c.Email.Trim().ToLower() == emailNormalizado
+                );
+        }
+
+
+        public async Task<bool> ExistsByPhoneAsync(string phone)
+        {
+            if (string.IsNullOrWhiteSpace(phone))
+                return false;
+
+            var phoneNormalizado = phone
+                .Replace(" ", "")
+                .Replace("-", "")
+                .Trim();
+
+            return await _dbContext.Clients
+                .AnyAsync(c =>
+                    c.Phone != null &&
+                    c.Phone
+                        .Replace(" ", "")
+                        .Replace("-", "")
+                        .Trim() == phoneNormalizado
+                );
+        }
+
 
         public async Task<List<Client>> SearchAsync(string query, int limit)
         {

@@ -14,9 +14,9 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<Expense>> GetAllAsync(string? search, int? expenseTypeId, DateTime? fromDate,DateTime? toDate)
+        public async Task<IEnumerable<Expenses>> GetAllAsync(string? search, int? expenseTypeId, DateTime? fromDate,DateTime? toDate)
         {
-            IQueryable<Expense> query = _dbContext.Expenses.AsNoTracking().Include(e => e.ExpenseType).Include(e => e.PaymentType);
+            IQueryable<Expenses> query = _dbContext.Expenses.AsNoTracking().Include(e => e.ExpenseType).Include(e => e.PaymentType);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -44,22 +44,22 @@ namespace APICalculos.Infrastructure.Repositories
         }
 
 
-        public async Task<Expense> GetByIdAsync(int id)
+        public async Task<Expenses> GetByIdAsync(int id)
         {
             return await _dbContext.Expenses.Include(st => st.ExpenseType).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task AddAsync(Expense expense)
+        public async Task AddAsync(Expenses expense)
         {
             await _dbContext.Expenses.AddAsync(expense);
         }
 
-        public void Update(Expense expense)
+        public void Update(Expenses expense)
         {
             _dbContext.Expenses.Update(expense);
         }
 
-        public void Remove(Expense expense)
+        public void Remove(Expenses expense)
         {
             _dbContext.Expenses.Remove(expense);
         }

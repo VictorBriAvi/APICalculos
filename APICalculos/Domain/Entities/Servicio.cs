@@ -12,7 +12,7 @@
 
 
 
-        public PaymentType TipoDePago { get; set; }
+        public PaymentTypes TipoDePago { get; set; }
         public Employee Empleado { get; set; }
         public Client Cliente { get; set; }
         public ServiceType TipoDeServicio { get; set; }

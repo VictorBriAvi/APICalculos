@@ -4,13 +4,15 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IClientRepository
     {
-        Task<IEnumerable<Client>> GetAllAsync();
+        Task<IEnumerable<Client>> GetAllAsync(string? search);
         Task<Client> GetByIdAsync(int id);
         Task<Client> GetByDocumentoAsync(string doc);
         Task AddAsync(Client cliente);
         void Remove(Client cliente);
         Task<bool> ExistsByNombreAsync(string nombre);
         Task<bool> ExistsByDocumentoAsync(string documento);
+        Task<bool> ExistsByEmailAsync(string email);
+        Task<bool> ExistsByPhoneAsync(string phone);
         void Update(Client cliente);
 
         Task<List<Client>> SearchAsync(string query, int limit);

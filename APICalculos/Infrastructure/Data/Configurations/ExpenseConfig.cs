@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace APICalculos.Infrastructure.Data.Configurations
 {
-    public class ExpenseConfig : IEntityTypeConfiguration<Expense>
+    public class ExpenseConfig : IEntityTypeConfiguration<Expenses>
     {
-        public void Configure(EntityTypeBuilder<Expense> builder)
+        public void Configure(EntityTypeBuilder<Expenses> builder)
         {
             builder.HasOne(e => e.ExpenseType)
                 .WithMany(et => et.Expenses)

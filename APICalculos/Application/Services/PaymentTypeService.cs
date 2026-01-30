@@ -52,7 +52,7 @@ namespace APICalculos.Application.Services
                 throw new InvalidOperationException("El nombre del cliente ya existe");
             }
 
-            var paymentType = _mapper.Map<PaymentType>(paymentTypeCreationDTO);
+            var paymentType = _mapper.Map<PaymentTypes>(paymentTypeCreationDTO);
 
             await _unitOfWork.PaymentType.AddAsync(paymentType);
 

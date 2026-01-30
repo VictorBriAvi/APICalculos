@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace APICalculos.Infrastructure.Data.Configurations
 {
-    public class PaymentTypeConfig : IEntityTypeConfiguration<PaymentType>
+    public class PaymentTypeConfig : IEntityTypeConfiguration<PaymentTypes>
     {
-        public void Configure(EntityTypeBuilder<PaymentType> builder)
+        public void Configure(EntityTypeBuilder<PaymentTypes> builder)
         {
             builder.HasKey(pt => pt.Id);
 

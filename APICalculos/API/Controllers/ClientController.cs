@@ -1,4 +1,5 @@
-﻿using APICalculos.Application.DTOs.Client;
+﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.Interfaces;
 using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,11 +18,14 @@ namespace APICalculos.API.Controllers
         }
 
 
+
+
         [HttpGet]
-        public async Task<ActionResult<List<ClientDTO>>> ObtenerClientes()
+        public async Task<ActionResult<List<ClientDTO>>> ObtenerClientes([FromQuery] string? search)
         {
-            var clientesDto = await _clientService.GetAllClientsAsync();
-            return Ok(clientesDto);
+            var clientDto = await _clientService.GetAllClientsAsync(search);
+
+            return Ok(clientDto);
         }
 
         [HttpGet("{id:int}")]
@@ -53,11 +57,11 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, ClientCreationDTO clienteCreacionDTO)
+        public async Task<IActionResult> Put(int id, ClientUpdateDTO clienteUpdateDTO)
         {
             try
             {
-                await _clientService.UpdateAsync(id, clienteCreacionDTO);
+                await _clientService.UpdateAsync(id, clienteUpdateDTO);
                 return Ok("Se modificó exitosamente");
             }
             catch (KeyNotFoundException)

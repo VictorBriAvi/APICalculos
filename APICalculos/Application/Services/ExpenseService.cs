@@ -61,7 +61,7 @@ namespace APICalculos.Application.Services
             if (dto.ExpenseDate > DateTime.UtcNow)
                 throw new ArgumentException("La fecha del gasto no puede ser futura.");
 
-            var expense = _mapper.Map<Expense>(dto);
+            var expense = _mapper.Map<Expenses>(dto);
 
             await _unitOfWork.Expenses.AddAsync(expense);
             await _unitOfWork.SaveChangesAsync();

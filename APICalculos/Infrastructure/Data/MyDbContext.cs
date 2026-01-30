@@ -33,13 +33,13 @@ namespace APICalculos.Infrastructure.Data
         public DbSet<CustomerHistory> CustomerHistories { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Servicio> Servicios { get; set; }
-        public DbSet<PaymentType> PaymentTypes { get; set; }
+        public DbSet<PaymentTypes> PaymentTypes { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
         public DbSet<ServiceCategorie> ServiceCategories { get; set; }
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<UsuarioRol> UsuarioRoles { get; set; }
-        public DbSet<Expense> Expenses { get; set; }
+        public DbSet<Expenses> Expenses { get; set; }
         public DbSet<ExpenseType> ExpenseTypes { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleDetail>  SaleDetails { get; set; }

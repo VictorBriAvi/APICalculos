@@ -1,8 +1,8 @@
 ﻿namespace APICalculos.Application.DTOs.Client
 {
-    public class ClientCreationDTO
+    public class ClientUpdateDTO
     {
-        public string Name { get; set; } = null!;
+        public string? Name { get; set; }
         public string? IdentityDocument { get; set; }
         public string? Email { get; set; }
         public string? Phone { get; set; }
