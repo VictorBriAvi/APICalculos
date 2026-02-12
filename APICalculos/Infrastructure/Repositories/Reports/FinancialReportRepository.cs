@@ -190,21 +190,61 @@ namespace APICalculos.Infrastructure.Repositories.Reports
         }
 
 
-        public async Task<List<SalesByPaymentSummaryDTO>> GetSalesSummaryByPaymentTypeAsync(DateTime startDate, DateTime endDate)
+        public async Task<List<PaymentTypeBalanceDTO>> GetPaymentTypeBalanceAsync(
+            DateTime startDate,
+            DateTime endDate)
         {
-            return await (from sp in _dbContext.SalePayments
-                          join s in _dbContext.Sales on sp.SaleId equals s.Id
-                          join pt in _dbContext.PaymentTypes on sp.PaymentTypeId equals pt.Id
-                          where s.DateSale >= startDate && s.DateSale <= endDate
-                          group sp by pt.Name into g
-                          orderby g.Key
-                          select new SalesByPaymentSummaryDTO
-                          {
-                              MedioDePago = g.Key,
-                              TotalRecaudado = g.Sum(x => x.AmountPaid),
-                              CantidadOperaciones = g.Count()
-                          }).ToListAsync();
+            // 🔹 Normalización de fechas (incluye el día completo)
+            var fromDate = startDate.Date;
+            var toDate = endDate.Date.AddDays(1);
+
+            // 🔹 Ventas por medio de pago
+            var ventas =
+                from sp in _dbContext.SalePayments
+                join s in _dbContext.Sales on sp.SaleId equals s.Id
+                where !s.IsDeleted
+                      && s.DateSale >= fromDate
+                      && s.DateSale < toDate
+                group sp by sp.PaymentTypeId into g
+                select new
+                {
+                    PaymentTypeId = g.Key,
+                    TotalVentas = (decimal?)g.Sum(x => x.AmountPaid)
+                };
+
+            // 🔹 Gastos por medio de pago
+            var gastos =
+                from e in _dbContext.Expenses
+                where e.ExpenseDate >= fromDate
+                      && e.ExpenseDate < toDate
+                group e by e.PaymentTypeId into g
+                select new
+                {
+                    PaymentTypeId = g.Key,
+                    TotalGastos = (decimal?)g.Sum(x => x.Price)
+                };
+
+            // 🔹 Balance final
+            var query =
+                from pt in _dbContext.PaymentTypes
+                join v in ventas on pt.Id equals v.PaymentTypeId into ventasJoin
+                from v in ventasJoin.DefaultIfEmpty()
+                join g in gastos on pt.Id equals g.PaymentTypeId into gastosJoin
+                from g in gastosJoin.DefaultIfEmpty()
+                orderby pt.Name
+                select new PaymentTypeBalanceDTO
+                {
+                    PaymentTypeId = pt.Id,
+                    MedioDePago = pt.Name,
+                    TotalVentas = v.TotalVentas ?? 0,
+                    TotalGastos = g.TotalGastos ?? 0,
+                    TotalDisponible =
+                        (v.TotalVentas ?? 0) - (g.TotalGastos ?? 0)
+                };
+
+            return await query.ToListAsync();
         }
+
 
         public async Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(DateTime? fromDate = null, DateTime? toDate = null)
         {

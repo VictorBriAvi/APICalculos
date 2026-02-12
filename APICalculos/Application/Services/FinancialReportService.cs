@@ -51,10 +51,14 @@ namespace APICalculos.Application.Services
         {
             return await _financialReportRepository.GetSalesReportByPaymentTypeAsync(start, end);
         }
-        public async Task<List<SalesByPaymentSummaryDTO>> GetSalesSummaryByPaymentTypeAsync(DateTime start, DateTime end)
+        public async Task<List<PaymentTypeBalanceDTO>> GetPaymentTypeBalanceAsync(
+            DateTime start,
+            DateTime end)
         {
-            return await _financialReportRepository.GetSalesSummaryByPaymentTypeAsync(start, end);
+            return await _financialReportRepository
+                .GetPaymentTypeBalanceAsync(start, end);
         }
+
         public Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(DateTime? fromDate = null, DateTime? toDate = null)
         {
             return _financialReportRepository.GetExpensesByCategoryAsync(fromDate, toDate);

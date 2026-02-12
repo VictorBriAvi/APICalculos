@@ -14,20 +14,33 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<Expenses>> GetAllAsync(string? search, int? expenseTypeId, DateTime? fromDate,DateTime? toDate)
+        public async Task<IEnumerable<Expenses>> GetAllAsync(
+            string? search,
+            int? expenseTypeId,
+            int? paymentTypeId,
+            DateTime? fromDate,
+            DateTime? toDate
+        )
         {
-            IQueryable<Expenses> query = _dbContext.Expenses.AsNoTracking().Include(e => e.ExpenseType).Include(e => e.PaymentType);
+            IQueryable<Expenses> query = _dbContext.Expenses
+                .AsNoTracking()
+                .Include(e => e.ExpenseType)
+                .Include(e => e.PaymentType);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var normalizedSearch = search.Trim().ToLower();
-
                 query = query.Where(e => e.Description.ToLower().Contains(normalizedSearch));
             }
 
             if (expenseTypeId.HasValue)
             {
                 query = query.Where(e => e.ExpenseTypeId == expenseTypeId.Value);
+            }
+
+            if (paymentTypeId.HasValue)
+            {
+                query = query.Where(e => e.PaymentTypeId == paymentTypeId.Value);
             }
 
             if (fromDate.HasValue)
@@ -40,8 +53,11 @@ namespace APICalculos.Infrastructure.Repositories
                 query = query.Where(e => e.ExpenseDate <= toDate.Value);
             }
 
-            return await query.OrderByDescending(e => e.ExpenseDate).ToListAsync();
+            return await query
+                .OrderByDescending(e => e.ExpenseDate)
+                .ToListAsync();
         }
+
 
 
         public async Task<Expenses> GetByIdAsync(int id)

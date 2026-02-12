@@ -81,12 +81,17 @@ namespace APICalculos.API.Controllers
             return Ok(report);
         }
 
-        [HttpGet("sales-summary-by-payment")]
-        public async Task<IActionResult> GetSalesSummaryByPayment([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        [HttpGet("payment-type-balance")]
+        public async Task<IActionResult> GetPaymentTypeBalance(
+            [FromQuery] DateTime startDate,
+            [FromQuery] DateTime endDate)
         {
-            var report = await _financialReportService.GetSalesSummaryByPaymentTypeAsync(startDate, endDate);
-            return Ok(report);
+            var result = await _financialReportService
+                .GetPaymentTypeBalanceAsync(startDate, endDate);
+
+            return Ok(result);
         }
+
 
         [HttpGet("expenses-by-category")]
         public async Task<IActionResult> GetExpensesByCategory([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)

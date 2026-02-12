@@ -25,6 +25,7 @@ namespace APICalculos.Application.Services
         public async Task<List<ExpenseDTO>> GetAllExpenseAsync(
             string? search,
             int? expenseTypeId,
+            int? paymentTypeId,
             DateTime? fromDate,
             DateTime? toDate
         )
@@ -35,12 +36,14 @@ namespace APICalculos.Application.Services
             var expenses = await _expensesRepository.GetAllAsync(
                 search,
                 expenseTypeId,
+                paymentTypeId,
                 fromDate,
                 toDate
             );
 
             return _mapper.Map<List<ExpenseDTO>>(expenses);
         }
+
 
 
         public async Task<ExpenseDTO> GetExpenseForIdAsync (int id)

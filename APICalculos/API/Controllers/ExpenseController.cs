@@ -20,6 +20,7 @@ namespace APICalculos.API.Controllers
         public async Task<ActionResult<List<ExpenseDTO>>> GetAll(
             [FromQuery] string? search,
             [FromQuery] int? expenseTypeId,
+            [FromQuery] int? paymentTypeId,
             [FromQuery] DateTime? fromDate,
             [FromQuery] DateTime? toDate
         )
@@ -27,12 +28,14 @@ namespace APICalculos.API.Controllers
             var expenseDto = await _expenseService.GetAllExpenseAsync(
                 search,
                 expenseTypeId,
+                paymentTypeId,
                 fromDate,
                 toDate
             );
 
             return Ok(expenseDto);
         }
+
 
 
         [HttpGet("{id:int}")]
