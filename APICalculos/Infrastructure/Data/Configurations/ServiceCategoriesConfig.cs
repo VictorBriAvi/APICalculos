@@ -13,6 +13,13 @@ namespace APICalculos.Infrastructure.Data.Configurations
             builder.Property(prop => prop.Name)
             .HasMaxLength(100)
             .IsRequired();
+
+            builder.HasOne(e => e.Store)
+    .WithMany()
+    .HasForeignKey(e => e.StoreId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.StoreId);
         }
     }
 }

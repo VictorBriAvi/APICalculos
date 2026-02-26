@@ -1,4 +1,6 @@
-﻿namespace APICalculos.Domain.Entidades
+﻿using APICalculos.Domain.Entities;
+
+namespace APICalculos.Domain.Entidades
 {
     public class Client
     {
@@ -10,6 +12,10 @@
         public DateTime? DateBirth { get; set; }
         public ICollection<Sale> Sale { get; set; }
         public ICollection<CustomerHistory> CustomerHistories { get; set; }
+
+        public int? StoreId { get; set; }
+        public Store? Store { get; set; }
+
 
     }
 }

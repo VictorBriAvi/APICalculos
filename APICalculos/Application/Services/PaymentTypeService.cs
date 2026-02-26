@@ -1,7 +1,6 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.PaymentType;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
-using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
@@ -11,86 +10,81 @@ namespace APICalculos.Application.Services
 {
     public class PaymentTypeService : IPaymentTypeService
     {
-        private readonly IPaymentTypeRepository _paymentTypeRepository;
-        private readonly IMapper _mapper;
+        private readonly IPaymentTypeRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
-        
-        public PaymentTypeService(IPaymentTypeRepository paymentTypeRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        private readonly IMapper _mapper;
+
+        public PaymentTypeService(
+            IPaymentTypeRepository repository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
-            _paymentTypeRepository = paymentTypeRepository;
-            _mapper = mapper;
+            _repository = repository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<List<PaymentTypeDTO>> GetAllPaymentTypeAsync(string? search)
+        public async Task<List<PaymentTypeDTO>> GetAllPaymentTypeAsync(int storeId, string? search)
         {
-            var paymentTypes =
-                await _paymentTypeRepository.GetAllAsync(search);
-
-            return _mapper.Map<List<PaymentTypeDTO>>(paymentTypes);
+            var entities = await _repository.GetAllAsync(storeId, search);
+            return _mapper.Map<List<PaymentTypeDTO>>(entities);
         }
 
-
-        public async Task<PaymentTypeDTO> GetPaymentTypeForId(int id)
+        public async Task<PaymentTypeDTO?> GetPaymentTypeForId(int id, int storeId)
         {
-            var paymentType = await _paymentTypeRepository.GetByIdAsync(id);
-            if (paymentType == null)
-            {
-                return null;
-            }
-            return _mapper.Map<PaymentTypeDTO>(paymentType);
+            var entity = await _repository.GetByIdAsync(id, storeId);
+            return entity == null ? null : _mapper.Map<PaymentTypeDTO>(entity);
         }
 
-        public async Task<PaymentTypeDTO> AddPaymenteTypeAsync(PaymentTypeCreationDTO paymentTypeCreationDTO)
+        public async Task<PaymentTypeDTO> AddPaymenteTypeAsync(int storeId, PaymentTypeCreationDTO dto)
         {
-            if (string.IsNullOrWhiteSpace(paymentTypeCreationDTO.Name))
-                throw new ArgumentException("El nombre no puede estar vacio");
-            
-            var existsName = await _paymentTypeRepository.ExistsByNameAsync(paymentTypeCreationDTO.Name);
-            if (existsName)
-            {
-                throw new InvalidOperationException("El nombre del cliente ya existe");
-            }
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("El nombre no puede estar vacío");
 
-            var paymentType = _mapper.Map<PaymentTypes>(paymentTypeCreationDTO);
+            var exists = await _repository.ExistsByNameAsync(dto.Name, storeId);
+            if (exists)
+                throw new InvalidOperationException("Ya existe un tipo de pago con ese nombre");
 
-            await _unitOfWork.PaymentType.AddAsync(paymentType);
+            var entity = _mapper.Map<PaymentTypes>(dto);
+            entity.StoreId = storeId;
 
-            await _unitOfWork.SaveChangesAsync();   
-            
-            return _mapper.Map<PaymentTypeDTO>(paymentType);
+            await _repository.AddAsync(entity);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<PaymentTypeDTO>(entity);
         }
 
-        public async Task UpdatePaymentTypeAsync(int id, PaymentTypeCreationDTO paymentTypeCreationDTO)
+        public async Task UpdatePaymentTypeAsync(int id, int storeId, PaymentTypeCreationDTO dto)
         {
-            var paymenteTypeDB = await _paymentTypeRepository.GetByIdAsync(id);
+            var entity = await _repository.GetByIdAsync(id, storeId);
 
-            if (paymenteTypeDB == null)
+            if (entity == null)
                 throw new KeyNotFoundException("Tipo de pago no encontrado");
 
-            if (!string.IsNullOrWhiteSpace(paymentTypeCreationDTO.Name))
-                paymenteTypeDB.Name = paymentTypeCreationDTO.Name;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                entity.Name = dto.Name;
 
-            _paymentTypeRepository.Update(paymenteTypeDB);
+            _repository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task DeletePaymentTypeAsync(int id)
+        public async Task DeletePaymentTypeAsync(int id, int storeId)
         {
-            var paymentTypeDB = await _paymentTypeRepository.GetByIdAsync(id);
-            if (paymentTypeDB == null)
+            var entity = await _repository.GetByIdAsync(id, storeId);
+
+            if (entity == null)
                 throw new KeyNotFoundException("Tipo de pago no encontrado");
 
             try
             {
-                _paymentTypeRepository.Remove(paymentTypeDB);
+                _repository.Remove(entity);
                 await _unitOfWork.SaveChangesAsync();
             }
             catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
             {
-                throw new InvalidOperationException("No se puede eliminar este tipo de pago porque está asociado a una venta.");
+                throw new InvalidOperationException(
+                    "No se puede eliminar este tipo de pago porque está asociado a una venta.");
             }
         }
-
     }
 }

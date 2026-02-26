@@ -4,11 +4,11 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IEmployeeService
     {
-        Task<List<EmployeeDTO>> GetAllEmployeesAsync(string? search);
-        Task<EmployeeDTO> GetEmployeeForIdAsync(int id);
-        Task<EmployeeDTO> AddEmployeeAsync(EmployeeCreationDTO clienteCreacionDTO);
-        Task UpdateEmployeeAsync(int id, EmployeeCreationDTO clienteCreacionDTO);
-        Task DeleteEmployeeAsync(int id);
-        Task<List<EmployeeSearchDTO>> SearchEmployeeAsync(string query);
+        Task<List<EmployeeDTO>> GetAllEmployeesAsync(int storeId, string? search);
+        Task<EmployeeDTO?> GetEmployeeForIdAsync(int id, int storeId);
+        Task<EmployeeDTO> AddEmployeeAsync(int storeId, EmployeeCreationDTO dto);
+        Task UpdateEmployeeAsync(int id, int storeId, EmployeeCreationDTO dto);
+        Task DeleteEmployeeAsync(int id, int storeId);
+        Task<List<EmployeeSearchDTO>> SearchEmployeeAsync(int storeId, string query);
     }
 }

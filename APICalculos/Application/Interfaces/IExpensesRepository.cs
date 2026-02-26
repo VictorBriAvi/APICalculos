@@ -4,13 +4,8 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IExpensesRepository
     {
-        //Task<IEnumerable<Expenses>> GetAllAsync(
-        //            string? search,
-        //            int? expenseTypeId,
-        //            DateTime? fromDate,
-        //            DateTime? toDate
-        //        );
         Task<IEnumerable<Expenses>> GetAllAsync(
+            int storeId,
             string? search,
             int? expenseTypeId,
             int? paymentTypeId,
@@ -18,10 +13,11 @@ namespace APICalculos.Application.Interfaces
             DateTime? toDate
         );
 
-        Task<Expenses> GetByIdAsync(int id);
+        Task<Expenses?> GetByIdAsync(int id, int storeId);
         Task AddAsync(Expenses expense);
         void Update(Expenses expense);
         void Remove(Expenses expense);
-        Task<bool> ExistsByNameAsync(string name);
+        Task<bool> ExistsByNameAsync(string name, int storeId);
     }
+
 }

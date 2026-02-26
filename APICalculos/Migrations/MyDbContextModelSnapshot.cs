@@ -37,9 +37,7 @@ namespace APICalculos.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("IdentityDocument")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -49,7 +47,12 @@ namespace APICalculos.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Clients");
                 });
@@ -71,12 +74,17 @@ namespace APICalculos.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Title")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("CustomerHistories");
                 });
@@ -105,7 +113,12 @@ namespace APICalculos.Migrations
                     b.Property<int>("PaymentPercentage")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Employees");
                 });
@@ -134,11 +147,16 @@ namespace APICalculos.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExpenseTypeId");
 
                     b.HasIndex("PaymentTypeId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Expenses");
                 });
@@ -154,7 +172,12 @@ namespace APICalculos.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("ExpenseTypes");
                 });
@@ -172,7 +195,12 @@ namespace APICalculos.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("PaymentTypes");
                 });
@@ -206,25 +234,30 @@ namespace APICalculos.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("ProductoId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Productos");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Rol", b =>
                 {
-                    b.Property<int>("RolId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("RolId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("NombreRol")
+                    b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.HasKey("RolId");
+                    b.HasKey("Id");
 
                     b.ToTable("Roles");
                 });
@@ -248,12 +281,17 @@ namespace APICalculos.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Sales");
                 });
@@ -284,6 +322,9 @@ namespace APICalculos.Migrations
                     b.Property<int>("ServiceTypeId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("decimal(18,2)");
 
@@ -294,6 +335,8 @@ namespace APICalculos.Migrations
                     b.HasIndex("SaleId");
 
                     b.HasIndex("ServiceTypeId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("SaleDetails");
                 });
@@ -311,7 +354,12 @@ namespace APICalculos.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("ServiceCategories");
                 });
@@ -334,9 +382,14 @@ namespace APICalculos.Migrations
                     b.Property<int>("ServiceCategorieId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ServiceCategorieId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("ServiceTypes");
                 });
@@ -380,52 +433,65 @@ namespace APICalculos.Migrations
                     b.ToTable("Servicios");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Usuario", b =>
+            modelBuilder.Entity("APICalculos.Domain.Entidades.User", b =>
                 {
-                    b.Property<int>("UsuarioId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UsuarioId"), 1L, 1);
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("Correo")
+                    b.Property<DateTime>("CreatedOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("PasswordHash")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("StoreId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<string>("NombreCompletoUsuario")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.HasKey("Id");
 
-                    b.Property<string>("NombreDeUsuario")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                    b.HasIndex("StoreId");
 
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.HasIndex("Username")
+                        .IsUnique();
 
-                    b.HasKey("UsuarioId");
-
-                    b.ToTable("Usuarios");
+                    b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.UsuarioRol", b =>
+            modelBuilder.Entity("APICalculos.Domain.Entidades.UserRol", b =>
                 {
-                    b.Property<int>("UsuarioId")
+                    b.Property<int>("UserId")
                         .HasColumnType("int");
 
                     b.Property<int>("RolId")
                         .HasColumnType("int");
 
-                    b.HasKey("UsuarioId", "RolId");
+                    b.HasKey("UserId", "RolId");
 
                     b.HasIndex("RolId");
 
-                    b.ToTable("UsuarioRoles");
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entities.SalePayment", b =>
@@ -448,13 +514,49 @@ namespace APICalculos.Migrations
                     b.Property<int>("SaleId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PaymentTypeId");
 
                     b.HasIndex("SaleId");
 
+                    b.HasIndex("StoreId");
+
                     b.ToTable("SalePayments");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entities.Store", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<DateTime>("CreateOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Stores");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entidades.Client", b =>
+                {
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.CustomerHistory", b =>
@@ -465,7 +567,23 @@ namespace APICalculos.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId");
+
                     b.Navigation("Client");
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entidades.Employee", b =>
+                {
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Expenses", b =>
@@ -482,9 +600,46 @@ namespace APICalculos.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("ExpenseType");
 
                     b.Navigation("PaymentType");
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entidades.ExpenseType", b =>
+                {
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entidades.PaymentTypes", b =>
+                {
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entidades.Producto", b =>
+                {
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Sale", b =>
@@ -495,7 +650,14 @@ namespace APICalculos.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Client");
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.SaleDetail", b =>
@@ -518,11 +680,28 @@ namespace APICalculos.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Employee");
 
                     b.Navigation("Sale");
 
                     b.Navigation("ServiceType");
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entidades.ServiceCategorie", b =>
+                {
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.ServiceType", b =>
@@ -533,7 +712,14 @@ namespace APICalculos.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("ServiceCategories");
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Servicio", b =>
@@ -571,23 +757,34 @@ namespace APICalculos.Migrations
                     b.Navigation("TipoDeServicio");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.UsuarioRol", b =>
+            modelBuilder.Entity("APICalculos.Domain.Entidades.User", b =>
+                {
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany("Users")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Store");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entidades.UserRol", b =>
                 {
                     b.HasOne("APICalculos.Domain.Entidades.Rol", "Rol")
-                        .WithMany("RolesUsuario")
+                        .WithMany("UserRoles")
                         .HasForeignKey("RolId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("APICalculos.Domain.Entidades.Usuario", "Usuario")
-                        .WithMany("UsuarioRoles")
-                        .HasForeignKey("UsuarioId")
+                    b.HasOne("APICalculos.Domain.Entidades.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Rol");
 
-                    b.Navigation("Usuario");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entities.SalePayment", b =>
@@ -604,9 +801,16 @@ namespace APICalculos.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("APICalculos.Domain.Entities.Store", "Store")
+                        .WithMany()
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("PaymentType");
 
                     b.Navigation("Sale");
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Client", b =>
@@ -633,7 +837,7 @@ namespace APICalculos.Migrations
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Rol", b =>
                 {
-                    b.Navigation("RolesUsuario");
+                    b.Navigation("UserRoles");
                 });
 
             modelBuilder.Entity("APICalculos.Domain.Entidades.Sale", b =>
@@ -653,9 +857,14 @@ namespace APICalculos.Migrations
                     b.Navigation("SaleDetail");
                 });
 
-            modelBuilder.Entity("APICalculos.Domain.Entidades.Usuario", b =>
+            modelBuilder.Entity("APICalculos.Domain.Entidades.User", b =>
                 {
-                    b.Navigation("UsuarioRoles");
+                    b.Navigation("UserRoles");
+                });
+
+            modelBuilder.Entity("APICalculos.Domain.Entities.Store", b =>
+                {
+                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,4 +1,6 @@
-﻿namespace APICalculos.Domain.Entidades
+﻿using APICalculos.Domain.Entities;
+
+namespace APICalculos.Domain.Entidades
 {
     public class SaleDetail
     {
@@ -16,6 +18,11 @@
         public Sale Sale { get; set; }
         public ServiceType ServiceType { get; set; }
         public Employee Employee { get; set; }
+
+        public int? StoreId { get; set; }
+        public Store? Store { get; set; }
+
+
 
     }
 }

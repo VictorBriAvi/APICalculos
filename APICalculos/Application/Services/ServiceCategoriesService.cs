@@ -1,4 +1,4 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.ServiceCategories;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.UnitOfWork;
@@ -10,87 +10,81 @@ namespace APICalculos.Application.Services
 {
     public class ServiceCategoriesService : IServiceCategoriesService
     {
-        private readonly IServiceCategoriesRepository _serviceCategoriesRepository;
-        private readonly IMapper _mapper;
+        private readonly IServiceCategoriesRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ServiceCategoriesService(IServiceCategoriesRepository serviceCategoriesRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public ServiceCategoriesService(
+            IServiceCategoriesRepository repository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
-            _serviceCategoriesRepository = serviceCategoriesRepository;
-            _mapper = mapper;
+            _repository = repository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
 
-        public async Task<List<ServiceCategoriesDTO>> GetAllServiceCategoriesAsync(string? search)
+        public async Task<List<ServiceCategoriesDTO>> GetAllServiceCategoriesAsync(int storeId, string? search)
         {
-            var serviceCategories =
-                await _serviceCategoriesRepository.GetAllAsync(search);
-
-            return _mapper.Map<List<ServiceCategoriesDTO>>(serviceCategories);
+            var entities = await _repository.GetAllAsync(storeId, search);
+            return _mapper.Map<List<ServiceCategoriesDTO>>(entities);
         }
 
-
-        public async Task<ServiceCategoriesDTO> GetServiceCategorieForId(int id)
+        public async Task<ServiceCategoriesDTO?> GetServiceCategorieForId(int id, int storeId)
         {
-            var serviceCategorie = await _serviceCategoriesRepository.GetByIdAsync(id);
-            if (serviceCategorie == null)
-            {
-                return null;
-            }
-
-            return _mapper.Map<ServiceCategoriesDTO>(serviceCategorie);
+            var entity = await _repository.GetByIdAsync(id, storeId);
+            return entity == null ? null : _mapper.Map<ServiceCategoriesDTO>(entity);
         }
 
-        public async Task<ServiceCategoriesDTO> AddServiceCategorieAsync(ServiceCategoriesCreationDTO serviceCategoriesCreationDTO)
+        public async Task<ServiceCategoriesDTO> AddServiceCategorieAsync(int storeId, ServiceCategoriesCreationDTO dto)
         {
-            if (string.IsNullOrWhiteSpace(serviceCategoriesCreationDTO.Name))
-            {
-                throw new ArgumentException("El nombre de la categoria de servicio no puede estar vacio");
-            }
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("El nombre de la categoría no puede estar vacío");
 
-            var existsName = await _serviceCategoriesRepository.ExistsByNameAsync(serviceCategoriesCreationDTO.Name);
-            if (existsName)
-            {
-                throw new InvalidOperationException("El nombre de la categoria de servicio ya existe");
-            }
+            var exists = await _repository.ExistsByNameAsync(dto.Name, storeId);
+            if (exists)
+                throw new InvalidOperationException("Ya existe una categoría con ese nombre");
 
-            var serviceCategorie = _mapper.Map<ServiceCategorie>(serviceCategoriesCreationDTO);
+            var entity = _mapper.Map<ServiceCategorie>(dto);
+            entity.StoreId = storeId;
 
-            await _unitOfWork.ServiceCategories.AddAsync(serviceCategorie);
+            await _repository.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<ServiceCategoriesDTO>(serviceCategorie);
+            return _mapper.Map<ServiceCategoriesDTO>(entity);
         }
 
-        public async Task UpdateServiceCategorieAsync(int id, ServiceCategoriesCreationDTO serviceCategoriesCreationDTO)
+        public async Task UpdateServiceCategorieAsync(int id, int storeId, ServiceCategoriesCreationDTO dto)
         {
-            var serviceCategorieDB = await _serviceCategoriesRepository.GetByIdAsync(id);
+            var entity = await _repository.GetByIdAsync(id, storeId);
 
-            if (serviceCategorieDB == null)
-                throw new KeyNotFoundException("Categoria servicio no encontrada");
+            if (entity == null)
+                throw new KeyNotFoundException("Categoría de servicio no encontrada");
 
-            if (!string.IsNullOrWhiteSpace(serviceCategoriesCreationDTO.Name))
-                serviceCategorieDB.Name = serviceCategoriesCreationDTO.Name;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                entity.Name = dto.Name;
 
-            _serviceCategoriesRepository.Update(serviceCategorieDB);
+            _repository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task DeleteServiceCategorieAsync(int id)
+        public async Task DeleteServiceCategorieAsync(int id, int storeId)
         {
-            var serviceCategorieDB = await _serviceCategoriesRepository.GetByIdAsync(id);
-            if (serviceCategorieDB == null)
-                throw new KeyNotFoundException("Servicio Categoria no encontrada");
+            var entity = await _repository.GetByIdAsync(id, storeId);
+
+            if (entity == null)
+                throw new KeyNotFoundException("Categoría de servicio no encontrada");
 
             try
             {
-
-                _serviceCategoriesRepository.Remove(serviceCategorieDB);
+                _repository.Remove(entity);
                 await _unitOfWork.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            catch (DbUpdateException ex) when (
+                ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
             {
-                throw new InvalidOperationException("No se puede eliminar esta categoria del servicio porque está asociado a una venta.");
+                throw new InvalidOperationException(
+                    "No se puede eliminar esta categoría porque está asociada a un servicio.");
             }
         }
     }

@@ -36,9 +36,10 @@ namespace APICalculos.Infrastructure.Data
         public DbSet<PaymentTypes> PaymentTypes { get; set; }
         public DbSet<ServiceType> ServiceTypes { get; set; }
         public DbSet<ServiceCategorie> ServiceCategories { get; set; }
-        public DbSet<Usuario> Usuarios { get; set; }
+        public DbSet<Store> Stores { get; set; }
+        public DbSet<User> Users{ get; set; }
         public DbSet<Rol> Roles { get; set; }
-        public DbSet<UsuarioRol> UsuarioRoles { get; set; }
+        public DbSet<UserRol> UserRoles { get; set; }
         public DbSet<Expenses> Expenses { get; set; }
         public DbSet<ExpenseType> ExpenseTypes { get; set; }
         public DbSet<Sale> Sales { get; set; }

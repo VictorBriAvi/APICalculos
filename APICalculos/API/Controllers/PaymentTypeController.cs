@@ -1,71 +1,75 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.PaymentType;
 using APICalculos.Application.Interfaces;
-using APICalculos.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
     [Route("api/paymenttype")]
-    public class PaymentTypeController : ControllerBase
+    [Authorize]
+    public class PaymentTypeController : BaseController
     {
-        private readonly IPaymentTypeService _paymentTypeService;
+        private readonly IPaymentTypeService _service;
 
-        public PaymentTypeController(IPaymentTypeService paymentTypeService)
+        public PaymentTypeController(IPaymentTypeService service)
         {
-            _paymentTypeService = paymentTypeService;
+            _service = service;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<PaymentTypeDTO>>> GetPaymentTypeAsync([FromQuery] string? search)
+        public async Task<ActionResult<List<PaymentTypeDTO>>> Get(string? search)
         {
-            var paymentTypeDto = await _paymentTypeService.GetAllPaymentTypeAsync(search);
-
-            return Ok(paymentTypeDto);
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetAllPaymentTypeAsync(storeId, search);
+            return Ok(result);
         }
 
-
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetPaymentTypeForId(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var paymentTypeDto = await _paymentTypeService.GetPaymentTypeForId(id);
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetPaymentTypeForId(id, storeId);
 
-            if (paymentTypeDto == null)
-                return NotFound($"No se encontro el cliente con el ID {id}");
+            if (result == null)
+                return NotFound("Tipo de pago no encontrado");
 
-            return Ok(paymentTypeDto);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(PaymentTypeCreationDTO paymentTypeCreationDTO)
+        public async Task<IActionResult> Post(PaymentTypeCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                var paymentTypeDto = await _paymentTypeService.AddPaymenteTypeAsync(paymentTypeCreationDTO);
-                return Ok(paymentTypeDto);
+                var result = await _service.AddPaymenteTypeAsync(storeId, dto);
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
-
                 return BadRequest(ex.Message);
             }
-            catch (InvalidOperationException ex) 
+            catch (InvalidOperationException ex)
             {
                 return Conflict(ex.Message);
             }
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, PaymentTypeCreationDTO paymentTypeCreationDTO)
+        public async Task<IActionResult> Put(int id, PaymentTypeCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _paymentTypeService.UpdatePaymentTypeAsync(id, paymentTypeCreationDTO);
-                return Ok("Se modifico exitosamente");
+                await _service.UpdatePaymentTypeAsync(id, storeId, dto);
+                return Ok("Se modificó exitosamente");
             }
             catch (KeyNotFoundException)
             {
-
                 return NotFound("Tipo de pago no encontrado");
             }
         }
@@ -73,9 +77,10 @@ namespace APICalculos.API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _paymentTypeService.DeletePaymentTypeAsync(id);
+                await _service.DeletePaymentTypeAsync(id, storeId);
                 return Ok("Se ha eliminado el tipo de pago");
             }
             catch (KeyNotFoundException)
@@ -87,7 +92,5 @@ namespace APICalculos.API.Controllers
                 return Conflict(ex.Message);
             }
         }
-
-
     }
 }

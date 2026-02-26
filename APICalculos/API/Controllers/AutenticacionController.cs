@@ -33,11 +33,11 @@ namespace APICalculos.API.Controllers
         public IActionResult Validar([FromBody] ValidarUsuarioDTO validarUsuarioDTO) 
         {
 
-            var correoDB = _context.Usuarios.FirstOrDefault(u => u.Correo == validarUsuarioDTO.Correo);
+            var correoDB = _context.Users.FirstOrDefault(u => u.Email == validarUsuarioDTO.Correo);
 
             if (correoDB != null)
             {
-                bool passwordValido = BCrypt.Net.BCrypt.Verify(validarUsuarioDTO.Password, correoDB.Password);
+                bool passwordValido = BCrypt.Net.BCrypt.Verify(validarUsuarioDTO.Password, correoDB.PasswordHash);
 
                 if (passwordValido)
                 {

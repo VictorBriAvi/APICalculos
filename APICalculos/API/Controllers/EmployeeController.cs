@@ -1,15 +1,14 @@
-﻿using APICalculos.Application.DTOs;
-using APICalculos.Application.DTOs.Client;
-using APICalculos.Application.DTOs.Employee;
+﻿using APICalculos.Application.DTOs.Employee;
 using APICalculos.Application.Interfaces;
-using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
     [Route("api/employee")]
-    public class EmployeeController : ControllerBase
+    public class EmployeeController : BaseController
     {
         private readonly IEmployeeService _employeeService;
 
@@ -21,27 +20,30 @@ namespace APICalculos.API.Controllers
         [HttpGet]
         public async Task<ActionResult<List<EmployeeDTO>>> GetAsync([FromQuery] string? search)
         {
-            var employeeDTO = await _employeeService.GetAllEmployeesAsync(search);
-
-            return Ok(employeeDTO);
+            var storeId = GetStoreIdFromToken();
+            var employees = await _employeeService.GetAllEmployeesAsync(storeId, search);
+            return Ok(employees);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetForIdAsync(int id)
         {
-            var employee = await _employeeService.GetEmployeeForIdAsync(id);  
+            var storeId = GetStoreIdFromToken();
+            var employee = await _employeeService.GetEmployeeForIdAsync(id, storeId);
+
             if (employee == null)
-                return NotFound($"No se encontró el colaborador con ID {id}");
+                return NotFound("Colaborador no encontrado");
 
             return Ok(employee);
         }
 
         [HttpPost]
-        public async Task<ActionResult<EmployeeDTO>> Create(EmployeeCreationDTO employeeCreationDTO)
+        public async Task<ActionResult<EmployeeDTO>> Create([FromBody] EmployeeCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                var employee = await _employeeService.AddEmployeeAsync(employeeCreationDTO);
+                var employee = await _employeeService.AddEmployeeAsync(storeId, dto);
                 return Ok(employee);
             }
             catch (ArgumentException ex)
@@ -55,30 +57,32 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateAsync(int id, EmployeeCreationDTO employeeCreationDTO)
+        public async Task<IActionResult> UpdateAsync(int id, [FromBody] EmployeeCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _employeeService.UpdateEmployeeAsync(id, employeeCreationDTO);
+                await _employeeService.UpdateEmployeeAsync(id, storeId, dto);
                 return Ok("Se modificó exitosamente");
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Cliente no encontrado");
+                return NotFound("Colaborador no encontrado");
             }
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> DeleteAsync(int id)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _employeeService.DeleteEmployeeAsync(id);
-                return Ok("Se ha eliminado el cliente");
+                await _employeeService.DeleteEmployeeAsync(id, storeId);
+                return Ok("Se eliminó correctamente");
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Tipo de pago no encontrado");
+                return NotFound("Colaborador no encontrado");
             }
             catch (InvalidOperationException ex)
             {
@@ -87,11 +91,11 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet("search")]
-        public async Task<ActionResult<List<ClientSearchDTO>>> SearchClients( [FromQuery] string query)
+        public async Task<ActionResult<List<EmployeeSearchDTO>>> Search([FromQuery] string query)
         {
-            var result = await _employeeService.SearchEmployeeAsync(query);
+            var storeId = GetStoreIdFromToken();
+            var result = await _employeeService.SearchEmployeeAsync(storeId, query);
             return Ok(result);
         }
-
     }
 }

@@ -1,13 +1,13 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.SaleDetail;
 
 namespace APICalculos.Application.Interfaces
 {
     public interface ISaleDetailService
     {
-        Task<List<SaleDetailDTO>> GetAllSaleDetailAsync();
-        Task<SaleDetailDTO> GetSaleDetailForId(int id);
-        Task<SaleDetailDTO> AddSaleDetailAsync(SaleDetailCreationDTO saleDetailCreationDTO);
-        Task UpdateSaleDetailAsync(int id, SaleDetailCreationDTO saleDetailCreationDTO);
-        Task DeleteSaleDetailAsync(int id);
+        Task<List<SaleDetailDTO>> GetAllSaleDetailAsync(int storeId);
+        Task<SaleDetailDTO> GetSaleDetailForId(int id, int storeId);
+        Task<SaleDetailDTO> AddSaleDetailAsync(SaleDetailCreationDTO dto, int storeId);
+        Task UpdateSaleDetailAsync(int id, SaleDetailCreationDTO dto, int storeId);
+        Task DeleteSaleDetailAsync(int id, int storeId);
     }
 }

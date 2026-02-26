@@ -1,13 +1,15 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.Expense;
 using APICalculos.Application.Interfaces;
-using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
-    [Route("api/Expense")]
-    public class ExpenseController :  ControllerBase
+    [Route("api/expense")]
+    public class ExpenseController : BaseController
     {
         private readonly IExpenseService _expenseService;
 
@@ -25,79 +27,68 @@ namespace APICalculos.API.Controllers
             [FromQuery] DateTime? toDate
         )
         {
-            var expenseDto = await _expenseService.GetAllExpenseAsync(
-                search,
-                expenseTypeId,
-                paymentTypeId,
-                fromDate,
-                toDate
+            var storeId = GetStoreIdFromToken();
+            var result = await _expenseService.GetAllExpenseAsync(
+                storeId, search, expenseTypeId, paymentTypeId, fromDate, toDate
             );
 
-            return Ok(expenseDto);
+            return Ok(result);
         }
-
-
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> GetForId(int id)
         {
-            var expenseDto = await _expenseService.GetExpenseForIdAsync(id);
+            var storeId = GetStoreIdFromToken();
+            var result = await _expenseService.GetExpenseForIdAsync(id, storeId);
 
-            if (expenseDto == null)
-                return NotFound($"No se encontro el tipo de servicio con el ID {id}");
+            if (result == null)
+                return NotFound("Gasto no encontrado");
 
-            return Ok(expenseDto);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(ExpenseCreationDTO expenseCreationDTO)
+        public async Task<IActionResult> Post([FromBody] ExpenseCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                var expenseDto = await _expenseService.AddExpensesAsync(expenseCreationDTO);
-                return Ok(expenseDto);
+                var result = await _expenseService.AddExpensesAsync(storeId, dto);
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
-
                 return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
             }
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, ExpenseCreationDTO expenseCreationDTO)
+        public async Task<IActionResult> Put(int id, [FromBody] ExpenseCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _expenseService.UpdateExpenseAsync(id, expenseCreationDTO);
-                return Ok("Se modifico exitosamente");
+                await _expenseService.UpdateExpenseAsync(id, storeId, dto);
+                return Ok("Se modificó exitosamente");
             }
             catch (KeyNotFoundException)
             {
-
-                return NotFound("Tipo de servicio no encontrado");
+                return NotFound("Gasto no encontrado");
             }
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _expenseService.DeleteExpenseAsync(id);
-                return Ok("Se ha eliminado el tipo de servicio");
+                await _expenseService.DeleteExpenseAsync(id, storeId);
+                return Ok("Se eliminó correctamente");
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Tipo de servicio no encontrado");
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
+                return NotFound("Gasto no encontrado");
             }
         }
     }

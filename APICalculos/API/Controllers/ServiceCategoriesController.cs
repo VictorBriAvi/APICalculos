@@ -1,52 +1,56 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.ServiceCategories;
 using APICalculos.Application.Interfaces;
-using APICalculos.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
     [Route("api/serviceCategorie")]
-    public class ServiceCategoriesController : ControllerBase
+    [Authorize]
+    public class ServiceCategoriesController : BaseController
     {
-        private readonly IServiceCategoriesService _serviceCategoriesService;
+        private readonly IServiceCategoriesService _service;
 
-        public ServiceCategoriesController(IServiceCategoriesService serviceCategoriesService)
+        public ServiceCategoriesController(IServiceCategoriesService service)
         {
-            _serviceCategoriesService = serviceCategoriesService;
+            _service = service;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ServiceCategoriesDTO>>> GetServiceCategorieAsync([FromQuery] string? search)
+        public async Task<ActionResult<List<ServiceCategoriesDTO>>> Get(string? search)
         {
-            var serviceCategorieDto = await _serviceCategoriesService.GetAllServiceCategoriesAsync(search);
-
-            return Ok(serviceCategorieDto);
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetAllServiceCategoriesAsync(storeId, search);
+            return Ok(result);
         }
 
-
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetServiceCategorieForId(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var serviceCategorieDto = await _serviceCategoriesService.GetServiceCategorieForId(id);
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetServiceCategorieForId(id, storeId);
 
-            if (serviceCategorieDto == null)
-                return NotFound($"No se encontro el cliente con el ID {id}");
+            if (result == null)
+                return NotFound("Categoría de servicio no encontrada");
 
-            return Ok(serviceCategorieDto);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(ServiceCategoriesCreationDTO serviceCategoriesCreationDTO)
+        public async Task<IActionResult> Post([FromBody] ServiceCategoriesCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                var serviceCategorieDto = await _serviceCategoriesService.AddServiceCategorieAsync(serviceCategoriesCreationDTO);
-                return Ok(serviceCategorieDto);
+                var result = await _service.AddServiceCategorieAsync(storeId, dto);
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
-
                 return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
@@ -56,31 +60,32 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, ServiceCategoriesCreationDTO serviceCategoriesCreationDTO)
+        public async Task<IActionResult> Put(int id, [FromBody] ServiceCategoriesCreationDTO dto)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _serviceCategoriesService.UpdateServiceCategorieAsync(id, serviceCategoriesCreationDTO);
-                return Ok("Se modifico exitosamente");
+                await _service.UpdateServiceCategorieAsync(id, storeId, dto);
+                return Ok("Se modificó exitosamente");
             }
             catch (KeyNotFoundException)
             {
-
-                return NotFound("Categoria servicio no encontrada");
+                return NotFound("Categoría de servicio no encontrada");
             }
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
+            var storeId = GetStoreIdFromToken();
             try
             {
-                await _serviceCategoriesService.DeleteServiceCategorieAsync(id);
-                return Ok("Se ha eliminado la categoria servicio");
+                await _service.DeleteServiceCategorieAsync(id, storeId);
+                return Ok("Se ha eliminado la categoría de servicio");
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Categoria servicio no encontrada");
+                return NotFound("Categoría de servicio no encontrada");
             }
             catch (InvalidOperationException ex)
             {

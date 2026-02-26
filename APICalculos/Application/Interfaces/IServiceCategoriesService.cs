@@ -1,13 +1,13 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.ServiceCategories;
 
 namespace APICalculos.Application.Interfaces
 {
     public interface IServiceCategoriesService
     {
-        Task<List<ServiceCategoriesDTO>> GetAllServiceCategoriesAsync(string? search);
-        Task<ServiceCategoriesDTO> GetServiceCategorieForId(int id);
-        Task<ServiceCategoriesDTO> AddServiceCategorieAsync(ServiceCategoriesCreationDTO serviceCategoriesCreationDTO);
-        Task UpdateServiceCategorieAsync(int id, ServiceCategoriesCreationDTO serviceCategoriesCreationDTO);
-        Task DeleteServiceCategorieAsync(int id);
+        Task<List<ServiceCategoriesDTO>> GetAllServiceCategoriesAsync(int storeId, string? search);
+        Task<ServiceCategoriesDTO?> GetServiceCategorieForId(int id, int storeId);
+        Task<ServiceCategoriesDTO> AddServiceCategorieAsync(int storeId, ServiceCategoriesCreationDTO dto);
+        Task UpdateServiceCategorieAsync(int id, int storeId, ServiceCategoriesCreationDTO dto);
+        Task DeleteServiceCategorieAsync(int id, int storeId);
     }
 }

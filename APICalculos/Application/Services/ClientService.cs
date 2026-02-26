@@ -2,12 +2,10 @@
 using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
-using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System.Globalization;
 
 namespace APICalculos.Application.Services
 {
@@ -17,67 +15,78 @@ namespace APICalculos.Application.Services
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ClientService(IClientRepository clientRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public ClientService(
+            IClientRepository clientRepository,
+            IMapper mapper,
+            IUnitOfWork unitOfWork)
         {
             _clientRepository = clientRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<ClientDTO>> GetAllClientsAsync(string? search)
+        // ✅ GET ALL
+        public async Task<List<ClientDTO>> GetAllClientsAsync(int storeId, string? search)
         {
-            var clients =
-                await _clientRepository.GetAllAsync(search);
-
+            var clients = await _clientRepository.GetAllAsync(storeId, search);
             return _mapper.Map<List<ClientDTO>>(clients);
         }
 
-        public async Task<ClientDTO?> GetClientForIdAsync(int id)
+        // ✅ GET BY ID
+        public async Task<ClientDTO?> GetClientForIdAsync(int id, int storeId)
         {
-            var cliente = await _clientRepository.GetByIdAsync(id);
+            var cliente = await _clientRepository.GetByIdAsync(id, storeId);
+
             if (cliente == null)
                 return null;
 
             return _mapper.Map<ClientDTO>(cliente);
         }
 
-
-        public async Task<ClientDTO> AddAsync(ClientCreationDTO clienteCreacionDTO)
+        // ✅ CREATE
+        public async Task<ClientDTO> AddAsync(int storeId, ClientCreationDTO clienteCreacionDTO)
         {
-            // Regla principal
-            if (
-                string.IsNullOrWhiteSpace(clienteCreacionDTO.Name) &&
+            // 🔥 Regla principal
+            if (string.IsNullOrWhiteSpace(clienteCreacionDTO.Name) &&
                 string.IsNullOrWhiteSpace(clienteCreacionDTO.Email) &&
-                string.IsNullOrWhiteSpace(clienteCreacionDTO.Phone)
-            )
+                string.IsNullOrWhiteSpace(clienteCreacionDTO.Phone))
             {
                 throw new ArgumentException(
-                    "Debe ingresar al menos Nombre, Email o Teléfono"
-                );
+                    "Debe ingresar al menos Nombre, Email o Teléfono");
             }
 
+            // 🔒 Validaciones por Store
             if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Name))
             {
-                var existeNombre = await _clientRepository.ExistsByNombreAsync(clienteCreacionDTO.Name);
+                var existeNombre = await _clientRepository
+                    .ExistsByNombreAsync(clienteCreacionDTO.Name, storeId);
+
                 if (existeNombre)
                     throw new InvalidOperationException("El nombre del cliente ya existe");
             }
 
             if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Email))
             {
-                var existeEmail = await _clientRepository.ExistsByEmailAsync(clienteCreacionDTO.Email);
+                var existeEmail = await _clientRepository
+                    .ExistsByEmailAsync(clienteCreacionDTO.Email, storeId);
+
                 if (existeEmail)
                     throw new InvalidOperationException("El email ya está registrado");
             }
 
             if (!string.IsNullOrWhiteSpace(clienteCreacionDTO.Phone))
             {
-                var existePhone = await _clientRepository.ExistsByPhoneAsync(clienteCreacionDTO.Phone);
+                var existePhone = await _clientRepository
+                    .ExistsByPhoneAsync(clienteCreacionDTO.Phone, storeId);
+
                 if (existePhone)
                     throw new InvalidOperationException("El teléfono ya está registrado");
             }
 
             var cliente = _mapper.Map<Client>(clienteCreacionDTO);
+
+            // 🔥 CLAVE MULTI-TENANT
+            cliente.StoreId = storeId;
 
             await _unitOfWork.Clients.AddAsync(cliente);
             await _unitOfWork.SaveChangesAsync();
@@ -85,10 +94,10 @@ namespace APICalculos.Application.Services
             return _mapper.Map<ClientDTO>(cliente);
         }
 
-
-        public async Task UpdateAsync(int id, ClientUpdateDTO clienteUpdateDTO)
+        // ✅ UPDATE
+        public async Task UpdateAsync(int id, int storeId, ClientUpdateDTO clienteUpdateDTO)
         {
-            var clienteDB = await _clientRepository.GetByIdAsync(id);
+            var clienteDB = await _clientRepository.GetByIdAsync(id, storeId);
 
             if (clienteDB == null)
                 throw new KeyNotFoundException("Cliente no encontrado");
@@ -105,7 +114,6 @@ namespace APICalculos.Application.Services
             if (clienteUpdateDTO.Phone != null)
                 clienteDB.Phone = clienteUpdateDTO.Phone;
 
-            // ✅ FECHA: correcto
             if (clienteUpdateDTO.DateBirth.HasValue)
                 clienteDB.DateBirth = clienteUpdateDTO.DateBirth.Value;
 
@@ -113,10 +121,11 @@ namespace APICalculos.Application.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-
-        public async Task DeleteAsync(int id)
+        // ✅ DELETE
+        public async Task DeleteAsync(int id, int storeId)
         {
-            var clienteDB = await _clientRepository.GetByIdAsync(id);
+            var clienteDB = await _clientRepository.GetByIdAsync(id, storeId);
+
             if (clienteDB == null)
                 throw new KeyNotFoundException("Cliente no encontrado");
 
@@ -125,22 +134,24 @@ namespace APICalculos.Application.Services
                 _clientRepository.Remove(clienteDB);
                 await _unitOfWork.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            catch (DbUpdateException ex)
+                when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
             {
-                throw new InvalidOperationException("No se puede eliminar este cliente porque está asociado a una venta.");
+                throw new InvalidOperationException(
+                    "No se puede eliminar este cliente porque está asociado a una venta.");
             }
         }
 
-        public async Task<List<ClientSearchDTO>> SearchClientsAsync(string query)
+        // ✅ SEARCH
+        public async Task<List<ClientSearchDTO>> SearchClientsAsync(int storeId, string query)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return new List<ClientSearchDTO>();
 
-            var clients = await _clientRepository.SearchAsync(query.Trim(), 15);
+            var clients = await _clientRepository
+                .SearchAsync(query.Trim(), 15, storeId);
 
             return _mapper.Map<List<ClientSearchDTO>>(clients);
         }
-
-
     }
 }

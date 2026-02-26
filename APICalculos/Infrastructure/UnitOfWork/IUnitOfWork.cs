@@ -14,6 +14,10 @@ namespace APICalculos.Infrastructure.UnitOfWork
         IExpensesRepository Expenses { get; }
         ISaleDetailRepository SaleDetail { get; }
         ISaleRepository Sale { get; }
+        IStoreRepository Stores { get; }
+        public IUserRepository Users { get; }
+
+
         Task<int> SaveChangesAsync();
     }
 }

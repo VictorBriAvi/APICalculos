@@ -1,4 +1,4 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.SaleDetail;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.UnitOfWork;
@@ -8,120 +8,104 @@ namespace APICalculos.Application.Services
 {
     public class SaleDetailService : ISaleDetailService
     {
-        private readonly ISaleDetailRepository _saleDetailRepository;
-        private readonly ISaleRepository _saleRepository;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IServiceTypeService _serviceTypeService;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public SaleDetailService(ISaleDetailRepository saleDetailRepository, IMapper mapper, IUnitOfWork unitOfWork, IServiceTypeService serviceTypeService, ISaleRepository saleRepository)
+        public SaleDetailService(
+            IUnitOfWork unitOfWork,
+            IServiceTypeService serviceTypeService,
+            IMapper mapper)
         {
-            _saleDetailRepository = saleDetailRepository;
-            _saleRepository = saleRepository;
+            _unitOfWork = unitOfWork;
             _serviceTypeService = serviceTypeService;
             _mapper = mapper;
-            _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<SaleDetailDTO>> GetAllSaleDetailAsync()
+        public async Task<List<SaleDetailDTO>> GetAllSaleDetailAsync(int storeId)
         {
-            var salesDetails = await _saleDetailRepository.GetAllAsync();
+            var salesDetails = await _unitOfWork.SaleDetail.GetAllAsync(storeId);
             return _mapper.Map<List<SaleDetailDTO>>(salesDetails);
         }
 
-        public async Task<SaleDetailDTO> GetSaleDetailForId (int id)
+        public async Task<SaleDetailDTO> GetSaleDetailForId(int id, int storeId)
         {
-            var saleDetail = await _saleDetailRepository.GetByIdAsync(id);
-            
-            if(saleDetail == null)
+            var saleDetail = await _unitOfWork.SaleDetail.GetByIdAsync(id, storeId);
+
+            if (saleDetail == null)
                 return null;
 
             return _mapper.Map<SaleDetailDTO>(saleDetail);
         }
 
-        public async Task<SaleDetailDTO> AddSaleDetailAsync(SaleDetailCreationDTO saleDetailCreationDTO)
+        public async Task<SaleDetailDTO> AddSaleDetailAsync(SaleDetailCreationDTO dto, int storeId)
         {
-            var saleDetail = _mapper.Map<SaleDetail>(saleDetailCreationDTO);
+            var saleDetail = _mapper.Map<SaleDetail>(dto);
+            saleDetail.StoreId = storeId;
+
             await _unitOfWork.SaleDetail.AddAsync(saleDetail);
             await _unitOfWork.SaveChangesAsync();
 
-            // 🔹 Recalcular total automáticamente
-            var total = await CalculateTotalAmountAsync(saleDetail.SaleId);
-            var sale = await _unitOfWork.Sale.GetByIdAsync(saleDetail.SaleId);
+            await RecalculateSaleTotalAsync(saleDetail.SaleId, storeId);
 
-            if (sale == null)
-                throw new KeyNotFoundException("Venta no encontrada.");
-
-            sale.TotalAmount = total;
-
-            // 🔸 No hagas Update(sale)
-            await _unitOfWork.SaveChangesAsync();
-
-             return _mapper.Map<SaleDetailDTO>(saleDetail);
+            return _mapper.Map<SaleDetailDTO>(saleDetail);
         }
 
-
-        public async Task UpdateSaleDetailAsync(int id, SaleDetailCreationDTO saleDetailCreationDTO)
+        public async Task UpdateSaleDetailAsync(int id, SaleDetailCreationDTO dto, int storeId)
         {
-            var saleDetailDB = await _saleDetailRepository.GetByIdAsync(id);
+            var saleDetailDB = await _unitOfWork.SaleDetail.GetByIdAsync(id, storeId);
+
             if (saleDetailDB == null)
                 throw new KeyNotFoundException("Detalle Venta no encontrado.");
 
-            // Actualizar ServiceType solo si se envió un cambio
-            if (saleDetailCreationDTO.ServiceTypeId > 0 && saleDetailCreationDTO.ServiceTypeId != saleDetailDB.ServiceTypeId)
+            if (dto.ServiceTypeId > 0 && dto.ServiceTypeId != saleDetailDB.ServiceTypeId)
             {
-                var serviceTypeDB = await _serviceTypeService.GetServiceTypeForId(saleDetailCreationDTO.ServiceTypeId);
-                if (serviceTypeDB == null)
-                    throw new KeyNotFoundException("Tipo de servicio no encontrado.");
+                var serviceTypeDB = await _serviceTypeService.GetServiceTypeForId(dto.ServiceTypeId, storeId);
 
                 saleDetailDB.ServiceType = null;
                 saleDetailDB.ServiceTypeId = serviceTypeDB.Id;
                 saleDetailDB.UnitPrice = serviceTypeDB.Price;
             }
 
-            // Actualizar Employee solo si se envió un cambio
-            if (saleDetailCreationDTO.EmployeeId > 0 && saleDetailCreationDTO.EmployeeId != saleDetailDB.EmployeeId)
+            if (dto.EmployeeId > 0)
             {
                 saleDetailDB.Employee = null;
-                saleDetailDB.EmployeeId = saleDetailCreationDTO.EmployeeId;
+                saleDetailDB.EmployeeId = dto.EmployeeId;
             }
 
-            // Ediciones parciales de valores numéricos
-            if (saleDetailCreationDTO.DiscountPercent >= 0)
-                saleDetailDB.DiscountPercent = saleDetailCreationDTO.DiscountPercent;
+            saleDetailDB.DiscountPercent = dto.DiscountPercent;
+            saleDetailDB.AdditionalCharge = dto.AdditionalCharge;
 
-            if (saleDetailCreationDTO.AdditionalCharge >= 0)
-                saleDetailDB.AdditionalCharge = saleDetailCreationDTO.AdditionalCharge;
-
-            _saleDetailRepository.Update(saleDetailDB);
+            _unitOfWork.SaleDetail.Update(saleDetailDB);
             await _unitOfWork.SaveChangesAsync();
 
-            // 🔹 Recalcular total automáticamente (mismo patrón que en Add)
-            var total = await CalculateTotalAmountAsync(saleDetailDB.SaleId);
-            var sale = await _unitOfWork.Sale.GetByIdAsync(saleDetailDB.SaleId);
-
-            if (sale == null)
-                throw new KeyNotFoundException("Venta no encontrada.");
-
-            sale.TotalAmount = total;
-            await _unitOfWork.SaveChangesAsync();
+            await RecalculateSaleTotalAsync(saleDetailDB.SaleId, storeId);
         }
 
-        public async Task DeleteSaleDetailAsync(int id)
+        public async Task DeleteSaleDetailAsync(int id, int storeId)
         {
-            var saleDetailDB = await _saleDetailRepository.GetByIdAsync(id);
+            var saleDetailDB = await _unitOfWork.SaleDetail.GetByIdAsync(id, storeId);
+
             if (saleDetailDB == null)
                 throw new KeyNotFoundException("Detalle Venta no encontrado.");
 
             int saleId = saleDetailDB.SaleId;
 
-            // 🔸 Eliminación lógica o física según tu diseño
-            _saleDetailRepository.Remove(saleDetailDB);
+            _unitOfWork.SaleDetail.Remove(saleDetailDB);
             await _unitOfWork.SaveChangesAsync();
 
-            // 🔹 Recalcular total automáticamente
-            var total = await CalculateTotalAmountAsync(saleId);
-            var sale = await _unitOfWork.Sale.GetByIdAsync(saleId);
+            await RecalculateSaleTotalAsync(saleId, storeId);
+        }
+
+        private async Task RecalculateSaleTotalAsync(int saleId, int storeId)
+        {
+            var saleDetails = await _unitOfWork.SaleDetail.GetBySaleIdAsync(saleId, storeId);
+
+            var total = saleDetails.Sum(d =>
+                (d.UnitPrice + d.AdditionalCharge) * (1 - (d.DiscountPercent / 100))
+            );
+
+            var sale = await _unitOfWork.Sale.GetByIdAsync(saleId, storeId);
 
             if (sale == null)
                 throw new KeyNotFoundException("Venta no encontrada.");
@@ -129,22 +113,5 @@ namespace APICalculos.Application.Services
             sale.TotalAmount = total;
             await _unitOfWork.SaveChangesAsync();
         }
-
-
-
-        #region funciones 
-        private async Task<decimal> CalculateTotalAmountAsync(int saleId)
-        {
-            var saleDetails = await _unitOfWork.SaleDetail.GetBySaleIdAsync(saleId);
-
-            if (saleDetails == null || !saleDetails.Any())
-                return 0;
-
-            return saleDetails.Sum(d =>
-                (d.UnitPrice + d.AdditionalCharge) * (1 - (d.DiscountPercent / 100))
-            );
-        }
-
-        #endregion
     }
 }

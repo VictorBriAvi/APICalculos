@@ -5,13 +5,13 @@ namespace APICalculos.Application.Interfaces
 {
     public interface IEmployeeRepository
     {
-        Task<IEnumerable<Employee>> GetAllAsync(string? search);
-        Task<Employee> GetByIdAsync(int id);
+        Task<IEnumerable<Employee>> GetAllAsync(int storeId, string? search);
+        Task<Employee?> GetByIdAsync(int id, int storeId);
         Task AddAsync(Employee employee);
-        void Remove(Employee employee);
         void Update(Employee employee);
-        Task<bool> ExistsByNameAsync(string name);
-        Task<List<Employee>> SearchAsync(string query, int limit);
+        void Remove(Employee employee);
+        Task<bool> ExistsByNameAsync(string name, int storeId);
+        Task<List<Employee>> SearchAsync(int storeId, string query, int limit);
 
     }
 }

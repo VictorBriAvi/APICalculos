@@ -8,9 +8,10 @@ namespace APICalculos.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Rol> builder)
         {
-            builder.Property(prop => prop.NombreRol)
+            builder.Property(r => r.Name)
                 .HasMaxLength(100)
                 .IsRequired();
         }
     }
+
 }

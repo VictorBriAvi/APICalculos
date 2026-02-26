@@ -1,128 +1,87 @@
 ﻿using APICalculos.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
     [Route("api/report")]
-    public class FinancialReportController : ControllerBase
+    [Authorize]
+    public class FinancialReportController : BaseController
     {
-        private readonly IFinancialReportService _financialReportService;
+        private readonly IFinancialReportService _service;
 
-        public FinancialReportController(IFinancialReportService financialReportService)
+        public FinancialReportController(IFinancialReportService service)
         {
-            _financialReportService = financialReportService;
+            _service = service;
         }
 
-        /// <summary>
-        /// Obtiene el resumen financiero (ventas, pagos y gastos)
-        /// </summary>
-        /// <param name="fromDate">Fecha de inicio (opcional)</param>
-        /// <param name="toDate">Fecha de fin (opcional)</param>
-        /// <returns>Totales de ventas, pagos y gastos</returns>
+        // =========================================
+        // SUMMARY
+        // =========================================
         [HttpGet("summary")]
-        public async Task<IActionResult> GetFinancialSummary([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        public async Task<IActionResult> GetFinancialSummary(DateTime? fromDate, DateTime? toDate)
         {
-            try
-            {
-                var result = await _financialReportService.GetFinancialSummaryAsync(fromDate, toDate);
-
-                return Ok(new
-                {
-
-                    data = result
-                });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                // 🔥 Nunca expongas excepciones internas en producción
-                return StatusCode(500, new { success = false, message = "Error interno del servidor", error = ex.Message });
-            }
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetFinancialSummaryAsync(storeId, fromDate, toDate);
+            return Ok(result);
         }
 
+        // =========================================
+        // DAILY SUMMARY
+        // =========================================
         [HttpGet("daily-summary")]
-        public async Task<IActionResult> GetDailyFinancialSummary([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        public async Task<IActionResult> GetDailyFinancialSummary(DateTime fromDate, DateTime toDate)
         {
-            try
-            {
-                var result = await _financialReportService.GetDailyFinancialSummaryAsync(fromDate, toDate);
-                return Ok(new
-                {
-                    success = true,
-                    message = "Resumen diario obtenido correctamente",
-                    data = result
-                });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { success = false, message = "Error interno del servidor", error = ex.Message });
-            }
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetDailyFinancialSummaryAsync(storeId, fromDate, toDate);
+            return Ok(result);
         }
 
+        // =========================================
+        // EMPLOYEE SALES SUMMARY
+        // =========================================
         [HttpGet("employee-sales-summary")]
-        public async Task<IActionResult> GetEmployeeSalesSummary([FromQuery] DateTime fromDate, [FromQuery] DateTime toDate)
+        public async Task<IActionResult> GetEmployeeSalesSummary(DateTime fromDate, DateTime toDate)
         {
-            var result = await _financialReportService.GetEmployeeSalesSummaryAsync(fromDate, toDate);
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetEmployeeSalesSummaryAsync(storeId, fromDate, toDate);
             return Ok(result);
         }
 
+        // =========================================
+        // SALES BY PAYMENT
+        // =========================================
         [HttpGet("sales-by-payment")]
-        public async Task<IActionResult> GetSalesByPaymentReport([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        public async Task<IActionResult> GetSalesByPaymentReport(DateTime startDate, DateTime endDate)
         {
-            var report = await _financialReportService.GetSalesReportByPaymentTypeAsync(startDate, endDate);
-            return Ok(report);
-        }
-
-        [HttpGet("payment-type-balance")]
-        public async Task<IActionResult> GetPaymentTypeBalance(
-            [FromQuery] DateTime startDate,
-            [FromQuery] DateTime endDate)
-        {
-            var result = await _financialReportService
-                .GetPaymentTypeBalanceAsync(startDate, endDate);
-
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetSalesReportByPaymentTypeAsync(storeId, startDate, endDate);
             return Ok(result);
         }
 
-
-        [HttpGet("expenses-by-category")]
-        public async Task<IActionResult> GetExpensesByCategory([FromQuery] DateTime? fromDate, [FromQuery] DateTime? toDate)
+        // =========================================
+        // PAYMENT TYPE BALANCE
+        // =========================================
+        [HttpGet("payment-type-balance")]
+        public async Task<IActionResult> GetPaymentTypeBalance(DateTime startDate, DateTime endDate)
         {
-            try
-            {
-                var result = await _financialReportService.GetExpensesByCategoryAsync(fromDate, toDate);
-
-                return Ok(new
-                {
-                    success = true,
-                    message = "Reporte de gastos por categoría obtenido correctamente",
-                    data = result
-                });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(new { success = false, message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    success = false,
-                    message = "Error interno del servidor",
-                    error = ex.Message
-                });
-            }
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetPaymentTypeBalanceAsync(storeId, startDate, endDate);
+            return Ok(result);
         }
 
-
-
+        // =========================================
+        // EXPENSES BY CATEGORY
+        // =========================================
+        [HttpGet("expenses-by-category")]
+        public async Task<IActionResult> GetExpensesByCategory(DateTime? fromDate, DateTime? toDate)
+        {
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetExpensesByCategoryAsync(storeId, fromDate, toDate);
+            return Ok(result);
+        }
     }
 }

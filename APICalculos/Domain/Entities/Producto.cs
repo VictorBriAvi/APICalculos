@@ -1,4 +1,6 @@
-﻿namespace APICalculos.Domain.Entidades
+﻿using APICalculos.Domain.Entities;
+
+namespace APICalculos.Domain.Entidades
 {
     public class Producto
     {
@@ -8,5 +10,10 @@
         public string DescripcionProducto { get; set; }
         public decimal PrecioProducto { get; set; }
         public int Stock { get; set; }
+
+        public int? StoreId { get; set; }
+        public Store? Store { get; set; }
+
+
     }
 }

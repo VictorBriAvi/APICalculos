@@ -1,4 +1,6 @@
-﻿namespace APICalculos.Domain.Entidades
+﻿using APICalculos.Domain.Entities;
+
+namespace APICalculos.Domain.Entidades
 {
     public class ServiceCategorie
     {
@@ -7,5 +9,10 @@
         public string Name { get; set; }
 
         public ICollection<ServiceType> ServiceTypes { get; set; }
+
+        public int? StoreId { get; set; }
+        public Store? Store { get; set; }
+
+
     }
 }

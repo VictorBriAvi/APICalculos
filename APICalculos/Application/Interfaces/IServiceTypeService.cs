@@ -1,20 +1,33 @@
-﻿using APICalculos.Application.DTOs;
-using APICalculos.Application.DTOs.Services;
+﻿using APICalculos.Application.DTOs.Services;
 
 namespace APICalculos.Application.Interfaces
 {
     public interface IServiceTypeService
     {
         Task<List<ServiceTypeDTO>> GetAllServiceTypesAsync(
-                    string? search,
-                    int? serviceCategorieId
-                );
-        Task<List<ServiceTypeDTO>> SearchServicesAsync(int? categoryId = null);
-        Task<ServiceTypeDTO> GetServiceTypeForId(int id);
-        Task<ServiceTypeDTO> AddServiceTypeAsync(ServiceTypeCreationDTO serviceTypeCreationDTO);
-        Task UpdateServiceTypeAsync(int id, ServiceTypeCreationDTO serviceTypeCreationDTO);
-        Task DeleteServiceTypeAsync(int Id);
-        Task<List<ServicesSearchDTO>> SearchServiceAsync(string query);
+            int storeId,
+            string? search,
+            int? serviceCategorieId);
 
+        Task<ServiceTypeDTO?> GetServiceTypeForId(int id, int storeId);
+
+        Task<List<ServiceTypeDTO>> SearchServicesAsync(
+            int storeId,
+            int? categoryId = null);
+
+        Task<ServiceTypeDTO> AddServiceTypeAsync(
+            int storeId,
+            ServiceTypeCreationDTO dto);
+
+        Task UpdateServiceTypeAsync(
+            int id,
+            int storeId,
+            ServiceTypeCreationDTO dto);
+
+        Task DeleteServiceTypeAsync(int id, int storeId);
+
+        Task<List<ServicesSearchDTO>> SearchServiceAsync(
+            int storeId,
+            string query);
     }
 }

@@ -8,6 +8,12 @@ namespace APICalculos.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Employee> builder)
         {
+            builder.HasOne(e => e.Store)
+                .WithMany()
+                .HasForeignKey(e => e.StoreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.StoreId);
             builder.Property(prop => prop.Name)
                 .HasMaxLength(100)
                 .IsRequired();

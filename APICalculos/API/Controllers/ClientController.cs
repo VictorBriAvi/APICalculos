@@ -1,14 +1,14 @@
-﻿using APICalculos.Application.DTOs;
-using APICalculos.Application.DTOs.Client;
+﻿using APICalculos.Application.DTOs.Client;
 using APICalculos.Application.Interfaces;
-using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
     [Route("api/client")]
-    public class ClientController : ControllerBase
+    public class ClientController : BaseController
     {
         private readonly IClientService _clientService;
 
@@ -17,84 +17,45 @@ namespace APICalculos.API.Controllers
             _clientService = clientService;
         }
 
-
-
-
         [HttpGet]
         public async Task<ActionResult<List<ClientDTO>>> ObtenerClientes([FromQuery] string? search)
         {
-            var clientDto = await _clientService.GetAllClientsAsync(search);
-
+            var storeId = GetStoreIdFromToken();
+            var clientDto = await _clientService.GetAllClientsAsync(storeId, search);
             return Ok(clientDto);
         }
 
         [HttpGet("{id:int}")]
         public async Task<IActionResult> BuscarClienteId(int id)
         {
-            var clienteDto = await _clientService.GetClientForIdAsync(id);
-            if (clienteDto == null)
-                return NotFound($"No se encontró el cliente con ID {id}");
-
+            var storeId = GetStoreIdFromToken();
+            var clienteDto = await _clientService.GetClientForIdAsync(id, storeId);
+            if (clienteDto == null) return NotFound($"No se encontró el cliente con ID {id}");
             return Ok(clienteDto);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ClientDTO>> Post(ClientCreationDTO clienteCreacionDTO)
+        public async Task<ActionResult<ClientDTO>> Post(ClientCreationDTO dto)
         {
-            try
-            {
-                var clienteDTO = await _clientService.AddAsync(clienteCreacionDTO);
-                return Ok(clienteDTO);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            var storeId = GetStoreIdFromToken();
+            var clienteDTO = await _clientService.AddAsync(storeId, dto);
+            return Ok(clienteDTO);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, ClientUpdateDTO clienteUpdateDTO)
+        public async Task<IActionResult> Put(int id, ClientUpdateDTO dto)
         {
-            try
-            {
-                await _clientService.UpdateAsync(id, clienteUpdateDTO);
-                return Ok("Se modificó exitosamente");
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound("Cliente no encontrado");
-            }
+            var storeId = GetStoreIdFromToken();
+            await _clientService.UpdateAsync(id, storeId, dto);
+            return Ok("Se modificó exitosamente");
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                await _clientService.DeleteAsync(id);
-                return Ok("Se ha eliminado el cliente");
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound("Tipo de pago no encontrado");
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message); // 409
-            }
+            var storeId = GetStoreIdFromToken();
+            await _clientService.DeleteAsync(id, storeId);
+            return Ok("Se ha eliminado el cliente");
         }
-
-        [HttpGet("search")]
-        public async Task<ActionResult<List<ClientSearchDTO>>> SearchClients(
-    [FromQuery] string query)
-        {
-            var result = await _clientService.SearchClientsAsync(query);
-            return Ok(result);
-        }
-
     }
 }

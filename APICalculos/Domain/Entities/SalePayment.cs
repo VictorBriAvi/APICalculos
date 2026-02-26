@@ -14,5 +14,10 @@ namespace APICalculos.Domain.Entities
 
         public Sale Sale { get; set; }
         public PaymentTypes PaymentType { get; set; }
+
+        public int? StoreId { get; set; }
+        public Store? Store { get; set; }
+
+
     }
 }

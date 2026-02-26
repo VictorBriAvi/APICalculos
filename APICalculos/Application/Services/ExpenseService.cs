@@ -1,5 +1,5 @@
-﻿using APICalculos.Application.DTOs;
-using APICalculos.Application.DTOs.Employee;
+﻿using APICalculos.Application.DTOs.Employee;
+using APICalculos.Application.DTOs.Expense;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.UnitOfWork;
@@ -15,7 +15,10 @@ namespace APICalculos.Application.Services
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public ExpenseService(IExpensesRepository expensesRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public ExpenseService(
+            IExpensesRepository expensesRepository,
+            IMapper mapper,
+            IUnitOfWork unitOfWork)
         {
             _expensesRepository = expensesRepository;
             _mapper = mapper;
@@ -23,6 +26,7 @@ namespace APICalculos.Application.Services
         }
 
         public async Task<List<ExpenseDTO>> GetAllExpenseAsync(
+            int storeId,
             string? search,
             int? expenseTypeId,
             int? paymentTypeId,
@@ -34,6 +38,7 @@ namespace APICalculos.Application.Services
                 throw new ArgumentException("La fecha desde no puede ser mayor a la fecha hasta.");
 
             var expenses = await _expensesRepository.GetAllAsync(
+                storeId,
                 search,
                 expenseTypeId,
                 paymentTypeId,
@@ -44,27 +49,30 @@ namespace APICalculos.Application.Services
             return _mapper.Map<List<ExpenseDTO>>(expenses);
         }
 
-
-
-        public async Task<ExpenseDTO> GetExpenseForIdAsync (int id)
+        public async Task<ExpenseDTO?> GetExpenseForIdAsync(int id, int storeId)
         {
-            var expense = await _expensesRepository.GetByIdAsync(id);
+            var expense =
+                await _expensesRepository.GetByIdAsync(id, storeId);
+
             if (expense == null)
-            {
                 return null;
-            }
+
             return _mapper.Map<ExpenseDTO>(expense);
         }
 
-        public async Task<ExpenseDTO> AddExpensesAsync(ExpenseCreationDTO dto)
+        public async Task<ExpenseDTO> AddExpensesAsync(
+            int storeId,
+            ExpenseCreationDTO dto)
         {
             if (dto.ExpenseDate == default)
                 throw new ArgumentException("La fecha del gasto es obligatoria.");
 
             if (dto.ExpenseDate > DateTime.UtcNow)
-                throw new ArgumentException("La fecha del gasto no puede ser futura.");
+                throw new ArgumentException("La fecha no puede ser futura.");
 
             var expense = _mapper.Map<Expenses>(dto);
+
+            expense.StoreId = storeId;
 
             await _unitOfWork.Expenses.AddAsync(expense);
             await _unitOfWork.SaveChangesAsync();
@@ -72,56 +80,53 @@ namespace APICalculos.Application.Services
             return _mapper.Map<ExpenseDTO>(expense);
         }
 
-
-        public async Task UpdateExpenseAsync (int id, ExpenseCreationDTO expenseCreationDTO)
+        public async Task UpdateExpenseAsync(
+            int id,
+            int storeId,
+            ExpenseCreationDTO dto)
         {
-            var expenseDB = await _expensesRepository.GetByIdAsync(id);
+            var expenseDB =
+                await _expensesRepository.GetByIdAsync(id, storeId);
+
             if (expenseDB == null)
-            {
                 throw new KeyNotFoundException("Gasto no encontrado");
-            }
 
-            if (!string.IsNullOrWhiteSpace(expenseCreationDTO.Description))
-                expenseDB.Description = expenseCreationDTO.Description;
+            if (!string.IsNullOrWhiteSpace(dto.Description))
+                expenseDB.Description = dto.Description;
 
-            if (!string.IsNullOrWhiteSpace(expenseCreationDTO.Price.ToString()))
-                expenseDB.Price = expenseCreationDTO.Price;
+            if (dto.Price > 0)
+                expenseDB.Price = dto.Price;
 
-            if (expenseCreationDTO.ExpenseTypeId != 0)
+            if (dto.ExpenseTypeId != 0)
             {
-                expenseDB.ExpenseType= null;
-                expenseDB.ExpenseTypeId = expenseCreationDTO.ExpenseTypeId;
+                expenseDB.ExpenseType = null;
+                expenseDB.ExpenseTypeId = dto.ExpenseTypeId;
             }
 
-            if (expenseCreationDTO.PaymentTypeId != 0)
+            if (dto.PaymentTypeId != 0)
             {
-                expenseDB.PaymentType= null;
-                expenseDB.PaymentTypeId = expenseCreationDTO.PaymentTypeId;
+                expenseDB.PaymentType = null;
+                expenseDB.PaymentTypeId = dto.PaymentTypeId;
             }
 
-            if (expenseCreationDTO.ExpenseDate != default)
-                expenseDB.ExpenseDate = expenseCreationDTO.ExpenseDate;
-
+            if (dto.ExpenseDate != default)
+                expenseDB.ExpenseDate = dto.ExpenseDate;
 
             _expensesRepository.Update(expenseDB);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task DeleteExpenseAsync(int id)
+        public async Task DeleteExpenseAsync(int id, int storeId)
         {
-            var expenseDB = await _expensesRepository.GetByIdAsync(id);
-            if (expenseDB == null)
-                throw new KeyNotFoundException("Tipo de pago no encontrado");
+            var expenseDB =
+                await _expensesRepository.GetByIdAsync(id, storeId);
 
-            try
-            {
-                _expensesRepository.Remove(expenseDB);
-                await _unitOfWork.SaveChangesAsync();
-            }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
-            {
-                throw new InvalidOperationException("No se puede eliminar este gasto porque está asociado a una venta.");
-            }
+            if (expenseDB == null)
+                throw new KeyNotFoundException("Gasto no encontrado");
+
+            _expensesRepository.Remove(expenseDB);
+            await _unitOfWork.SaveChangesAsync();
         }
     }
+
 }

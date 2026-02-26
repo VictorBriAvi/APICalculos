@@ -23,7 +23,12 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 
+            builder.HasOne(e => e.Store)
+    .WithMany()
+    .HasForeignKey(e => e.StoreId)
+    .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasIndex(e => e.StoreId);
         }
     }
 }

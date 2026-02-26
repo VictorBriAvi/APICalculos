@@ -1,50 +1,56 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.CustomerHistory;
 using APICalculos.Application.Interfaces;
-using APICalculos.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
     [Route("api/customerHistory")]
-    public class CustomerHistoryController : ControllerBase
+    public class CustomerHistoryController : BaseController
     {
-        private readonly ICustomerHistoryService _customerHistoryService;
+        private readonly ICustomerHistoryService _service;
 
-        public CustomerHistoryController(ICustomerHistoryService customerHistoryService)
+        public CustomerHistoryController(ICustomerHistoryService service)
         {
-            _customerHistoryService = customerHistoryService;
+            _service = service;
         }
 
+        // ✅ GET ALL
         [HttpGet]
-        public async Task<ActionResult<List<CustomerHistoryDTO>>> GetAllCustomerHistoryAsync()
+        public async Task<ActionResult<List<CustomerHistoryDTO>>> GetAll()
         {
-            var customerHistoriesDto = await _customerHistoryService.GetAllCustomerHistoriesAsync();
-            return Ok(customerHistoriesDto);
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetAllCustomerHistoriesAsync(storeId);
+            return Ok(result);
         }
 
+        // ✅ GET BY ID
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetCustomerHistoryForId(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var customerHistoryDto = await _customerHistoryService.GetCustomerHistoryForId(id);
+            var storeId = GetStoreIdFromToken();
+            var result = await _service.GetCustomerHistoryForId(id, storeId);
 
-            if (customerHistoryDto == null)
-                return NotFound($"No se encontro el tipo de servicio con el ID {id}");
+            if (result == null)
+                return NotFound($"No se encontró el historial con ID {id}");
 
-            return Ok(customerHistoryDto);
+            return Ok(result);
         }
 
+        // ✅ CREATE
         [HttpPost]
-        public async Task<IActionResult> Post(CustomerHistoryCreationDTO customerHistoryCreationDTO)
+        public async Task<IActionResult> Create([FromBody] CustomerHistoryCreationDTO dto)
         {
             try
             {
-                var customerHistoryDto = await _customerHistoryService.AddCustomerHistoryAsync(customerHistoryCreationDTO);
-                return Ok(customerHistoryDto);
+                var storeId = GetStoreIdFromToken();
+                var result = await _service.AddCustomerHistoryAsync(storeId, dto);
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
-
                 return BadRequest(ex.Message);
             }
             catch (InvalidOperationException ex)
@@ -53,34 +59,36 @@ namespace APICalculos.API.Controllers
             }
         }
 
+        // ✅ UPDATE
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, CustomerHistoryUpdateDTO customerHistoryCreationDTO)
+        public async Task<IActionResult> Update(int id, [FromBody] CustomerHistoryUpdateDTO dto)
         {
             try
             {
-                await _customerHistoryService.UpdateCustomerHistoryAsync(id, customerHistoryCreationDTO);
-                return Ok("Se modifico exitosamente");
+                var storeId = GetStoreIdFromToken();
+                await _service.UpdateCustomerHistoryAsync(id, storeId, dto);
+                return Ok("Historial actualizado correctamente");
             }
             catch (KeyNotFoundException)
             {
-
-                return NotFound("Tipo de servicio no encontrado");
+                return NotFound("Historial no encontrado");
             }
         }
 
+        // ✅ DELETE
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
             try
             {
-                await _customerHistoryService.DeleteCustomerHistoriesAsync(id);
-                return Ok("Se ha eliminado el tipo de servicio");
+                var storeId = GetStoreIdFromToken();
+                await _service.DeleteCustomerHistoriesAsync(id, storeId);
+                return Ok("Historial eliminado correctamente");
             }
             catch (KeyNotFoundException)
             {
-                return NotFound("Tipo de servicio no encontrado");
+                return NotFound("Historial no encontrado");
             }
         }
-
     }
 }

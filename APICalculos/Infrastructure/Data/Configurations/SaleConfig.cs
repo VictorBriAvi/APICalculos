@@ -35,6 +35,13 @@ namespace APICalculos.Infrastructure.Data.Configurations
 
             builder.Property(v => v.IsDeleted)
                 .HasDefaultValue(false);
+
+            builder.HasOne(e => e.Store)
+    .WithMany()
+    .HasForeignKey(e => e.StoreId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.StoreId);
         }
     }
 

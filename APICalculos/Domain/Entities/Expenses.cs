@@ -1,4 +1,6 @@
-﻿namespace APICalculos.Domain.Entidades
+﻿using APICalculos.Domain.Entities;
+
+namespace APICalculos.Domain.Entidades
 {
     public class Expenses
     {
@@ -13,5 +15,9 @@
 
         public int PaymentTypeId { get; set; }
         public PaymentTypes PaymentType { get; set; }
+
+        public int? StoreId { get; set; }
+        public Store? Store { get; set; }
+
     }
 }

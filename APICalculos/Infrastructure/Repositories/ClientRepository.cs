@@ -1,5 +1,6 @@
 ﻿using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
+using APICalculos.Domain.Entities;
 using APICalculos.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,24 +17,28 @@ namespace APICalculos.Infrastructure.Repositories
 
         }
 
-        public async Task<IEnumerable<Client>> GetAllAsync(string? search)
+        public async Task<IEnumerable<Client>> GetAllAsync(int storeId, string? search)
         {
-            var query = _dbContext.Clients.AsNoTracking();
+            var query = _dbContext.Clients
+                .AsNoTracking()
+                .Where(c => c.StoreId == storeId);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var normalizedSearch = search.Trim().ToLower();
-
                 query = query.Where(c => c.Name.ToLower().Contains(normalizedSearch));
             }
 
             return await query.OrderByDescending(x => x.Id).ToListAsync();
         }
 
-        public async Task<Client?> GetByIdAsync(int id)
+        public async Task<Client?> GetByIdAsync(int id, int storeId)
         {
-            return await _dbContext.Clients.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
+            return await _dbContext.Clients
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == id && c.StoreId == storeId);
         }
+
 
 
         public async Task<Client?> GetByDocumentoAsync(string doc)
@@ -57,12 +62,16 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext.Clients.Update(cliente); 
         }
 
-        public async Task<bool> ExistsByNombreAsync(string nombre)
+        public async Task<bool> ExistsByNombreAsync(string nombre, int storeId)
         {
             var nombreNormalizado = nombre.Replace(" ", "").Trim();
+
             return await _dbContext.Clients
-                .AnyAsync(c => c.Name.Replace(" ", "").Trim() == nombreNormalizado);
+                .AnyAsync(c =>
+                    c.StoreId == storeId &&
+                    c.Name.Replace(" ", "").Trim() == nombreNormalizado);
         }
+
 
         public async Task<bool> ExistsByDocumentoAsync(string documento)
         {
@@ -71,7 +80,7 @@ namespace APICalculos.Infrastructure.Repositories
                 .AnyAsync(c => c.IdentityDocument.Replace(" ", "").Trim() == documentoNormalizado);
         }
 
-        public async Task<bool> ExistsByEmailAsync(string email)
+        public async Task<bool> ExistsByEmailAsync(string email, int storeId)
         {
             if (string.IsNullOrWhiteSpace(email))
                 return false;
@@ -81,12 +90,13 @@ namespace APICalculos.Infrastructure.Repositories
             return await _dbContext.Clients
                 .AnyAsync(c =>
                     c.Email != null &&
+                    c.StoreId == storeId &&
                     c.Email.Trim().ToLower() == emailNormalizado
                 );
         }
 
 
-        public async Task<bool> ExistsByPhoneAsync(string phone)
+        public async Task<bool> ExistsByPhoneAsync(string phone, int storeId)
         {
             if (string.IsNullOrWhiteSpace(phone))
                 return false;
@@ -99,6 +109,7 @@ namespace APICalculos.Infrastructure.Repositories
             return await _dbContext.Clients
                 .AnyAsync(c =>
                     c.Phone != null &&
+                    c.StoreId == storeId &&
                     c.Phone
                         .Replace(" ", "")
                         .Replace("-", "")
@@ -107,18 +118,19 @@ namespace APICalculos.Infrastructure.Repositories
         }
 
 
-        public async Task<List<Client>> SearchAsync(string query, int limit)
+        public async Task<List<Client>> SearchAsync(string query, int limit, int storeId)
         {
             return await _dbContext.Clients
                 .AsNoTracking()
                 .Where(c =>
-                    c.Name.Contains(query) ||
-                    c.IdentityDocument.Contains(query)
-                )
+                    c.StoreId == storeId &&
+                    (c.Name.Contains(query) ||
+                     c.IdentityDocument.Contains(query)))
                 .OrderBy(c => c.Name)
                 .Take(limit)
                 .ToListAsync();
         }
+
 
 
     }

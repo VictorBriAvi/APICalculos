@@ -9,6 +9,13 @@ namespace APICalculos.Infrastructure.Data.Configurations
         public void Configure(EntityTypeBuilder<ExpenseType> builder)
         {
             builder.HasKey(t => t.Id);
+
+            builder.HasOne(e => e.Store)
+    .WithMany()
+    .HasForeignKey(e => e.StoreId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.StoreId);
         }
     }
 }

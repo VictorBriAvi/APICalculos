@@ -15,6 +15,7 @@ namespace APICalculos.Infrastructure.Repositories
         }
 
         public async Task<IEnumerable<Expenses>> GetAllAsync(
+            int storeId,
             string? search,
             int? expenseTypeId,
             int? paymentTypeId,
@@ -23,6 +24,7 @@ namespace APICalculos.Infrastructure.Repositories
         )
         {
             IQueryable<Expenses> query = _dbContext.Expenses
+                .Where(e => e.StoreId == storeId)
                 .AsNoTracking()
                 .Include(e => e.ExpenseType)
                 .Include(e => e.PaymentType);
@@ -30,39 +32,35 @@ namespace APICalculos.Infrastructure.Repositories
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var normalizedSearch = search.Trim().ToLower();
-                query = query.Where(e => e.Description.ToLower().Contains(normalizedSearch));
+                query = query.Where(e =>
+                    e.Description.ToLower().Contains(normalizedSearch));
             }
 
             if (expenseTypeId.HasValue)
-            {
                 query = query.Where(e => e.ExpenseTypeId == expenseTypeId.Value);
-            }
 
             if (paymentTypeId.HasValue)
-            {
                 query = query.Where(e => e.PaymentTypeId == paymentTypeId.Value);
-            }
 
             if (fromDate.HasValue)
-            {
                 query = query.Where(e => e.ExpenseDate >= fromDate.Value);
-            }
 
             if (toDate.HasValue)
-            {
                 query = query.Where(e => e.ExpenseDate <= toDate.Value);
-            }
 
             return await query
                 .OrderByDescending(e => e.ExpenseDate)
                 .ToListAsync();
         }
 
-
-
-        public async Task<Expenses> GetByIdAsync(int id)
+        public async Task<Expenses?> GetByIdAsync(int id, int storeId)
         {
-            return await _dbContext.Expenses.Include(st => st.ExpenseType).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Expenses
+                .Include(e => e.ExpenseType)
+                .Include(e => e.PaymentType)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x =>
+                    x.Id == id && x.StoreId == storeId);
         }
 
         public async Task AddAsync(Expenses expense)
@@ -80,10 +78,14 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext.Expenses.Remove(expense);
         }
 
-        public async Task<bool> ExistsByNameAsync(string name)
+        public async Task<bool> ExistsByNameAsync(string name, int storeId)
         {
             var convertName = name.Replace(" ", "").Trim();
-            return await _dbContext.Expenses.AnyAsync(c => c.Description.Replace(" ", "").Trim() == convertName);
+
+            return await _dbContext.Expenses.AnyAsync(c =>
+                c.StoreId == storeId &&
+                c.Description.Replace(" ", "").Trim() == convertName);
         }
     }
+
 }

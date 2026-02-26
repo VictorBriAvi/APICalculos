@@ -1,13 +1,16 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.SaleDetail;
 using APICalculos.Application.Interfaces;
-using APICalculos.Application.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace APICalculos.API.Controllers
 {
     [ApiController]
     [Route("api/saleDetail")]
-    public class SaleDetailController : ControllerBase
+    [Authorize]
+    public class SaleDetailController : BaseController
     {
         private readonly ISaleDetailService _saleDetailService;
 
@@ -16,73 +19,48 @@ namespace APICalculos.API.Controllers
             _saleDetailService = saleDetailService;
         }
 
-
         [HttpGet]
-        public async Task<ActionResult<List<SaleDetailDTO>>> GetAllSaleDetailAsync()
+        public async Task<ActionResult<List<SaleDetailDTO>>> GetAll()
         {
-            var saleDetailDto = await _saleDetailService.GetAllSaleDetailAsync();
-            return Ok(saleDetailDto);
+            var storeId = GetStoreIdFromToken();
+            var result = await _saleDetailService.GetAllSaleDetailAsync(storeId);
+            return Ok(result);
         }
 
         [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetSaleDetailForId(int id)
+        public async Task<IActionResult> GetById(int id)
         {
-            var saleDetailDto = await _saleDetailService.GetSaleDetailForId(id);
+            var storeId = GetStoreIdFromToken();
+            var result = await _saleDetailService.GetSaleDetailForId(id, storeId);
 
-            if (saleDetailDto == null)
-                return NotFound($"No se encontro el tipo de servicio con el ID {id}");
+            if (result == null)
+                return NotFound();
 
-            return Ok(saleDetailDto);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post(SaleDetailCreationDTO saleDetailCreationDTO)
+        public async Task<IActionResult> Post([FromBody] SaleDetailCreationDTO dto)
         {
-            try
-            {
-                var saleDetailDTO = await _saleDetailService.AddSaleDetailAsync(saleDetailCreationDTO);
-                return Ok(saleDetailDTO);
-            }
-            catch (ArgumentException ex)
-            {
-
-                return BadRequest(ex.Message);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return Conflict(ex.Message);
-            }
+            var storeId = GetStoreIdFromToken();
+            var result = await _saleDetailService.AddSaleDetailAsync(dto, storeId);
+            return Ok(result);
         }
 
         [HttpPut("{id:int}")]
-        public async Task<IActionResult> Put(int id, SaleDetailCreationDTO saleDetailCreationDTO)
+        public async Task<IActionResult> Put(int id, [FromBody] SaleDetailCreationDTO dto)
         {
-            try
-            {
-                await _saleDetailService.UpdateSaleDetailAsync(id, saleDetailCreationDTO);
-                return Ok("Se modifico exitosamente");
-            }
-            catch (KeyNotFoundException)
-            {
-
-                return NotFound("detalle servicio no encontrado");
-            }
+            var storeId = GetStoreIdFromToken();
+            await _saleDetailService.UpdateSaleDetailAsync(id, dto, storeId);
+            return Ok("Se modificó exitosamente");
         }
 
         [HttpDelete("{id:int}")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                await _saleDetailService.DeleteSaleDetailAsync(id);
-                return Ok("Se ha eliminado el tipo de servicio");
-            }
-            catch (KeyNotFoundException)
-            {
-                return NotFound("Tipo de servicio no encontrado");
-            }
+            var storeId = GetStoreIdFromToken();
+            await _saleDetailService.DeleteSaleDetailAsync(id, storeId);
+            return Ok("Eliminado correctamente");
         }
-
-
     }
 }

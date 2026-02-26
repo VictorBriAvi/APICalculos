@@ -17,10 +17,13 @@ namespace APICalculos.Domain.Entidades
 
         public void CalculateTotal()
         {
-            TotalAmount = SaleDetail.Sum(d =>
-                (d.UnitPrice + d.AdditionalCharge) * (1 - (d.DiscountPercent / 100))
-            );
+            TotalAmount = SaleDetail.Sum(d => (d.UnitPrice + d.AdditionalCharge) * (1 - (d.DiscountPercent / 100)));
         }
+
+        public int? StoreId { get; set; }
+        public Store? Store { get; set; }
+
+
 
     }
 }

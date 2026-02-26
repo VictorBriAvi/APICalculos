@@ -2,8 +2,6 @@
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Threading.Tasks;
 
 namespace APICalculos.Infrastructure.Repositories
 {
@@ -16,17 +14,17 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<ServiceCategorie>> GetAllAsync(string? search)
+        public async Task<IEnumerable<ServiceCategorie>> GetAllAsync(int storeId, string? search)
         {
-            var query = _dbContext.ServiceCategories.AsNoTracking();
+            var query = _dbContext.ServiceCategories
+                .AsNoTracking()
+                .Where(x => x.StoreId == storeId);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var normalizedSearch = search.Trim().ToLower();
-
-                query = query.Where(c =>
-                    c.Name.ToLower().Contains(normalizedSearch)
-                );
+                query = query.Where(x =>
+                    x.Name.ToLower().Contains(normalizedSearch));
             }
 
             return await query
@@ -34,10 +32,10 @@ namespace APICalculos.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-
-        public async Task<ServiceCategorie> GetByIdAsync(int id)
+        public async Task<ServiceCategorie?> GetByIdAsync(int id, int storeId)
         {
-            return await _dbContext.ServiceCategories.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.ServiceCategories
+                .FirstOrDefaultAsync(x => x.Id == id && x.StoreId == storeId);
         }
 
         public async Task AddAsync(ServiceCategorie serviceCategorie)
@@ -55,12 +53,13 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext.ServiceCategories.Remove(serviceCategorie);
         }
 
-        public async Task<bool> ExistsByNameAsync(string name)
+        public async Task<bool> ExistsByNameAsync(string name, int storeId)
         {
-            var convertName = name.Replace(" ", "").Trim();
-            return await _dbContext.ServiceCategories.AnyAsync(c => c.Name.Replace(" ", "").Trim() == convertName);
+            var normalized = name.Replace(" ", "").Trim().ToLower();
+
+            return await _dbContext.ServiceCategories.AnyAsync(x =>
+                x.StoreId == storeId &&
+                x.Name.Replace(" ", "").Trim().ToLower() == normalized);
         }
-
-
     }
 }

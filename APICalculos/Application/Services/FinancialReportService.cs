@@ -1,69 +1,63 @@
 ﻿using APICalculos.Application.DTOs.Reports;
 using APICalculos.Application.Interfaces;
-using APICalculos.Infrastructure.Repositories;
-using APICalculos.Infrastructure.Repositories.Reports;
-using System.Globalization;
 
 namespace APICalculos.Application.Services
 {
     public class FinancialReportService : IFinancialReportService
     {
-        private readonly IFinancialReportRepository _financialReportRepository;
-        
-        public FinancialReportService (IFinancialReportRepository financialReportRepository)
+        private readonly IFinancialReportRepository _repository;
+
+        public FinancialReportService(IFinancialReportRepository repository)
         {
-            _financialReportRepository = financialReportRepository;
+            _repository = repository;
         }
 
-        public async Task<FinancialSummaryDTO> GetFinancialSummaryAsync(DateTime? fromDate = null, DateTime? toDate = null)
+        public Task<FinancialSummaryDTO> GetFinancialSummaryAsync(
+            int storeId,
+            DateTime? fromDate = null,
+            DateTime? toDate = null)
         {
-
-            if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
-                throw new ArgumentException("La fecha de inicio no puede ser mayor a la fecha final.");
-
-            var summary = await _financialReportRepository.GetFinancialSummaryAsync(fromDate, toDate);
-
-            return summary;
+            return _repository.GetFinancialSummaryAsync(storeId, fromDate, toDate);
         }
 
-        public async Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(
+        public Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(
+            int storeId,
             DateTime fromDate,
             DateTime toDate)
         {
-            if (fromDate > toDate)
-                throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
-
-            return await _financialReportRepository
-                .GetDailyFinancialSummaryAsync(fromDate, toDate);
+            return _repository.GetDailyFinancialSummaryAsync(storeId, fromDate, toDate);
         }
 
-
-        public async Task<IEnumerable<EmployeeSalesSummaryDTO>> GetEmployeeSalesSummaryAsync(DateTime fromDate, DateTime toDate)
+        public Task<IEnumerable<EmployeeSalesSummaryDTO>> GetEmployeeSalesSummaryAsync(
+            int storeId,
+            DateTime fromDate,
+            DateTime toDate)
         {
-            if (fromDate > toDate)
-                throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha final.");
-
-            var summary = await _financialReportRepository.GetEmployeeSalesSummaryAsync(fromDate, toDate);
-            return summary;
+            return _repository.GetEmployeeSalesSummaryAsync(storeId, fromDate, toDate);
         }
 
-        public async Task<List<SalesByPaymentReportDTO>> GetSalesReportByPaymentTypeAsync(DateTime start, DateTime end)
-        {
-            return await _financialReportRepository.GetSalesReportByPaymentTypeAsync(start, end);
-        }
-        public async Task<List<PaymentTypeBalanceDTO>> GetPaymentTypeBalanceAsync(
+        public Task<List<SalesByPaymentReportDTO>> GetSalesReportByPaymentTypeAsync(
+            int storeId,
             DateTime start,
             DateTime end)
         {
-            return await _financialReportRepository
-                .GetPaymentTypeBalanceAsync(start, end);
+            return _repository.GetSalesReportByPaymentTypeAsync(storeId, start, end);
         }
 
-        public Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(DateTime? fromDate = null, DateTime? toDate = null)
+        public Task<List<PaymentTypeBalanceDTO>> GetPaymentTypeBalanceAsync(
+            int storeId,
+            DateTime start,
+            DateTime end)
         {
-            return _financialReportRepository.GetExpensesByCategoryAsync(fromDate, toDate);
+            return _repository.GetPaymentTypeBalanceAsync(storeId, start, end);
         }
 
-
+        public Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(
+            int storeId,
+            DateTime? fromDate = null,
+            DateTime? toDate = null)
+        {
+            return _repository.GetExpensesByCategoryAsync(storeId, fromDate, toDate);
+        }
     }
 }

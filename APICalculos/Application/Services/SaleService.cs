@@ -1,11 +1,9 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.Sale;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Domain.Entities;
-using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
-using System.Globalization;
 
 namespace APICalculos.Application.Services
 {
@@ -15,217 +13,212 @@ namespace APICalculos.Application.Services
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SaleService(ISaleRepository saleRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public SaleService(
+            ISaleRepository saleRepository,
+            IMapper mapper,
+            IUnitOfWork unitOfWork)
         {
             _saleRepository = saleRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<SaleDTO>> GetAllSaleAsync()
+        // =========================================
+        // GET ALL
+        // =========================================
+        public async Task<List<SaleDTO>> GetAllSaleAsync(int storeId)
         {
-            var sales = await _saleRepository.GetAllAsync();
+            var sales = await _saleRepository.GetAllAsync(storeId);
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
-        public async Task<List<SaleDTO>> GetSalesByDateRangeAsync(DateTime fromDate,DateTime toDate)
+        // =========================================
+        // RESUMEN AGRUPADO POR DIA
+        // =========================================
+        //public async Task<List<SaleDTO>> GetSalesByDateRangeAsync(
+        //    int storeId,
+        //    DateTime fromDate,
+        //    DateTime toDate)
+        //{
+        //    if (fromDate > toDate)
+        //        throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
+
+        //    fromDate = fromDate.Date;
+        //    toDate = toDate.Date.AddDays(1).AddTicks(-1);
+
+        //    var sales = await _saleRepository
+        //        .GetByDateRangeAsync(fromDate, toDate, storeId);
+
+        //    var mappedSales = _mapper.Map<List<SaleDTO>>(sales);
+
+        //    foreach (var sale in mappedSales)
+        //    {
+        //        foreach (var detail in sale.SaleDetail)
+        //        {
+        //            var baseAmount = detail.UnitPrice + detail.AdditionalCharge;
+        //            var discount = baseAmount * (detail.DiscountPercent / 100m);
+        //            detail.TotalCalculated = baseAmount - discount;
+        //        }
+
+        //        sale.TotalAmount = sale.SaleDetail.Sum(d => d.TotalCalculated);
+        //    }
+
+        //    var groupedByDate = mappedSales
+        //        .GroupBy(s => s.DateSale.Date)
+        //        .Select(group => new SaleDTO
+        //        {
+        //            Id = 0,
+        //            DateSale = group.Key,
+        //            NameClient = "Resumen diario",
+        //            ClientId = 0,
+        //            SaleDetail = group.SelectMany(s => s.SaleDetail).ToList(),
+        //            Payments = group.SelectMany(s => s.Payments).ToList(),
+        //            TotalAmount = group.Sum(s => s.TotalAmount),
+        //            IsDeleted = false
+        //        })
+        //        .OrderByDescending(s => s.DateSale)
+        //        .ToList();
+
+        //    return groupedByDate;
+        //}
+
+        // =========================================
+        // LISTADO NORMAL POR RANGO
+        // =========================================
+        public async Task<List<SaleDTO>> GetFilteredSalesAsync(
+            int storeId,
+            DateTime? fromDate,
+            DateTime? toDate,
+            int? clientId,
+            int? paymentTypeId,
+            int? employeeId,
+            int? serviceTypeId)
         {
-            if (fromDate > toDate)
-                throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
+            if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
+                throw new ArgumentException("Rango de fechas inválido.");
 
-            fromDate = fromDate.Date;
-            toDate = toDate.Date.AddDays(1).AddTicks(-1);
+            if (fromDate.HasValue)
+                fromDate = fromDate.Value.Date;
 
-            var sales = await _saleRepository.GetByDateRangeAsync(fromDate, toDate);
-            var mappedSales = _mapper.Map<List<SaleDTO>>(sales);
+            if (toDate.HasValue)
+                toDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
 
-            // 🔹 Calcular totales por detalle
-            foreach (var sale in mappedSales)
-            {
-                foreach (var detail in sale.SaleDetail)
-                {
-                    var baseAmount = detail.UnitPrice + detail.AdditionalCharge;
-                    var discount = baseAmount * (detail.DiscountPercent / 100m);
-                    detail.TotalCalculated = baseAmount - discount;
-                }
+            var sales = await _saleRepository.GetFilteredAsync(
+                storeId,
+                fromDate,
+                toDate,
+                clientId,
+                paymentTypeId,
+                employeeId,
+                serviceTypeId);
 
-                sale.TotalAmount = sale.SaleDetail.Sum(d => d.TotalCalculated);
-            }
-
-            // 🔹 AGRUPAR POR FECHA
-            var groupedByDate = mappedSales
-                .GroupBy(s => s.DateSale.Date)
-                .Select(group => new SaleDTO
-                {
-                    // 👉 No tiene sentido un Id único acá
-                    Id = 0,
-
-                    DateSale = group.Key,
-
-                    NameClient = "Resumen diario",
-                    ClientId = 0,
-
-                    SaleDetail = group
-                        .SelectMany(s => s.SaleDetail)
-                        .ToList(),
-
-                    Payments = group
-                        .SelectMany(s => s.Payments)
-                        .ToList(),
-
-                    TotalAmount = group.Sum(s => s.TotalAmount),
-
-                    IsDeleted = false
-                })
-                .OrderByDescending(s => s.DateSale)
-                .ToList();
-
-            return groupedByDate;
+            return _mapper.Map<List<SaleDTO>>(sales);
         }
 
-
-        public async Task<List<SaleDTO>> GetSalesRangeDateAsync(DateTime fromDate, DateTime toDate)
+        // =========================================
+        // GET BY ID
+        // =========================================
+        public async Task<SaleDTO?> GetSaleForId(int id, int storeId)
         {
-            if (fromDate > toDate)
-                throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
-
-            fromDate = fromDate.Date;
-            toDate = toDate.Date.AddDays(1).AddTicks(-1);
-
-            var sales = await _saleRepository.GetByDateRangeAsync(fromDate, toDate);
-            var mappedSales = _mapper.Map<List<SaleDTO>>(sales);
-
-            foreach (var sale in mappedSales)
-            {
-                foreach (var detail in sale.SaleDetail)
-                {
-                    var baseAmount = detail.UnitPrice + detail.AdditionalCharge;
-                    var discount = baseAmount * (detail.DiscountPercent / 100m);
-                    detail.TotalCalculated = baseAmount - discount;
-                }
-
-                sale.TotalAmount = sale.SaleDetail.Sum(d => d.TotalCalculated);
-            }
-
-            return mappedSales
-                .OrderByDescending(s => s.DateSale)
-                .ToList();
-        }
-
-
-
-
-        public async Task<SaleDTO> GetSaleForId(int id)
-        {
-            var sale = await _saleRepository.GetByIdAsync(id);
+            var sale = await _saleRepository.GetByIdAsync(id, storeId);
             if (sale == null)
                 return null;
-            return _mapper.Map<SaleDTO>(sale);
-        }
-
-        public async Task<SaleDTO> AddSaleAsync(SaleCreationDTO saleCreationDTO)
-        {
-
-            var client = await _unitOfWork.Clients.GetByIdAsync(saleCreationDTO.ClientId);
-            if (client == null)
-                throw new Exception($"El cliente con Id {saleCreationDTO.ClientId} no existe.");
-
-            var sale = _mapper.Map<Sale>(saleCreationDTO);
-            sale.DateSale = DateTime.UtcNow;
-
-            await _unitOfWork.Sale.AddAsync(sale);
-            await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<SaleDTO>(sale);
         }
 
-
-        public async Task<SaleDTO> AddSaleWithDetailsAsync(SaleCreationDTO dto)
+        // =========================================
+        // CREATE
+        // =========================================
+        public async Task<SaleDTO> AddSaleWithDetailsAsync(
+            int storeId,
+            SaleCreationDTO dto)
         {
             var sale = new Sale
             {
-                ClientId = dto.ClientId,
+                StoreId = storeId,
                 DateSale = DateTime.Now,
+                ClientId = dto.ClientId,
                 SaleDetail = new List<SaleDetail>(),
                 Payments = new List<SalePayment>()
             };
 
-            foreach (var d in dto.SaleDetails)
+            foreach (var detail in dto.SaleDetails)
             {
                 sale.SaleDetail.Add(new SaleDetail
                 {
-                    ServiceTypeId = d.ServiceTypeId,
-                    EmployeeId = d.EmployeeId,
-                    UnitPrice = d.UnitPrice,
-                    DiscountPercent = d.DiscountPercent,
-                    AdditionalCharge = d.AdditionalCharge
+                    ServiceTypeId = detail.ServiceTypeId,
+                    EmployeeId = detail.EmployeeId,
+                    UnitPrice = detail.UnitPrice,
+                    AdditionalCharge = detail.AdditionalCharge,
+                    DiscountPercent = detail.DiscountPercent,
+                    StoreId = storeId
+
                 });
             }
 
-            foreach (var p in dto.Payments)
+            foreach (var payment in dto.Payments)
             {
                 sale.Payments.Add(new SalePayment
                 {
-                    PaymentTypeId = p.PaymentTypeId,
-                    AmountPaid = p.AmountPaid,
+                    PaymentTypeId = payment.PaymentTypeId,
+                    AmountPaid = payment.AmountPaid,
                     PaymentDate = DateTime.Now
                 });
             }
 
             sale.CalculateTotal();
 
-            await _unitOfWork.Sale.AddAsync(sale);
+            await _saleRepository.AddAsync(sale);
             await _unitOfWork.SaveChangesAsync();
 
             return _mapper.Map<SaleDTO>(sale);
         }
 
-        public async Task UpdateSaleAsync(int id, SaleCreationDTO saleCreationDTO)
+        // =========================================
+        // UPDATE
+        // =========================================
+        public async Task UpdateSaleAsync(
+            int id,
+            int storeId,
+            SaleCreationDTO dto)
         {
-            var saleDB = await _saleRepository.GetByIdAsync(id);
+            var saleDB = await _saleRepository.GetByIdAsync(id, storeId);
+
             if (saleDB == null)
                 throw new KeyNotFoundException("Venta no encontrada");
 
-            // 🔹 Actualizar cliente
-            if (saleCreationDTO.ClientId > 0)
-                saleDB.ClientId = saleCreationDTO.ClientId;
+            saleDB.ClientId = dto.ClientId;
 
-            // 🔹 Actualizar pagos
-            if (saleCreationDTO.Payments != null && saleCreationDTO.Payments.Any())
+            saleDB.Payments.Clear();
+            foreach (var paymentDTO in dto.Payments)
             {
-                // Limpia los pagos previos (para simplificar)
-                saleDB.Payments.Clear();
-                foreach (var paymentDTO in saleCreationDTO.Payments)
+                saleDB.Payments.Add(new SalePayment
                 {
-                    saleDB.Payments.Add(new SalePayment
-                    {
-                        PaymentTypeId = paymentDTO.PaymentTypeId,
-                        AmountPaid = paymentDTO.AmountPaid,
-                        PaymentDate = DateTime.Now
-                    });
-                }
+                    PaymentTypeId = paymentDTO.PaymentTypeId,
+                    AmountPaid = paymentDTO.AmountPaid,
+                    PaymentDate = DateTime.Now
+                });
             }
 
-            if (saleCreationDTO.TotalAmount > 0)
-                saleDB.TotalAmount = saleCreationDTO.TotalAmount;
-            else
-                saleDB.CalculateTotal();
+            saleDB.CalculateTotal();
 
             _saleRepository.Update(saleDB);
             await _unitOfWork.SaveChangesAsync();
         }
 
-
-
-        public async Task DeleteSaleAsync(int id)
+        // =========================================
+        // DELETE
+        // =========================================
+        public async Task DeleteSaleAsync(int id, int storeId)
         {
-            var saleDB = await _saleRepository.GetByIdAsync(id);
+            var saleDB = await _saleRepository.GetByIdAsync(id, storeId);
+
             if (saleDB == null)
                 throw new KeyNotFoundException("Venta no encontrada");
 
             _saleRepository.Remove(saleDB);
             await _unitOfWork.SaveChangesAsync();
         }
-
     }
 }

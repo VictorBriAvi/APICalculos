@@ -14,23 +14,30 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<IEnumerable<Employee>> GetAllAsync(string? search)
+        public async Task<IEnumerable<Employee>> GetAllAsync(int storeId, string? search)
         {
-            var query = _dbContext.Employees.AsNoTracking();
+            var query = _dbContext.Employees
+                .Where(e => e.StoreId == storeId)
+                .AsNoTracking();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var normalizedSearch = search.Trim().ToLower();
 
-                query = query.Where(c => c.Name.ToLower().Contains(normalizedSearch));
+                query = query.Where(c =>
+                    c.Name.ToLower().Contains(normalizedSearch));
             }
 
-            return await query.OrderByDescending(x => x.Id).ToListAsync();
+            return await query
+                .OrderByDescending(x => x.Id)
+                .ToListAsync();
         }
 
-        public async Task<Employee> GetByIdAsync(int id)
+        public async Task<Employee?> GetByIdAsync(int id, int storeId)
         {
-            return await _dbContext.Employees.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
+            return await _dbContext.Employees
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == id && x.StoreId == storeId);
         }
 
         public async Task AddAsync(Employee employee)
@@ -48,16 +55,28 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext.Employees.Update(employee);
         }
 
-        public async Task<bool> ExistsByNameAsync(string name)
+        public async Task<bool> ExistsByNameAsync(string name, int storeId)
         {
             var nameEmployee = name.Replace(" ", "").Trim();
-            return await _dbContext.Employees.AnyAsync(c => c.Name.Replace(" ", "").Trim() == nameEmployee);        
+
+            return await _dbContext.Employees
+                .AnyAsync(c =>
+                    c.StoreId == storeId &&
+                    c.Name.Replace(" ", "").Trim() == nameEmployee);
         }
 
-        public async Task<List<Employee>> SearchAsync(string query, int limit)
+        public async Task<List<Employee>> SearchAsync(int storeId, string query, int limit)
         {
-            return await _dbContext.Employees.AsNoTracking().Where(c => c.Name.Contains(query) || c.IdentityDocument.Contains(query)).OrderBy(c => c.Name).Take(limit).ToListAsync();
+            return await _dbContext.Employees
+                .AsNoTracking()
+                .Where(c =>
+                    c.StoreId == storeId &&
+                    (c.Name.Contains(query) ||
+                     c.IdentityDocument.Contains(query)))
+                .OrderBy(c => c.Name)
+                .Take(limit)
+                .ToListAsync();
         }
-
     }
+
 }

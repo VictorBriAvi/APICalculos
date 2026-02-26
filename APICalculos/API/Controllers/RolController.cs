@@ -4,9 +4,9 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Net;
-using APICalculos.Application.DTOs;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.Data;
+using APICalculos.Application.DTOs.Rol;
 
 namespace APICalculos.API.Controllers
 {
@@ -35,7 +35,7 @@ namespace APICalculos.API.Controllers
         [HttpGet("buscarRolPorId/{id:int}")]
         public async Task<ActionResult<PaymentTypes>> BuscarRolId(int id)
         {
-            var rolId = await _context.Roles.FirstOrDefaultAsync(g => g.RolId == id);
+            var rolId = await _context.Roles.FirstOrDefaultAsync(g => g.Id == id);
 
             if (rolId is null)
             {
@@ -46,8 +46,8 @@ namespace APICalculos.API.Controllers
 
             var rolDTO = new RolDTO
             {
-                RolId = rolId.RolId,
-                NombreRol = rolId.NombreRol,
+                RolId = rolId.Id,
+                NombreRol = rolId.Name,
 
             };
 
@@ -57,7 +57,7 @@ namespace APICalculos.API.Controllers
         [HttpPost]
         public async Task<ActionResult<Rol>> Post(RolCreacionDTO rolCreacionDTO)
         {
-            var existeNombreRol = await _context.Roles.AnyAsync(g => g.NombreRol.Replace(" ", "").Trim() == rolCreacionDTO.NombreRol.Replace(" ", "").Trim());
+            var existeNombreRol = await _context.Roles.AnyAsync(g => g.Name.Replace(" ", "").Trim() == rolCreacionDTO.NombreRol.Replace(" ", "").Trim());
 
             if (string.IsNullOrWhiteSpace(rolCreacionDTO.NombreRol))
             {
@@ -82,15 +82,15 @@ namespace APICalculos.API.Controllers
         public async Task<ActionResult> Put(RolCreacionDTO rolCreacionDTO, int id)
         {
 
-            var existeNombreRol = await _context.Roles.AnyAsync(g => g.NombreRol.Replace(" ", "").Trim() == rolCreacionDTO.NombreRol.Replace(" ", "").Trim());
+            var existeNombreRol = await _context.Roles.AnyAsync(g => g.Name.Replace(" ", "").Trim() == rolCreacionDTO.NombreRol.Replace(" ", "").Trim());
          
             //productoDB busca el primer valor Id con el ingresado
-            var rolDB = await _context.Roles.AsTracking().FirstOrDefaultAsync(a => a.RolId == id);
+            var rolDB = await _context.Roles.AsTracking().FirstOrDefaultAsync(a => a.Id == id);
 
 
             if (!string.IsNullOrWhiteSpace(rolCreacionDTO.NombreRol))
             {
-                rolDB.NombreRol = rolCreacionDTO.NombreRol;
+                rolDB.Name = rolCreacionDTO.NombreRol;
             }
 
             if (existeNombreRol)
@@ -116,7 +116,7 @@ namespace APICalculos.API.Controllers
         {
             //productoDB busca el primer valor Id con el ingresado
 
-            var rolId = await _context.Roles.FirstOrDefaultAsync(g => g.RolId == id);
+            var rolId = await _context.Roles.FirstOrDefaultAsync(g => g.Id == id);
 
 
 

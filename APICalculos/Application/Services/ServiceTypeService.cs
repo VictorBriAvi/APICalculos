@@ -1,144 +1,136 @@
-﻿using APICalculos.Application.DTOs;
-using APICalculos.Application.DTOs.Client;
-using APICalculos.Application.DTOs.Services;
+﻿using APICalculos.Application.DTOs.Services;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
-using APICalculos.Infrastructure.Repositories;
 using APICalculos.Infrastructure.UnitOfWork;
 using AutoMapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
 
 namespace APICalculos.Application.Services
 {
     public class ServiceTypeService : IServiceTypeService
     {
-        private readonly IServiceTypeRepository _serviceTypeRepository;
-        private readonly IServiceCategoriesService _serviceCategoriesService;
-        private readonly IMapper _mapper;
+        private readonly IServiceTypeRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public ServiceTypeService(IServiceTypeRepository serviceTypeRepository, IMapper mapper, IUnitOfWork unitOfWork, IServiceCategoriesService serviceCategoriesService)
+        public ServiceTypeService(
+            IServiceTypeRepository repository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
-            _serviceTypeRepository = serviceTypeRepository;
-            _mapper = mapper;
+            _repository = repository;
             _unitOfWork = unitOfWork;
-            _serviceCategoriesService = serviceCategoriesService;
+            _mapper = mapper;
         }
 
         public async Task<List<ServiceTypeDTO>> GetAllServiceTypesAsync(
+            int storeId,
             string? search,
-            int? serviceCategorieId
-        )
+            int? serviceCategorieId)
         {
-            var serviceTypes =
-                await _serviceTypeRepository.GetAllAsync(search, serviceCategorieId);
+            var entities =
+                await _repository.GetAllAsync(storeId, search, serviceCategorieId);
 
-            return _mapper.Map<List<ServiceTypeDTO>>(serviceTypes);
+            return _mapper.Map<List<ServiceTypeDTO>>(entities);
         }
 
-        public async Task<ServiceTypeDTO> GetServiceTypeForId(int id)
+        public async Task<ServiceTypeDTO?> GetServiceTypeForId(int id, int storeId)
         {
-            var serviceType = await _serviceTypeRepository.GetByIdAsync(id);
-            if (serviceType == null)
-            {
-                return null;
-            }
-            return _mapper.Map<ServiceTypeDTO>(serviceType);
+            var entity = await _repository.GetByIdAsync(id, storeId);
+            return entity == null ? null : _mapper.Map<ServiceTypeDTO>(entity);
         }
 
-        public async Task<List<ServiceTypeDTO>> SearchServicesAsync(int? categoryId = null)
+        public async Task<List<ServiceTypeDTO>> SearchServicesAsync(
+            int storeId,
+            int? categoryId = null)
         {
-            // En el futuro: podrías agregar más filtros (precio, nombre, etc.)
             Expression<Func<ServiceType, bool>> filter = s => true;
 
             if (categoryId.HasValue)
-            {
                 filter = s => s.ServiceCategorieId == categoryId.Value;
-            }
 
-            var results = await _serviceTypeRepository.SearchAsync(filter);
+            var results = await _repository.SearchAsync(storeId, filter);
 
             return _mapper.Map<List<ServiceTypeDTO>>(results);
         }
 
-
-        public async Task<ServiceTypeDTO> AddServiceTypeAsync(ServiceTypeCreationDTO serviceTypeCreationDTO)
+        public async Task<ServiceTypeDTO> AddServiceTypeAsync(
+            int storeId,
+            ServiceTypeCreationDTO dto)
         {
-            if (string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Name))
-            {
-                throw new ArgumentException("El nombre de tipo de servicio no puede estar vacio ");
-            }
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("El nombre no puede estar vacío");
 
-            var existName = await _serviceTypeRepository.ExistsByNameAsync(serviceTypeCreationDTO.Name);
-            if (existName)
-            {
-                throw new InvalidOperationException("EL nombre del cliente ya existe");
-            }
+            var exists = await _repository.ExistsByNameAsync(dto.Name, storeId);
+            if (exists)
+                throw new InvalidOperationException("Ya existe un servicio con ese nombre");
 
-            var serviceType = _mapper.Map<ServiceType>(serviceTypeCreationDTO);
+            var entity = _mapper.Map<ServiceType>(dto);
+            entity.StoreId = storeId;
 
-            await _unitOfWork.ServiceTypes.AddAsync(serviceType);
-
+            await _repository.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<ServiceTypeDTO>(serviceType);
-
+            return _mapper.Map<ServiceTypeDTO>(entity);
         }
 
-        public async Task UpdateServiceTypeAsync(int id, ServiceTypeCreationDTO serviceTypeCreationDTO)
+        public async Task UpdateServiceTypeAsync(
+            int id,
+            int storeId,
+            ServiceTypeCreationDTO dto)
         {
-            var serviceTypeDB = await _serviceTypeRepository.GetByIdAsync(id);
-            if (serviceTypeDB == null)
+            var entity = await _repository.GetByIdAsync(id, storeId);
+
+            if (entity == null)
                 throw new KeyNotFoundException("Tipo de servicio no encontrado");
 
-            if (!string.IsNullOrWhiteSpace(serviceTypeCreationDTO.Name))
-                serviceTypeDB.Name = serviceTypeCreationDTO.Name;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                entity.Name = dto.Name;
 
-            if (serviceTypeCreationDTO.Price > 0) // sin ToString()
-                serviceTypeDB.Price = serviceTypeCreationDTO.Price;
+            if (dto.Price > 0)
+                entity.Price = dto.Price;
 
-            if (serviceTypeCreationDTO.ServiceCategorieId != 0)
-            {
-                // Desasociamos la navegación para que EF tome solo la FK
-                serviceTypeDB.ServiceCategories = null;
-                serviceTypeDB.ServiceCategorieId = serviceTypeCreationDTO.ServiceCategorieId;
-            }
+            if (dto.ServiceCategorieId != 0)
+                entity.ServiceCategorieId = dto.ServiceCategorieId;
 
-            _serviceTypeRepository.Update(serviceTypeDB);
+            _repository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
         }
 
-
-        public async Task DeleteServiceTypeAsync(int Id)
+        public async Task DeleteServiceTypeAsync(int id, int storeId)
         {
-            var serviceTypeDB = await _serviceTypeRepository.GetByIdAsync(Id);
+            var entity = await _repository.GetByIdAsync(id, storeId);
 
-            if (serviceTypeDB == null)
+            if (entity == null)
                 throw new KeyNotFoundException("Tipo de servicio no encontrado");
 
             try
             {
-                _serviceTypeRepository.Remove(serviceTypeDB);
+                _repository.Remove(entity);
                 await _unitOfWork.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            catch (DbUpdateException ex) when (
+                ex.InnerException is SqlException sqlEx &&
+                sqlEx.Number == 547)
             {
-                throw new InvalidOperationException("No se puede eliminar este tipo de servicio porque está asociado a una venta.");
+                throw new InvalidOperationException(
+                    "No se puede eliminar este tipo de servicio porque está asociado a una venta.");
             }
         }
 
-        public async Task<List<ServicesSearchDTO>> SearchServiceAsync(string query)
+        public async Task<List<ServicesSearchDTO>> SearchServiceAsync(
+            int storeId,
+            string query)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return new List<ServicesSearchDTO>();
 
-            var clients = await _serviceTypeRepository.SearchAsync(query.Trim(), 15);
+            var results =
+                await _repository.SearchAsync(storeId, query.Trim(), 15);
 
-            return _mapper.Map<List<ServicesSearchDTO>>(clients);
+            return _mapper.Map<List<ServicesSearchDTO>>(results);
         }
-
     }
 }

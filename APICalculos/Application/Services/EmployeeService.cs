@@ -18,100 +18,111 @@ namespace APICalculos.Application.Services
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public EmployeeService(IEmployeeRepository employeeRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public EmployeeService(
+            IEmployeeRepository employeeRepository,
+            IMapper mapper,
+            IUnitOfWork unitOfWork)
         {
             _employeeRepository = employeeRepository;
-            _mapper = mapper;   
+            _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<EmployeeDTO>> GetAllEmployeesAsync(string? search)
+        public async Task<List<EmployeeDTO>> GetAllEmployeesAsync(int storeId, string? search)
         {
             var employees =
-                await _employeeRepository.GetAllAsync(search);
+                await _employeeRepository.GetAllAsync(storeId, search);
 
             return _mapper.Map<List<EmployeeDTO>>(employees);
         }
 
-        public async Task<EmployeeDTO> GetEmployeeForIdAsync(int id)
+        public async Task<EmployeeDTO?> GetEmployeeForIdAsync(int id, int storeId)
         {
-            var employe = await _employeeRepository.GetByIdAsync(id);
-            if (employe == null)
-            {
+            var employee =
+                await _employeeRepository.GetByIdAsync(id, storeId);
+
+            if (employee == null)
                 return null;
-            }
-            return _mapper.Map<EmployeeDTO>(employe);
-        }
 
-        public async Task<EmployeeDTO> AddEmployeeAsync(EmployeeCreationDTO employeeCreationDTO)
-        {
-            if (string.IsNullOrWhiteSpace(employeeCreationDTO.Name))
-            {
-                throw new ArgumentException("El nombre del colaborador no puede estar vacio");
-            }
-
-            var existsName = await _employeeRepository.ExistsByNameAsync(employeeCreationDTO.Name);
-            if (existsName)
-            {
-                throw new InvalidOperationException("El nombre del cliente ya existe");
-            }
-
-            var employee = _mapper.Map<Employee>(employeeCreationDTO);
-
-            await _unitOfWork.Employees.AddAsync(employee);
-            await _unitOfWork.SaveChangesAsync();
             return _mapper.Map<EmployeeDTO>(employee);
         }
 
-        public async Task UpdateEmployeeAsync(int id, EmployeeCreationDTO employeeCreationDTO)
+        public async Task<EmployeeDTO> AddEmployeeAsync(int storeId, EmployeeCreationDTO dto)
         {
-            var employeeDB = await _employeeRepository.GetByIdAsync(id);
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("El nombre no puede estar vacío");
 
+            var existsName =
+                await _employeeRepository.ExistsByNameAsync(dto.Name, storeId);
+
+            if (existsName)
+                throw new InvalidOperationException("El colaborador ya existe en esta tienda");
+
+            var employee = _mapper.Map<Employee>(dto);
+
+            employee.StoreId = storeId;
+
+            await _unitOfWork.Employees.AddAsync(employee);
+            await _unitOfWork.SaveChangesAsync();
+
+            return _mapper.Map<EmployeeDTO>(employee);
+        }
+
+        public async Task UpdateEmployeeAsync(int id, int storeId, EmployeeCreationDTO dto)
+        {
+            var employeeDB =
+                await _employeeRepository.GetByIdAsync(id, storeId);
 
             if (employeeDB == null)
                 throw new KeyNotFoundException("Colaborador no encontrado");
-            // Actualiza solo si vienen datos válidos
-            if (!string.IsNullOrWhiteSpace(employeeCreationDTO.Name))
-                employeeDB.Name = employeeCreationDTO.Name;
 
-            if (!string.IsNullOrWhiteSpace(employeeCreationDTO.IdentityDocument))
-                employeeDB.IdentityDocument = employeeCreationDTO.IdentityDocument;
+            if (!string.IsNullOrWhiteSpace(dto.Name))
+                employeeDB.Name = dto.Name;
 
-            if (!string.IsNullOrWhiteSpace(employeeCreationDTO.PaymentPercentage.ToString()))
-                employeeDB.PaymentPercentage = employeeCreationDTO.PaymentPercentage;
+            if (!string.IsNullOrWhiteSpace(dto.IdentityDocument))
+                employeeDB.IdentityDocument = dto.IdentityDocument;
 
-            if (employeeCreationDTO.DateBirth != default)
-                employeeDB.DateBirth = employeeCreationDTO.DateBirth;
+            if (dto.PaymentPercentage > 0)
+                employeeDB.PaymentPercentage = dto.PaymentPercentage;
+
+            if (dto.DateBirth != default)
+                employeeDB.DateBirth = dto.DateBirth;
 
             _employeeRepository.Update(employeeDB);
             await _unitOfWork.SaveChangesAsync();
         }
 
-        public async Task DeleteEmployeeAsync(int id)
+        public async Task DeleteEmployeeAsync(int id, int storeId)
         {
-            var clienteDB = await _employeeRepository.GetByIdAsync(id);
-            if (clienteDB == null)
-                throw new KeyNotFoundException("Cliente no encontrado");
+            var employeeDB =
+                await _employeeRepository.GetByIdAsync(id, storeId);
+
+            if (employeeDB == null)
+                throw new KeyNotFoundException("Colaborador no encontrado");
 
             try
             {
-                _employeeRepository.Remove(clienteDB);
+                _employeeRepository.Remove(employeeDB);
                 await _unitOfWork.SaveChangesAsync();
             }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
+            catch (DbUpdateException ex)
+                when (ex.InnerException is SqlException sqlEx && sqlEx.Number == 547)
             {
-                throw new InvalidOperationException("No se puede eliminar este Colaborador porque está asociado a una venta.");
+                throw new InvalidOperationException(
+                    "No se puede eliminar porque está asociado a una venta.");
             }
         }
 
-        public async Task<List<EmployeeSearchDTO>> SearchEmployeeAsync(string query)
+        public async Task<List<EmployeeSearchDTO>> SearchEmployeeAsync(int storeId, string query)
         {
             if (string.IsNullOrWhiteSpace(query))
                 return new List<EmployeeSearchDTO>();
 
-            var clients = await _employeeRepository.SearchAsync(query.Trim(), 15);
+            var employees =
+                await _employeeRepository.SearchAsync(storeId, query.Trim(), 15);
 
-            return _mapper.Map<List<EmployeeSearchDTO>>(clients);
+            return _mapper.Map<List<EmployeeSearchDTO>>(employees);
         }
     }
+
 }

@@ -1,4 +1,5 @@
 ﻿using APICalculos.Application.DTOs;
+using APICalculos.Application.DTOs.CustomerHistory;
 using APICalculos.Application.Interfaces;
 using APICalculos.Domain.Entidades;
 using APICalculos.Infrastructure.UnitOfWork;
@@ -8,103 +9,87 @@ namespace APICalculos.Application.Services
 {
     public class CustomerHistoryService : ICustomerHistoryService
     {
-        private readonly ICustomerHistoryRepository _customerHistoryRepository;
-        private readonly IMapper _mapper;
+        private readonly ICustomerHistoryRepository _repository;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMapper _mapper;
 
-        public CustomerHistoryService(ICustomerHistoryRepository customerHistoryRepository, IMapper mapper, IUnitOfWork unitOfWork)
+        public CustomerHistoryService(
+            ICustomerHistoryRepository repository,
+            IUnitOfWork unitOfWork,
+            IMapper mapper)
         {
-            _customerHistoryRepository = customerHistoryRepository;
-            _mapper = mapper;
+            _repository = repository;
             _unitOfWork = unitOfWork;
+            _mapper = mapper;
         }
-        
-        public async Task<List<CustomerHistoryDTO>> GetAllCustomerHistoriesAsync()
+
+        public async Task<List<CustomerHistoryDTO>> GetAllCustomerHistoriesAsync(int storeId)
         {
-            var customerHistory = await _customerHistoryRepository.GetAllAsync();
-            return _mapper.Map<List<CustomerHistoryDTO>>(customerHistory);
+            var histories = await _repository.GetAllAsync(storeId);
+            return _mapper.Map<List<CustomerHistoryDTO>>(histories);
         }
-        
-        public async Task<CustomerHistoryDTO> GetCustomerHistoryForId(int id)
+
+        public async Task<CustomerHistoryDTO?> GetCustomerHistoryForId(int id, int storeId)
         {
-            var customerHistory = await _customerHistoryRepository.GetByIdAsync(id);
-            if (customerHistory == null)
-            {
+            var history = await _repository.GetByIdAsync(id, storeId);
+            if (history == null)
                 return null;
-            }
 
-            return _mapper.Map<CustomerHistoryDTO>(customerHistory);
+            return _mapper.Map<CustomerHistoryDTO>(history);
         }
 
-        public async Task<CustomerHistoryDTO> AddCustomerHistoryAsync(CustomerHistoryCreationDTO customerHistoryCreationDTO)
+        public async Task<CustomerHistoryDTO> AddCustomerHistoryAsync(int storeId, CustomerHistoryCreationDTO dto)
         {
-            if (string.IsNullOrWhiteSpace(customerHistoryCreationDTO.Title))
-            {
-                throw new ArgumentException("El titulo del registro historial ya existe ");
-            }
-            
-            var existsTitle = await _customerHistoryRepository.ExistsByTitleAsync(customerHistoryCreationDTO.Title);
-            if (existsTitle)
-            {
-                throw new InvalidOperationException("El titulo de la historia ya existe");
-            }
+            if (string.IsNullOrWhiteSpace(dto.Title))
+                throw new ArgumentException("El título es obligatorio.");
 
-            var customerHistory = _mapper.Map<CustomerHistory>(customerHistoryCreationDTO);
-            customerHistory.DateHistory = DateTime.UtcNow;
+            var exists = await _repository.ExistsByTitleAsync(dto.Title, storeId);
+            if (exists)
+                throw new InvalidOperationException("El título ya existe en esta tienda.");
 
-            await _unitOfWork.CustomerHistory.AddAsync(customerHistory);
+            var entity = _mapper.Map<CustomerHistory>(dto);
+
+            entity.DateHistory = DateTime.UtcNow;
+            entity.StoreId = storeId;
+
+            await _unitOfWork.CustomerHistory.AddAsync(entity);
             await _unitOfWork.SaveChangesAsync();
 
-            return _mapper.Map<CustomerHistoryDTO>(customerHistory);
+            return _mapper.Map<CustomerHistoryDTO>(entity);
         }
 
-        public async Task UpdateCustomerHistoryAsync(int id, CustomerHistoryUpdateDTO dto)
+        public async Task UpdateCustomerHistoryAsync(int id, int storeId, CustomerHistoryUpdateDTO dto)
         {
-            var customerHistoryDB = await _customerHistoryRepository.GetByIdAsync(id);
+            var entity = await _repository.GetByIdAsync(id, storeId);
 
-            if (customerHistoryDB == null)
-            {
-                throw new KeyNotFoundException("Historial Cliente no encontrado");
-            }
+            if (entity == null)
+                throw new KeyNotFoundException("Historial no encontrado");
 
-            // Solo actualizo lo que sí se puede modificar
             if (!string.IsNullOrWhiteSpace(dto.Title))
-            {
-                customerHistoryDB.Title = dto.Title;
-            }
+                entity.Title = dto.Title;
 
             if (!string.IsNullOrWhiteSpace(dto.Description))
+                entity.Description = dto.Description;
+
+            if (dto.ClientId > 0)
             {
-                customerHistoryDB.Description = dto.Description;
+                entity.Client = null;
+                entity.ClientId = dto.ClientId;
             }
 
-            if (dto.ClientId != 0)
-            {
-                // Desasociamos la navegación para que EF tome solo la FK
-                customerHistoryDB.Client = null;
-                customerHistoryDB.ClientId= dto.ClientId;
-            }
-
-            // ⚠️ Importante: NO tocamos customerHistoryDB.DateHistory
-            // Ese campo representa la fecha de creación y nunca debe cambiar.
-
-            _customerHistoryRepository.Update(customerHistoryDB);
+            _repository.Update(entity);
             await _unitOfWork.SaveChangesAsync();
         }
 
-
-        public async Task DeleteCustomerHistoriesAsync(int id)
+        public async Task DeleteCustomerHistoriesAsync(int id, int storeId)
         {
-            var customerHistoriesDB = await _customerHistoryRepository.GetByIdAsync(id);
+            var entity = await _repository.GetByIdAsync(id, storeId);
 
-            if (customerHistoriesDB == null)
-            {
-                throw new KeyNotFoundException("Historial cliente no encontrado");
-            }
+            if (entity == null)
+                throw new KeyNotFoundException("Historial no encontrado");
 
-            _customerHistoryRepository.Remove(customerHistoriesDB);
+            _repository.Remove(entity);
             await _unitOfWork.SaveChangesAsync();
         }
-
     }
 }

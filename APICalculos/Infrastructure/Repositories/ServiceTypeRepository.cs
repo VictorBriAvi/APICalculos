@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace APICalculos.Infrastructure.Repositories
 {
-    public class ServiceTypeRepository :IServiceTypeRepository
+    public class ServiceTypeRepository : IServiceTypeRepository
     {
         private readonly MyDbContext _dbContext;
 
@@ -16,28 +16,26 @@ namespace APICalculos.Infrastructure.Repositories
         }
 
         public async Task<IEnumerable<ServiceType>> GetAllAsync(
+            int storeId,
             string? search,
-            int? serviceCategorieId
-        )
+            int? serviceCategorieId)
         {
-            IQueryable<ServiceType> query = _dbContext.ServiceTypes
+            var query = _dbContext.ServiceTypes
                 .AsNoTracking()
-                .Include(s => s.ServiceCategories);
+                .Include(s => s.ServiceCategories)
+                .Where(x => x.StoreId == storeId);
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var normalizedSearch = search.Trim().ToLower();
-
+                var normalized = search.Trim().ToLower();
                 query = query.Where(s =>
-                    s.Name.ToLower().Contains(normalizedSearch)
-                );
+                    s.Name.ToLower().Contains(normalized));
             }
 
             if (serviceCategorieId.HasValue)
             {
                 query = query.Where(s =>
-                    s.ServiceCategorieId == serviceCategorieId.Value
-                );
+                    s.ServiceCategorieId == serviceCategorieId.Value);
             }
 
             return await query
@@ -45,20 +43,39 @@ namespace APICalculos.Infrastructure.Repositories
                 .ToListAsync();
         }
 
-
-
-        public async Task<IEnumerable<ServiceType>> SearchAsync(Expression<Func<ServiceType, bool>> predicate)
+        public async Task<IEnumerable<ServiceType>> SearchAsync(
+            int storeId,
+            Expression<Func<ServiceType, bool>> predicate)
         {
             return await _dbContext.ServiceTypes
                 .Include(s => s.ServiceCategories)
                 .AsNoTracking()
+                .Where(x => x.StoreId == storeId)
                 .Where(predicate)
                 .ToListAsync();
         }
 
-        public async Task<ServiceType> GetByIdAsync(int Id)
+        public async Task<List<ServiceType>> SearchAsync(
+            int storeId,
+            string query,
+            int limit)
         {
-            return await _dbContext.ServiceTypes.Include(st => st.ServiceCategories).AsNoTracking().FirstOrDefaultAsync(x => x.Id == Id);
+            return await _dbContext.ServiceTypes
+                .AsNoTracking()
+                .Where(x => x.StoreId == storeId &&
+                            x.Name.Contains(query))
+                .OrderBy(x => x.Name)
+                .Take(limit)
+                .ToListAsync();
+        }
+
+        public async Task<ServiceType?> GetByIdAsync(int id, int storeId)
+        {
+            return await _dbContext.ServiceTypes
+                .Include(s => s.ServiceCategories)
+                .FirstOrDefaultAsync(x =>
+                    x.Id == id &&
+                    x.StoreId == storeId);
         }
 
         public async Task AddAsync(ServiceType serviceType)
@@ -76,21 +93,17 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext.ServiceTypes.Remove(serviceType);
         }
 
-        public async Task<bool> ExistsByNameAsync(string name)
+        public async Task<bool> ExistsByNameAsync(string name, int storeId)
         {
-            var convertName = name.Replace(" ", "").Trim();
-            return await _dbContext.ServiceTypes.AnyAsync(c => c.Name.Replace(" ", "").Trim() == convertName);
-        }
+            var normalized = name.Replace(" ", "")
+                                 .Trim()
+                                 .ToLower();
 
-        public async Task<List<ServiceType>> SearchAsync(string query, int limit)
-        {
-            return await _dbContext.ServiceTypes
-                .AsNoTracking()
-                .Where(st => st.Name.Contains(query))
-                .OrderBy(st => st.Name)
-                .Take(limit)
-                .ToListAsync();
+            return await _dbContext.ServiceTypes.AnyAsync(x =>
+                x.StoreId == storeId &&
+                x.Name.Replace(" ", "")
+                      .Trim()
+                      .ToLower() == normalized);
         }
-
     }
 }

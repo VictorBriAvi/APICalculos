@@ -29,6 +29,13 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .HasForeignKey(dv => dv.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+
+            builder.HasOne(e => e.Store)
+    .WithMany()
+    .HasForeignKey(e => e.StoreId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.StoreId);
         }
     }
 }

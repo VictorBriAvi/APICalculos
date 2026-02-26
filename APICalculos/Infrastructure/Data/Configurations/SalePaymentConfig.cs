@@ -27,6 +27,14 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .WithMany(pt => pt.SalePayments)
                 .HasForeignKey(sp => sp.PaymentTypeId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+
+            builder.HasOne(e => e.Store)
+    .WithMany()
+    .HasForeignKey(e => e.StoreId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(e => e.StoreId);
         }
     }
 }

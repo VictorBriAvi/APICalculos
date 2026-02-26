@@ -24,7 +24,7 @@ namespace APICalculos.API.Controllers
 
         }
         [HttpPost]
-        public async Task<ActionResult<UsuarioRol>> Post(UsuarioRolCreacionDTO usuarioRolCreacionDTO)
+        public async Task<ActionResult<UserRol>> Post(UsuarioRolCreacionDTO usuarioRolCreacionDTO)
         {
 
             if (usuarioRolCreacionDTO.UsuarioId <= 0)
@@ -39,7 +39,7 @@ namespace APICalculos.API.Controllers
                 return BadRequest(mensajeError);
             }
 
-            var usuarioRol = _mapper.Map<UsuarioRol>(usuarioRolCreacionDTO);
+            var usuarioRol = _mapper.Map<UserRol>(usuarioRolCreacionDTO);
             _context.Add(usuarioRol);
             await _context.SaveChangesAsync();
             var mensaje = "Se agrego correctamente :D";
@@ -52,7 +52,7 @@ namespace APICalculos.API.Controllers
         public async Task<ActionResult> Put(UsuarioRolCreacionDTO usuarioRolCreacionDTO,int id)
         {
 
-            var usuarioRolDb = await _context.UsuarioRoles.FirstOrDefaultAsync(u => u.UsuarioId == id);
+            var usuarioRolDb = await _context.UserRoles.FirstOrDefaultAsync(u => u.UserId == id);
 
             if (usuarioRolDb == null)
             {
@@ -76,7 +76,7 @@ namespace APICalculos.API.Controllers
         {
             //productoDB busca el primer valor Id con el ingresado
 
-            var usuarioId = await _context.Usuarios.FirstOrDefaultAsync(g => g.UsuarioId == id);
+            var usuarioId = await _context.Users.FirstOrDefaultAsync(g => g.Id == id);
 
             if (usuarioId is null)
             {

@@ -1,7 +1,17 @@
 ﻿using APICalculos.Application.DTOs;
 using APICalculos.Application.DTOs.Client;
+using APICalculos.Application.DTOs.CustomerHistory;
 using APICalculos.Application.DTOs.Employee;
+using APICalculos.Application.DTOs.Expense;
+using APICalculos.Application.DTOs.ExpenseType;
+using APICalculos.Application.DTOs.PaymentType;
+using APICalculos.Application.DTOs.Rol;
+using APICalculos.Application.DTOs.Sale;
+using APICalculos.Application.DTOs.SaleDetail;
+using APICalculos.Application.DTOs.ServiceCategories;
 using APICalculos.Application.DTOs.Services;
+using APICalculos.Application.DTOs.Store;
+using APICalculos.Application.DTOs.User;
 using APICalculos.Domain.Entidades;
 using APICalculos.Domain.Entities;
 using AutoMapper;
@@ -49,16 +59,16 @@ namespace APICalculos.Application.Mapping
             CreateMap<ServicioCreacionDTO, Servicio>();
 
 
-            CreateMap<Usuario, UsuarioDTO>()
-                .ForMember(dto => dto.TipoRol, opt => opt.MapFrom(ent => ent.UsuarioRoles.FirstOrDefault().Rol.NombreRol))
-                .ForMember(dto => dto.NombreUsuario, opt => opt.MapFrom(ent => ent.UsuarioRoles.FirstOrDefault().Usuario.NombreDeUsuario));
-            CreateMap<UsuarioCreacionDTO, Usuario>();
+            CreateMap<User, UsuarioDTO>()
+                .ForMember(dto => dto.TipoRol, opt => opt.MapFrom(ent => ent.UserRoles.FirstOrDefault().Rol.Name))
+                .ForMember(dto => dto.NombreUsuario, opt => opt.MapFrom(ent => ent.UserRoles.FirstOrDefault().User.FullName));
+            CreateMap<UsuarioCreacionDTO, User>();
 
             CreateMap<Rol, RolDTO>();
             CreateMap<RolCreacionDTO, Rol>();
 
-            CreateMap<UsuarioRol, UsuarioRolCreacionDTO>();
-            CreateMap<UsuarioRolCreacionDTO, UsuarioRol>();
+            CreateMap<UserRol, UsuarioRolCreacionDTO>();
+            CreateMap<UsuarioRolCreacionDTO, UserRol>();
 
             CreateMap<Expenses, ExpenseDTO>()
                 .ForMember(dto => dto.NameExpenseType, ent => ent.MapFrom(prop => prop.ExpenseType.Name))
@@ -96,7 +106,7 @@ namespace APICalculos.Application.Mapping
                 .ForMember(dto => dto.Id, opt => opt.MapFrom(v => v.Id))
                 .ForMember(dto => dto.ClientId, opt => opt.MapFrom(v => v.ClientId))
                 .ForMember(dto => dto.NameClient, opt => opt.MapFrom(v => v.Client.Name))
-                .ForMember(dto => dto.TotalAmount, opt => opt.MapFrom(v => v.TotalAmount))
+                //.ForMember(dto => dto.TotalAmount, opt => opt.MapFrom(v => v.TotalAmount))
                 .ForMember(dto => dto.DateSale, opt => opt.MapFrom(v => v.DateSale))
                 .ForMember(dto => dto.IsDeleted, opt => opt.MapFrom(v => v.IsDeleted))
                 .ForMember(dto => dto.SaleDetail, opt => opt.MapFrom(v => v.SaleDetail))
@@ -142,6 +152,29 @@ namespace APICalculos.Application.Mapping
             CreateMap<Client, ClientSearchDTO>();
             CreateMap<Employee, EmployeeSearchDTO>();
             CreateMap<ServiceType, ServicesSearchDTO>();
+
+
+            CreateMap<Store, StoreResponseDTO>();
+
+            CreateMap<StoreCreateDto, Store>()
+                .ForMember(dest => dest.CreateOn,
+                           opt => opt.MapFrom(_ => DateTime.UtcNow));
+
+            CreateMap<StoreUpdateDTO, Store>();
+
+            CreateMap<User, UserResponseDTO>();
+
+            CreateMap<UserCreateDTO, User>()
+                .ForMember(dest => dest.PasswordHash,
+                           opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedOn,
+                           opt => opt.MapFrom(_ => DateTime.UtcNow))
+                .ForMember(dest => dest.IsActive,
+                           opt => opt.MapFrom(_ => true));
+
+            CreateMap<UserUpdateDTO, User>();
+
+
         }
     }
 }

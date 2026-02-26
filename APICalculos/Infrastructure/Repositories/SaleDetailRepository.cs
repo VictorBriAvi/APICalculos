@@ -8,35 +8,48 @@ namespace APICalculos.Infrastructure.Repositories
     public class SaleDetailRepository : ISaleDetailRepository
     {
         private readonly MyDbContext _dbContext;
-        
+
         public SaleDetailRepository(MyDbContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         #region GET
-        public async Task<IEnumerable<SaleDetail>> GetAllAsync()
-        {
-            return await _dbContext.SaleDetails.Include(st => st.Sale).Include(st => st.ServiceType).Include(st => st.Employee).AsNoTracking().OrderByDescending(x => x.Id).ToListAsync();
 
-        }
-
-        public async Task<SaleDetail> GetByIdAsync(int id)
-        {
-            return await _dbContext.SaleDetails.Include(st => st.Sale).Include(st => st.ServiceType).Include(st => st.Employee).AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
-        }
-
-        public async Task<List<SaleDetail>> GetBySaleIdAsync(int saleId)
+        public async Task<IEnumerable<SaleDetail>> GetAllAsync(int storeId)
         {
             return await _dbContext.SaleDetails
-                .Where(d => d.SaleId == saleId && !d.IsDeleted)
+                .Where(x => x.StoreId == storeId && !x.IsDeleted)
+                .Include(st => st.Sale)
+                .Include(st => st.ServiceType)
+                .Include(st => st.Employee)
+                .AsNoTracking()
+                .OrderByDescending(x => x.Id)
+                .ToListAsync();
+        }
+
+        public async Task<SaleDetail> GetByIdAsync(int id, int storeId)
+        {
+            return await _dbContext.SaleDetails
+                .Where(x => x.Id == id && x.StoreId == storeId && !x.IsDeleted)
+                .Include(st => st.Sale)
+                .Include(st => st.ServiceType)
+                .Include(st => st.Employee)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+        }
+
+        public async Task<List<SaleDetail>> GetBySaleIdAsync(int saleId, int storeId)
+        {
+            return await _dbContext.SaleDetails
+                .Where(d => d.SaleId == saleId && d.StoreId == storeId && !d.IsDeleted)
                 .Include(d => d.ServiceType)
                 .Include(d => d.Employee)
                 .AsNoTracking()
                 .ToListAsync();
         }
-        #endregion
 
+        #endregion
 
         public async Task AddAsync(SaleDetail saleDetail)
         {

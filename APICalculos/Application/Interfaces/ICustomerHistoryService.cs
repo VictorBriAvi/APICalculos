@@ -1,13 +1,13 @@
-﻿using APICalculos.Application.DTOs;
+﻿using APICalculos.Application.DTOs.CustomerHistory;
 
 namespace APICalculos.Application.Interfaces
 {
     public interface ICustomerHistoryService
     {
-        Task<List<CustomerHistoryDTO>> GetAllCustomerHistoriesAsync();
-        Task<CustomerHistoryDTO> GetCustomerHistoryForId(int id);
-        Task<CustomerHistoryDTO> AddCustomerHistoryAsync(CustomerHistoryCreationDTO customerHistoryCreationDTO);
-        Task UpdateCustomerHistoryAsync(int id, CustomerHistoryUpdateDTO dto);
-        Task DeleteCustomerHistoriesAsync(int id);
+        Task<List<CustomerHistoryDTO>> GetAllCustomerHistoriesAsync(int storeId);
+        Task<CustomerHistoryDTO?> GetCustomerHistoryForId(int id, int storeId);
+        Task<CustomerHistoryDTO> AddCustomerHistoryAsync(int storeId, CustomerHistoryCreationDTO dto);
+        Task UpdateCustomerHistoryAsync(int id, int storeId, CustomerHistoryUpdateDTO dto);
+        Task DeleteCustomerHistoriesAsync(int id, int storeId);
     }
 }
