@@ -8,8 +8,8 @@ namespace APICalculos.Domain.Entidades
         public string Name { get; set; }
         public ICollection<Expenses> Expenses { get; set; }
 
-        public int? StoreId { get; set; }
-        public Store? Store { get; set; }
+        public int StoreId { get; set; }
+        public Store Store { get; set; }
 
 
 

@@ -19,8 +19,8 @@ namespace APICalculos.Domain.Entidades
         public ServiceType ServiceType { get; set; }
         public Employee Employee { get; set; }
 
-        public int? StoreId { get; set; }
-        public Store? Store { get; set; }
+        public int StoreId { get; set; }
+        public Store Store { get; set; }
 
 
 

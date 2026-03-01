@@ -16,8 +16,8 @@ namespace APICalculos.Domain.Entidades
         public int PaymentTypeId { get; set; }
         public PaymentTypes PaymentType { get; set; }
 
-        public int? StoreId { get; set; }
-        public Store? Store { get; set; }
+        public int StoreId { get; set; }
+        public Store Store { get; set; }
 
     }
 }

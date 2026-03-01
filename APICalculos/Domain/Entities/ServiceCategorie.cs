@@ -10,8 +10,8 @@ namespace APICalculos.Domain.Entidades
 
         public ICollection<ServiceType> ServiceTypes { get; set; }
 
-        public int? StoreId { get; set; }
-        public Store? Store { get; set; }
+        public int StoreId { get; set; }
+        public Store Store { get; set; }
 
 
     }

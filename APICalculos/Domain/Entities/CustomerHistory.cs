@@ -12,8 +12,8 @@ namespace APICalculos.Domain.Entidades
         public int ClientId { get; set; }
         public Client Client { get; set;}
 
-        public int? StoreId { get; set; }
-        public Store? Store { get; set; }
+        public int StoreId { get; set; }
+        public Store Store { get; set; }
 
 
     }

@@ -107,7 +107,7 @@ namespace APICalculos.Application.Mapping
                 .ForMember(dto => dto.ClientId, opt => opt.MapFrom(v => v.ClientId))
                 .ForMember(dto => dto.NameClient, opt => opt.MapFrom(v => v.Client.Name))
                 //.ForMember(dto => dto.TotalAmount, opt => opt.MapFrom(v => v.TotalAmount))
-                .ForMember(dto => dto.DateSale, opt => opt.MapFrom(v => v.DateSale))
+                .ForMember(dto => dto.DateSale, opt => opt.MapFrom(v => v.DateSale.ToString("dd-MM-yyyy")))
                 .ForMember(dto => dto.IsDeleted, opt => opt.MapFrom(v => v.IsDeleted))
                 .ForMember(dto => dto.SaleDetail, opt => opt.MapFrom(v => v.SaleDetail))
                 .ForMember(dto => dto.Payments, opt => opt.MapFrom(v => v.Payments));

@@ -11,8 +11,8 @@ namespace APICalculos.Domain.Entidades
         public ServiceCategorie ServiceCategories { get; set; }
         public ICollection<SaleDetail> SaleDetail { get; set; }
 
-        public int? StoreId { get; set; }
-        public Store? Store { get; set; }
+        public int StoreId { get; set; }
+        public Store Store { get; set; }
 
 
 

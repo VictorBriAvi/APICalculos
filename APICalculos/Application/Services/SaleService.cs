@@ -85,14 +85,7 @@ namespace APICalculos.Application.Services
         // =========================================
         // LISTADO NORMAL POR RANGO
         // =========================================
-        public async Task<List<SaleDTO>> GetFilteredSalesAsync(
-            int storeId,
-            DateTime? fromDate,
-            DateTime? toDate,
-            int? clientId,
-            int? paymentTypeId,
-            int? employeeId,
-            int? serviceTypeId)
+        public async Task<List<SaleDTO>> GetFilteredSalesAsync(int storeId,DateTime? fromDate, DateTime? toDate,int? clientId,int? paymentTypeId,int? employeeId,int? serviceTypeId)
         {
             if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
                 throw new ArgumentException("Rango de fechas inválido.");
@@ -103,14 +96,7 @@ namespace APICalculos.Application.Services
             if (toDate.HasValue)
                 toDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
 
-            var sales = await _saleRepository.GetFilteredAsync(
-                storeId,
-                fromDate,
-                toDate,
-                clientId,
-                paymentTypeId,
-                employeeId,
-                serviceTypeId);
+            var sales = await _saleRepository.GetFilteredAsync(storeId,fromDate,toDate,clientId,paymentTypeId,employeeId,serviceTypeId);
 
             return _mapper.Map<List<SaleDTO>>(sales);
         }
@@ -163,7 +149,10 @@ namespace APICalculos.Application.Services
                 {
                     PaymentTypeId = payment.PaymentTypeId,
                     AmountPaid = payment.AmountPaid,
-                    PaymentDate = DateTime.Now
+                    PaymentDate = DateTime.Now,
+                    StoreId = storeId
+                    
+                    
                 });
             }
 

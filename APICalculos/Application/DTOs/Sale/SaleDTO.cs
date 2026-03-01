@@ -13,7 +13,8 @@ namespace APICalculos.Application.DTOs.Sale
         public string NameClient { get; set; }
 
         public decimal TotalAmount { get; set; }
-        public DateTime DateSale { get; set; }
+        //public DateTime DateSale { get; set; }
+        public string DateSale { get; set; }
         public bool IsDeleted { get; set; } = false;
 
         public List<SaleDetailDTO> SaleDetail { get; set; }

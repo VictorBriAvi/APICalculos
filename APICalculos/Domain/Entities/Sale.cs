@@ -20,8 +20,8 @@ namespace APICalculos.Domain.Entidades
             TotalAmount = SaleDetail.Sum(d => (d.UnitPrice + d.AdditionalCharge) * (1 - (d.DiscountPercent / 100)));
         }
 
-        public int? StoreId { get; set; }
-        public Store? Store { get; set; }
+        public int StoreId { get; set; }
+        public Store Store { get; set; }
 
 
 

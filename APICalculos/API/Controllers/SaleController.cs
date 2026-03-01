@@ -29,50 +29,24 @@ namespace APICalculos.API.Controllers
         }
 
         [HttpGet("by-date-range")]
-        public async Task<ActionResult<List<SaleDTO>>> GetSalesByDateRangeAsync(
-            [FromQuery] DateTime? fromDate,
-            [FromQuery] DateTime? toDate,
-            [FromQuery] int? clientId,
-            [FromQuery] int? paymentTypeId,
-            [FromQuery] int? employeeId,
-            [FromQuery] int? serviceTypeId)
+        public async Task<ActionResult<List<SaleDTO>>> GetSalesByDateRangeAsync([FromQuery] DateTime? fromDate,[FromQuery] DateTime? toDate,[FromQuery] int? clientId,[FromQuery] int? paymentTypeId,[FromQuery] int? employeeId,[FromQuery] int? serviceTypeId)
         {
             if (fromDate == default || toDate == default)
                 return BadRequest("Las fechas son obligatorias.");
 
             var storeId = GetStoreIdFromToken();
 
-            var result = await _saleService.GetFilteredSalesAsync(
-                storeId,
-                fromDate,
-                toDate,
-                clientId,
-                paymentTypeId,
-                employeeId,
-                serviceTypeId);
+            var result = await _saleService.GetFilteredSalesAsync(storeId,fromDate,toDate,clientId,paymentTypeId,employeeId,serviceTypeId);
 
             return Ok(result);
         }
 
         [HttpGet("filtered")]
-        public async Task<ActionResult<List<SaleDTO>>> GetFiltered(
-            [FromQuery] DateTime? fromDate,
-            [FromQuery] DateTime? toDate,
-            [FromQuery] int? clientId,
-            [FromQuery] int? paymentTypeId,
-            [FromQuery] int? employeeId,
-            [FromQuery] int? serviceTypeId)
+        public async Task<ActionResult<List<SaleDTO>>> GetFiltered([FromQuery] DateTime? fromDate,[FromQuery] DateTime? toDate, [FromQuery] int? clientId,[FromQuery] int? paymentTypeId,[FromQuery] int? employeeId,[FromQuery] int? serviceTypeId)
         {
             var storeId = GetStoreIdFromToken();
 
-            var result = await _saleService.GetFilteredSalesAsync(
-                storeId,
-                fromDate,
-                toDate,
-                clientId,
-                paymentTypeId,
-                employeeId,
-                serviceTypeId);
+            var result = await _saleService.GetFilteredSalesAsync(storeId,fromDate,toDate,clientId,paymentTypeId,employeeId,serviceTypeId);
 
             return Ok(result);
         }
