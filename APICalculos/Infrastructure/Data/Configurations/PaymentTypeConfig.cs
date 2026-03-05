@@ -14,6 +14,9 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired();
 
+            builder.Property(pt => pt.ApplyDiscount).IsRequired();
+
+            builder.Property(pt => pt.DiscountPercent).HasColumnType("decimal(5,2)").IsRequired();
 
             builder.HasMany(pt => pt.SalePayments)
                 .WithOne(sp => sp.PaymentType)
@@ -21,9 +24,9 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(e => e.Store)
-    .WithMany()
-    .HasForeignKey(e => e.StoreId)
-    .OnDelete(DeleteBehavior.Restrict);
+                .WithMany()
+                .HasForeignKey(e => e.StoreId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(e => e.StoreId);
         }

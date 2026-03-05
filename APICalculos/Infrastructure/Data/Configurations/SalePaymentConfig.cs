@@ -30,9 +30,9 @@ namespace APICalculos.Infrastructure.Data.Configurations
 
 
             builder.HasOne(e => e.Store)
-    .WithMany()
-    .HasForeignKey(e => e.StoreId)
-    .OnDelete(DeleteBehavior.Restrict);
+                .WithMany()
+                .HasForeignKey(e => e.StoreId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(e => e.StoreId);
         }

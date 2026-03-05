@@ -9,6 +9,11 @@ namespace APICalculos.Domain.Entities
         public int SaleId { get; set; }
         public int PaymentTypeId { get; set; }
 
+        public decimal AppliedDiscountPercent { get; set; }
+        public decimal DiscountAmount { get; set; }
+        public decimal NetAmount { get; set; }
+
+
         public decimal AmountPaid { get; set; }
         public DateTime PaymentDate { get; set; }
 

@@ -10,82 +10,28 @@ namespace APICalculos.Application.Services
     public class SaleService : ISaleService
     {
         private readonly ISaleRepository _saleRepository;
+        private readonly IPaymentTypeRepository _paymentTypeRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
         public SaleService(
             ISaleRepository saleRepository,
+            IPaymentTypeRepository paymentTypeRepository,
             IMapper mapper,
             IUnitOfWork unitOfWork)
         {
             _saleRepository = saleRepository;
+            _paymentTypeRepository = paymentTypeRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
-
-        // =========================================
-        // GET ALL
-        // =========================================
         public async Task<List<SaleDTO>> GetAllSaleAsync(int storeId)
         {
             var sales = await _saleRepository.GetAllAsync(storeId);
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
-        // =========================================
-        // RESUMEN AGRUPADO POR DIA
-        // =========================================
-        //public async Task<List<SaleDTO>> GetSalesByDateRangeAsync(
-        //    int storeId,
-        //    DateTime fromDate,
-        //    DateTime toDate)
-        //{
-        //    if (fromDate > toDate)
-        //        throw new ArgumentException("La fecha de inicio no puede ser mayor que la fecha de fin.");
-
-        //    fromDate = fromDate.Date;
-        //    toDate = toDate.Date.AddDays(1).AddTicks(-1);
-
-        //    var sales = await _saleRepository
-        //        .GetByDateRangeAsync(fromDate, toDate, storeId);
-
-        //    var mappedSales = _mapper.Map<List<SaleDTO>>(sales);
-
-        //    foreach (var sale in mappedSales)
-        //    {
-        //        foreach (var detail in sale.SaleDetail)
-        //        {
-        //            var baseAmount = detail.UnitPrice + detail.AdditionalCharge;
-        //            var discount = baseAmount * (detail.DiscountPercent / 100m);
-        //            detail.TotalCalculated = baseAmount - discount;
-        //        }
-
-        //        sale.TotalAmount = sale.SaleDetail.Sum(d => d.TotalCalculated);
-        //    }
-
-        //    var groupedByDate = mappedSales
-        //        .GroupBy(s => s.DateSale.Date)
-        //        .Select(group => new SaleDTO
-        //        {
-        //            Id = 0,
-        //            DateSale = group.Key,
-        //            NameClient = "Resumen diario",
-        //            ClientId = 0,
-        //            SaleDetail = group.SelectMany(s => s.SaleDetail).ToList(),
-        //            Payments = group.SelectMany(s => s.Payments).ToList(),
-        //            TotalAmount = group.Sum(s => s.TotalAmount),
-        //            IsDeleted = false
-        //        })
-        //        .OrderByDescending(s => s.DateSale)
-        //        .ToList();
-
-        //    return groupedByDate;
-        //}
-
-        // =========================================
-        // LISTADO NORMAL POR RANGO
-        // =========================================
-        public async Task<List<SaleDTO>> GetFilteredSalesAsync(int storeId,DateTime? fromDate, DateTime? toDate,int? clientId,int? paymentTypeId,int? employeeId,int? serviceTypeId)
+        public async Task<List<SaleDTO>> GetFilteredSalesAsync(int storeId, DateTime? fromDate, DateTime? toDate, int? clientId, int? paymentTypeId, int? employeeId, int? serviceTypeId)
         {
             if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
                 throw new ArgumentException("Rango de fechas inválido.");
@@ -96,14 +42,11 @@ namespace APICalculos.Application.Services
             if (toDate.HasValue)
                 toDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
 
-            var sales = await _saleRepository.GetFilteredAsync(storeId,fromDate,toDate,clientId,paymentTypeId,employeeId,serviceTypeId);
+            var sales = await _saleRepository.GetFilteredAsync(storeId, fromDate, toDate, clientId, paymentTypeId, employeeId, serviceTypeId);
 
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
-        // =========================================
-        // GET BY ID
-        // =========================================
         public async Task<SaleDTO?> GetSaleForId(int id, int storeId)
         {
             var sale = await _saleRepository.GetByIdAsync(id, storeId);
@@ -113,9 +56,6 @@ namespace APICalculos.Application.Services
             return _mapper.Map<SaleDTO>(sale);
         }
 
-        // =========================================
-        // CREATE
-        // =========================================
         public async Task<SaleDTO> AddSaleWithDetailsAsync(
             int storeId,
             SaleCreationDTO dto)
@@ -145,14 +85,23 @@ namespace APICalculos.Application.Services
 
             foreach (var payment in dto.Payments)
             {
+                var paymentType = await _paymentTypeRepository.GetByIdAsync(payment.PaymentTypeId, storeId) ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {payment.PaymentTypeId}");
+
+                var appliedDiscountPercent = paymentType.ApplyDiscount ? paymentType.DiscountPercent : 0;
+                var discountAmount = payment.AmountPaid * (appliedDiscountPercent / 100m);
+                var netAmount = payment.AmountPaid - discountAmount;
+
                 sale.Payments.Add(new SalePayment
                 {
                     PaymentTypeId = payment.PaymentTypeId,
                     AmountPaid = payment.AmountPaid,
+                    AppliedDiscountPercent = appliedDiscountPercent,
+                    DiscountAmount = discountAmount,
+                    NetAmount = netAmount,
                     PaymentDate = DateTime.Now,
                     StoreId = storeId
-                    
-                    
+
+
                 });
             }
 
@@ -164,9 +113,6 @@ namespace APICalculos.Application.Services
             return _mapper.Map<SaleDTO>(sale);
         }
 
-        // =========================================
-        // UPDATE
-        // =========================================
         public async Task UpdateSaleAsync(
             int id,
             int storeId,
@@ -182,10 +128,20 @@ namespace APICalculos.Application.Services
             saleDB.Payments.Clear();
             foreach (var paymentDTO in dto.Payments)
             {
+                var paymentType = await _paymentTypeRepository.GetByIdAsync(paymentDTO.PaymentTypeId, storeId)
+    ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {paymentDTO.PaymentTypeId}");
+
+                var appliedDiscountPercent = paymentType.ApplyDiscount ? paymentType.DiscountPercent : 0;
+                var discountAmount = paymentDTO.AmountPaid * (appliedDiscountPercent / 100m);
+                var netAmount = paymentDTO.AmountPaid - discountAmount;
+
                 saleDB.Payments.Add(new SalePayment
                 {
                     PaymentTypeId = paymentDTO.PaymentTypeId,
                     AmountPaid = paymentDTO.AmountPaid,
+                    AppliedDiscountPercent = appliedDiscountPercent,
+                    DiscountAmount = discountAmount,
+                    NetAmount = netAmount,
                     PaymentDate = DateTime.Now
                 });
             }
@@ -196,9 +152,6 @@ namespace APICalculos.Application.Services
             await _unitOfWork.SaveChangesAsync();
         }
 
-        // =========================================
-        // DELETE
-        // =========================================
         public async Task DeleteSaleAsync(int id, int storeId)
         {
             var saleDB = await _saleRepository.GetByIdAsync(id, storeId);
