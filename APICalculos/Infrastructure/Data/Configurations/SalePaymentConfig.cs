@@ -14,6 +14,30 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .HasColumnType("decimal(18,2)")
                 .IsRequired();
 
+            builder.Property(sp => sp.AppliedDiscountPercent)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            builder.Property(sp => sp.DiscountAmount)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
+            builder.Property(sp => sp.NetAmount)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
+            builder.Property(sp => sp.AppliedSurchargePercent)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            builder.Property(sp => sp.SurchargeAmount)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
+            builder.Property(sp => sp.FinalAmount)
+                .HasColumnType("decimal(18,2)")
+                .IsRequired();
+
             builder.Property(sp => sp.PaymentDate)
                 .HasColumnType("date")
                 .IsRequired();

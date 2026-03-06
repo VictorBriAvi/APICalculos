@@ -184,12 +184,16 @@ namespace APICalculos.Infrastructure.Repositories
             DateTime startDate,
             DateTime endDate)
         {
+            var fromDate = startDate.Date;
+            var toDate = endDate.Date.AddDays(1);
+
             return await (from sp in _dbContext.SalePayments
                           join s in _dbContext.Sales on sp.SaleId equals s.Id
                           join pt in _dbContext.PaymentTypes on sp.PaymentTypeId equals pt.Id
                           where s.StoreId == storeId
-                                && s.DateSale >= startDate
-                                && s.DateSale <= endDate
+                                && !s.IsDeleted
+                                && s.DateSale >= fromDate
+                                && s.DateSale < toDate
                           group new { sp, s, pt }
                           by new { Fecha = s.DateSale.Date, pt.Name } into g
                           orderby g.Key.Fecha, g.Key.Name
@@ -197,7 +201,10 @@ namespace APICalculos.Infrastructure.Repositories
                           {
                               Fecha = g.Key.Fecha,
                               MedioDePago = g.Key.Name,
-                              TotalRecaudado = g.Sum(x => x.sp.AmountPaid)
+                              TotalRecaudado = g.Sum(x =>
+                                  x.sp.FinalAmount != 0m
+                                      ? x.sp.FinalAmount
+                                      : (x.sp.NetAmount != 0m ? x.sp.NetAmount : x.sp.AmountPaid))
                           }).ToListAsync();
         }
 
@@ -220,7 +227,10 @@ namespace APICalculos.Infrastructure.Repositories
                 select new
                 {
                     PaymentTypeId = g.Key,
-                    TotalVentas = (decimal?)g.Sum(x => x.AmountPaid)
+                    TotalVentas = (decimal?)g.Sum(x =>
+                        x.FinalAmount != 0m
+                            ? x.FinalAmount
+                            : (x.NetAmount != 0m ? x.NetAmount : x.AmountPaid))
                 };
 
             var gastos =

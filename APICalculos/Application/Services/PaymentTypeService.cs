@@ -41,11 +41,23 @@ namespace APICalculos.Application.Services
             if (string.IsNullOrWhiteSpace(dto.Name))
                 throw new ArgumentException("El nombre no puede estar vacío");
 
+            if (dto.DiscountPercent < 0 || dto.DiscountPercent > 100)
+                throw new ArgumentException("El porcentaje de descuento debe estar entre 0 y 100");
+
+            if (dto.SurchargePercent < 0 || dto.SurchargePercent > 100)
+                throw new ArgumentException("El porcentaje de recargo debe estar entre 0 y 100");
+
             var exists = await _repository.ExistsByNameAsync(dto.Name, storeId);
             if (exists)
                 throw new InvalidOperationException("Ya existe un tipo de pago con ese nombre");
 
             var entity = _mapper.Map<PaymentTypes>(dto);
+            if (!dto.ApplyDiscount)
+                entity.DiscountPercent = 0;
+
+            if (!dto.ApplySurcharge)
+                entity.SurchargePercent = 0;
+
             entity.StoreId = storeId;
 
             await _repository.AddAsync(entity);
@@ -63,6 +75,17 @@ namespace APICalculos.Application.Services
 
             if (!string.IsNullOrWhiteSpace(dto.Name))
                 entity.Name = dto.Name;
+
+            if (dto.DiscountPercent < 0 || dto.DiscountPercent > 100)
+                throw new ArgumentException("El porcentaje de descuento debe estar entre 0 y 100");
+
+            if (dto.SurchargePercent < 0 || dto.SurchargePercent > 100)
+                throw new ArgumentException("El porcentaje de recargo debe estar entre 0 y 100");
+
+            entity.ApplyDiscount = dto.ApplyDiscount;
+            entity.DiscountPercent = dto.ApplyDiscount ? dto.DiscountPercent : 0;
+            entity.ApplySurcharge = dto.ApplySurcharge;
+            entity.SurchargePercent = dto.ApplySurcharge ? dto.SurchargePercent : 0;
 
             _repository.Update(entity);
             await _unitOfWork.SaveChangesAsync();

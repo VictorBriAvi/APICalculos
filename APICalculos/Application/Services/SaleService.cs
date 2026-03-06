@@ -10,15 +10,18 @@ namespace APICalculos.Application.Services
     public class SaleService : ISaleService
     {
         private readonly ISaleRepository _saleRepository;
+        private readonly IPaymentTypeRepository _paymentTypeRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
         public SaleService(
             ISaleRepository saleRepository,
+            IPaymentTypeRepository paymentTypeRepository,
             IMapper mapper,
             IUnitOfWork unitOfWork)
         {
             _saleRepository = saleRepository;
+            _paymentTypeRepository = paymentTypeRepository;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
         }
@@ -145,10 +148,27 @@ namespace APICalculos.Application.Services
 
             foreach (var payment in dto.Payments)
             {
+                var paymentType = await _paymentTypeRepository.GetByIdAsync(payment.PaymentTypeId, storeId)
+                    ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {payment.PaymentTypeId}");
+
+                var appliedDiscountPercent = paymentType.ApplyDiscount ? paymentType.DiscountPercent : 0;
+                var discountAmount = payment.AmountPaid * (appliedDiscountPercent / 100m);
+                var netAmount = payment.AmountPaid - discountAmount;
+
+                var appliedSurchargePercent = paymentType.ApplySurcharge ? paymentType.SurchargePercent : 0;
+                var surchargeAmount = netAmount * (appliedSurchargePercent / 100m);
+                var finalAmount = netAmount + surchargeAmount;
+
                 sale.Payments.Add(new SalePayment
                 {
                     PaymentTypeId = payment.PaymentTypeId,
                     AmountPaid = payment.AmountPaid,
+                    AppliedDiscountPercent = appliedDiscountPercent,
+                    DiscountAmount = discountAmount,
+                    NetAmount = netAmount,
+                    AppliedSurchargePercent = appliedSurchargePercent,
+                    SurchargeAmount = surchargeAmount,
+                    FinalAmount = finalAmount,
                     PaymentDate = DateTime.Now,
                     StoreId = storeId
                     
@@ -182,11 +202,29 @@ namespace APICalculos.Application.Services
             saleDB.Payments.Clear();
             foreach (var paymentDTO in dto.Payments)
             {
+                var paymentType = await _paymentTypeRepository.GetByIdAsync(paymentDTO.PaymentTypeId, storeId)
+                    ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {paymentDTO.PaymentTypeId}");
+
+                var appliedDiscountPercent = paymentType.ApplyDiscount ? paymentType.DiscountPercent : 0;
+                var discountAmount = paymentDTO.AmountPaid * (appliedDiscountPercent / 100m);
+                var netAmount = paymentDTO.AmountPaid - discountAmount;
+
+                var appliedSurchargePercent = paymentType.ApplySurcharge ? paymentType.SurchargePercent : 0;
+                var surchargeAmount = netAmount * (appliedSurchargePercent / 100m);
+                var finalAmount = netAmount + surchargeAmount;
+
                 saleDB.Payments.Add(new SalePayment
                 {
                     PaymentTypeId = paymentDTO.PaymentTypeId,
                     AmountPaid = paymentDTO.AmountPaid,
-                    PaymentDate = DateTime.Now
+                    AppliedDiscountPercent = appliedDiscountPercent,
+                    DiscountAmount = discountAmount,
+                    NetAmount = netAmount,
+                    AppliedSurchargePercent = appliedSurchargePercent,
+                    SurchargeAmount = surchargeAmount,
+                    FinalAmount = finalAmount,
+                    PaymentDate = DateTime.Now,
+                    StoreId = storeId
                 });
             }
 

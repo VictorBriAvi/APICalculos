@@ -14,6 +14,19 @@ namespace APICalculos.Infrastructure.Data.Configurations
                 .HasMaxLength(100)
                 .IsRequired();
 
+            builder.Property(pt => pt.ApplyDiscount)
+                .IsRequired();
+
+            builder.Property(pt => pt.DiscountPercent)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
+
+            builder.Property(pt => pt.ApplySurcharge)
+                .IsRequired();
+
+            builder.Property(pt => pt.SurchargePercent)
+                .HasColumnType("decimal(5,2)")
+                .IsRequired();
 
             builder.HasMany(pt => pt.SalePayments)
                 .WithOne(sp => sp.PaymentType)
