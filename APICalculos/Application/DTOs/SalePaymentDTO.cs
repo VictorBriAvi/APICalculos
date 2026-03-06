@@ -8,5 +8,8 @@
         public decimal AppliedDiscountPercent { get; set; }
         public decimal DiscountAmount { get; set; }
         public decimal NetAmount { get; set; }
+        public decimal AppliedSurchargePercent { get; set; }
+        public decimal SurchargeAmount { get; set; }
+        public decimal FinalAmount { get; set; }
     }
 }

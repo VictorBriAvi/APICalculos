@@ -85,11 +85,18 @@ namespace APICalculos.Application.Services
 
             foreach (var payment in dto.Payments)
             {
-                var paymentType = await _paymentTypeRepository.GetByIdAsync(payment.PaymentTypeId, storeId) ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {payment.PaymentTypeId}");
+                var paymentType = await _paymentTypeRepository.GetByIdAsync(payment.PaymentTypeId, storeId)
+                    ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {payment.PaymentTypeId}");
 
                 var appliedDiscountPercent = paymentType.ApplyDiscount ? paymentType.DiscountPercent : 0;
-                var discountAmount = payment.AmountPaid * (appliedDiscountPercent / 100m);
-                var netAmount = payment.AmountPaid - discountAmount;
+                var appliedSurchargePercent = paymentType.ApplySurcharge ? paymentType.SurchargePercent : 0;
+
+                var baseAmount = payment.AmountPaid;
+                var surchargeAmount = baseAmount * (appliedSurchargePercent / 100m);
+                var amountWithSurcharge = baseAmount + surchargeAmount;
+                var discountAmount = amountWithSurcharge * (appliedDiscountPercent / 100m);
+                var finalAmount = amountWithSurcharge;
+                var netAmount = finalAmount - discountAmount;
 
                 sale.Payments.Add(new SalePayment
                 {
@@ -98,10 +105,11 @@ namespace APICalculos.Application.Services
                     AppliedDiscountPercent = appliedDiscountPercent,
                     DiscountAmount = discountAmount,
                     NetAmount = netAmount,
+                    AppliedSurchargePercent = appliedSurchargePercent,
+                    SurchargeAmount = surchargeAmount,
+                    FinalAmount = finalAmount,
                     PaymentDate = DateTime.Now,
                     StoreId = storeId
-
-
                 });
             }
 
@@ -113,10 +121,7 @@ namespace APICalculos.Application.Services
             return _mapper.Map<SaleDTO>(sale);
         }
 
-        public async Task UpdateSaleAsync(
-            int id,
-            int storeId,
-            SaleCreationDTO dto)
+        public async Task UpdateSaleAsync( int id, int storeId,SaleCreationDTO dto)
         {
             var saleDB = await _saleRepository.GetByIdAsync(id, storeId);
 
@@ -129,11 +134,18 @@ namespace APICalculos.Application.Services
             foreach (var paymentDTO in dto.Payments)
             {
                 var paymentType = await _paymentTypeRepository.GetByIdAsync(paymentDTO.PaymentTypeId, storeId)
-    ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {paymentDTO.PaymentTypeId}");
+                    ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {paymentDTO.PaymentTypeId}");
 
                 var appliedDiscountPercent = paymentType.ApplyDiscount ? paymentType.DiscountPercent : 0;
-                var discountAmount = paymentDTO.AmountPaid * (appliedDiscountPercent / 100m);
-                var netAmount = paymentDTO.AmountPaid - discountAmount;
+                var appliedSurchargePercent = paymentType.ApplySurcharge ? paymentType.SurchargePercent : 0;
+
+                var baseAmount = paymentDTO.AmountPaid;
+                var surchargeAmount = baseAmount * (appliedSurchargePercent / 100m);
+                var amountWithSurcharge = baseAmount + surchargeAmount;
+                var discountAmount = amountWithSurcharge * (appliedDiscountPercent / 100m);
+                var finalAmount = amountWithSurcharge;
+                var netAmount = finalAmount - discountAmount;
+
 
                 saleDB.Payments.Add(new SalePayment
                 {
@@ -142,7 +154,11 @@ namespace APICalculos.Application.Services
                     AppliedDiscountPercent = appliedDiscountPercent,
                     DiscountAmount = discountAmount,
                     NetAmount = netAmount,
-                    PaymentDate = DateTime.Now
+                    AppliedSurchargePercent = appliedSurchargePercent,
+                    SurchargeAmount = surchargeAmount,
+                    FinalAmount = finalAmount,
+                    PaymentDate = DateTime.Now,
+                    StoreId = storeId
                 });
             }
 

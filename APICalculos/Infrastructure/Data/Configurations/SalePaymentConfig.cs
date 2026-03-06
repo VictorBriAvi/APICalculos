@@ -10,29 +10,27 @@ namespace APICalculos.Infrastructure.Data.Configurations
         {
             builder.HasKey(sp => sp.Id);
 
-            builder.Property(sp => sp.AmountPaid)
-                .HasColumnType("decimal(18,2)")
-                .IsRequired();
+            builder.Property(sp => sp.AmountPaid).HasColumnType("decimal(18,2)").IsRequired();
 
-            builder.Property(sp => sp.PaymentDate)
-                .HasColumnType("date")
-                .IsRequired();
+            builder.Property(sp => sp.AppliedDiscountPercent).HasColumnType("decimal(5,2)").IsRequired();
 
-            builder.HasOne(sp => sp.Sale)
-                .WithMany(s => s.Payments)
-                .HasForeignKey(sp => sp.SaleId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.Property(sp => sp.DiscountAmount).HasColumnType("decimal(18,2)").IsRequired();
 
-            builder.HasOne(sp => sp.PaymentType)
-                .WithMany(pt => pt.SalePayments)
-                .HasForeignKey(sp => sp.PaymentTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(sp => sp.NetAmount).HasColumnType("decimal(18,2)").IsRequired();
 
+            builder.Property(sp => sp.AppliedSurchargePercent).HasColumnType("decimal(5,2)").IsRequired();
 
-            builder.HasOne(e => e.Store)
-                .WithMany()
-                .HasForeignKey(e => e.StoreId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(sp => sp.SurchargeAmount).HasColumnType("decimal(18,2)").IsRequired();
+
+            builder.Property(sp => sp.FinalAmount).HasColumnType("decimal(18,2)").IsRequired();
+
+            builder.Property(sp => sp.PaymentDate).HasColumnType("date").IsRequired();
+
+            builder.HasOne(sp => sp.Sale).WithMany(s => s.Payments).HasForeignKey(sp => sp.SaleId).OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(sp => sp.PaymentType).WithMany(pt => pt.SalePayments).HasForeignKey(sp => sp.PaymentTypeId).OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(e => e.Store).WithMany().HasForeignKey(e => e.StoreId).OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(e => e.StoreId);
         }

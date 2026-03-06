@@ -10,23 +10,19 @@ namespace APICalculos.Infrastructure.Data.Configurations
         {
             builder.HasKey(pt => pt.Id);
 
-            builder.Property(pt => pt.Name)
-                .HasMaxLength(100)
-                .IsRequired();
+            builder.Property(pt => pt.Name).HasMaxLength(100).IsRequired();
 
             builder.Property(pt => pt.ApplyDiscount).IsRequired();
 
             builder.Property(pt => pt.DiscountPercent).HasColumnType("decimal(5,2)").IsRequired();
 
-            builder.HasMany(pt => pt.SalePayments)
-                .WithOne(sp => sp.PaymentType)
-                .HasForeignKey(sp => sp.PaymentTypeId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(pt => pt.ApplySurcharge).IsRequired();
 
-            builder.HasOne(e => e.Store)
-                .WithMany()
-                .HasForeignKey(e => e.StoreId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(pt => pt.SurchargePercent).HasColumnType("decimal(5,2)").IsRequired();
+
+            builder.HasMany(pt => pt.SalePayments).WithOne(sp => sp.PaymentType).HasForeignKey(sp => sp.PaymentTypeId).OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(e => e.Store).WithMany().HasForeignKey(e => e.StoreId).OnDelete(DeleteBehavior.Restrict);
 
             builder.HasIndex(e => e.StoreId);
         }
