@@ -9,39 +9,35 @@ namespace APICalculos.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<Sale> builder)
         {
-            builder.HasKey(v => v.Id);
+            builder.HasKey(s => s.Id);
 
-            builder.HasOne(v => v.Client)
-                .WithMany(c => c.Sale)
-                .HasForeignKey(v => v.ClientId)
-                .OnDelete(DeleteBehavior.Restrict);
+            builder.Property(s => s.BaseAmount)
+                .HasColumnType("decimal(18,2)").IsRequired();
 
-            builder.HasMany(v => v.SaleDetail)
-                .WithOne(dv => dv.Sale)
-                .HasForeignKey(dv => dv.SaleId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.Property(s => s.SurchargePercent)
+                .HasColumnType("decimal(5,2)").IsRequired();
 
-            builder.HasMany(v => v.Payments)
-                .WithOne(p => p.Sale)
-                .HasForeignKey(p => p.SaleId)
-                .OnDelete(DeleteBehavior.Cascade);
+            builder.Property(s => s.SurchargeAmount)
+                .HasColumnType("decimal(18,2)").IsRequired();
 
-            builder.Property(v => v.TotalAmount)
-                .HasColumnType("decimal(18,2)")
-                .IsRequired();
+            builder.Property(s => s.TotalAmount)
+                .HasColumnType("decimal(18,2)").IsRequired();
 
-            builder.Property(v => v.DateSale)
-                .IsRequired();
+            builder.Property(s => s.DateSale)
+                .HasColumnType("date").IsRequired();
 
-            builder.Property(v => v.IsDeleted)
+            builder.Property(s => s.IsDeleted)
                 .HasDefaultValue(false);
 
-            builder.HasOne(e => e.Store)
-    .WithMany()
-    .HasForeignKey(e => e.StoreId)
-    .OnDelete(DeleteBehavior.Restrict);
+            // NO configurar HasOne(Client) acá — ya está definido en otro lado
+            // y EF genera ClientId1 duplicado si se repite
 
-            builder.HasIndex(e => e.StoreId);
+            builder.HasOne(s => s.Store)
+                .WithMany()
+                .HasForeignKey(s => s.StoreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(s => s.StoreId);
         }
     }
 
