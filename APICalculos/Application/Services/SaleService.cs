@@ -14,11 +14,7 @@ namespace APICalculos.Application.Services
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
 
-        public SaleService(
-            ISaleRepository saleRepository,
-            IPaymentTypeRepository paymentTypeRepository,
-            IMapper mapper,
-            IUnitOfWork unitOfWork)
+        public SaleService(ISaleRepository saleRepository,IPaymentTypeRepository paymentTypeRepository,IMapper mapper,IUnitOfWork unitOfWork)
         {
             _saleRepository = saleRepository;
             _paymentTypeRepository = paymentTypeRepository;
@@ -32,11 +28,7 @@ namespace APICalculos.Application.Services
             return _mapper.Map<List<SaleDTO>>(sales);
         }
 
-        public async Task<List<SaleDTO>> GetFilteredSalesAsync(
-            int storeId,
-            DateTime? fromDate, DateTime? toDate,
-            int? clientId, int? paymentTypeId,
-            int? employeeId, int? serviceTypeId)
+        public async Task<List<SaleDTO>> GetFilteredSalesAsync(int storeId,DateTime? fromDate, DateTime? toDate,int? clientId, int? paymentTypeId,int? employeeId, int? serviceTypeId)
         {
             if (fromDate.HasValue && toDate.HasValue && fromDate > toDate)
                 throw new ArgumentException("Rango de fechas inválido.");
@@ -44,8 +36,7 @@ namespace APICalculos.Application.Services
             if (fromDate.HasValue) fromDate = fromDate.Value.Date;
             if (toDate.HasValue) toDate = toDate.Value.Date.AddDays(1).AddTicks(-1);
 
-            var sales = await _saleRepository.GetFilteredAsync(
-                storeId, fromDate, toDate, clientId, paymentTypeId, employeeId, serviceTypeId);
+            var sales = await _saleRepository.GetFilteredAsync(storeId, fromDate, toDate, clientId, paymentTypeId, employeeId, serviceTypeId);
 
             return _mapper.Map<List<SaleDTO>>(sales);
         }
@@ -58,34 +49,21 @@ namespace APICalculos.Application.Services
 
         public async Task<SaleDTO> AddSaleWithDetailsAsync(int storeId, SaleCreationDTO dto)
         {
-            // ── 1. Cargar todos los tipos de pago de una sola vez ─────────────────
             var paymentTypes = new Dictionary<int, PaymentTypes>();
+
             foreach (var p in dto.Payments)
             {
                 if (!paymentTypes.ContainsKey(p.PaymentTypeId))
                 {
-                    var pt = await _paymentTypeRepository.GetByIdAsync(p.PaymentTypeId, storeId)
-                        ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {p.PaymentTypeId}");
+                    var pt = await _paymentTypeRepository.GetByIdAsync(p.PaymentTypeId, storeId) ?? throw new KeyNotFoundException($"Tipo de pago no encontrado: {p.PaymentTypeId}");
                     paymentTypes[p.PaymentTypeId] = pt;
                 }
             }
 
-            // ── 2. Recargo: pertenece a la VENTA, no al pago individual ──────────
-            //    Se aplica el MAYOR porcentaje entre todos los medios de pago usados.
-            //    El recargo lo paga el CLIENTE y sube el TotalAmount de la venta.
-            var surchargePercent = paymentTypes.Values
-                .Where(pt => pt.ApplySurcharge)
-                .Select(pt => pt.SurchargePercent)
-                .DefaultIfEmpty(0m)
-                .Max();
-
-            // BaseAmount = suma de los AmountPaid del frontend
-            // (el frontend ya calculó el total efectivo y distribuyó los montos)
+            var surchargePercent = paymentTypes.Values.Where(pt => pt.ApplySurcharge).Select(pt => pt.SurchargePercent).DefaultIfEmpty(0m).Max();
             var baseAmount = dto.Payments.Sum(p => p.AmountPaid);
             var surchargeAmount = baseAmount * (surchargePercent / 100m);
             var totalAmount = baseAmount + surchargeAmount;
-
-            // ── 3. Construir la venta ─────────────────────────────────────────────
             var sale = new Sale
             {
                 StoreId = storeId,
@@ -93,11 +71,8 @@ namespace APICalculos.Application.Services
                 ClientId = dto.ClientId,
                 SaleDetail = new List<SaleDetail>(),
                 Payments = new List<SalePayment>(),
-
-                // Recargo a nivel venta
                 SurchargePercent = surchargePercent,
                 SurchargeAmount = surchargeAmount,
-                // TotalAmount lo setea CalculateTotal() pero lo pre-seteamos por claridad
             };
 
             foreach (var detail in dto.SaleDetails)
@@ -113,9 +88,6 @@ namespace APICalculos.Application.Services
                 });
             }
 
-            // ── 4. Pagos: solo registrar el descuento que cobra la app ────────────
-            //    El descuento (ej: 3% débito) es lo que la app le descuenta al NEGOCIO.
-            //    No tiene nada que ver con el recargo que pagó el cliente.
             foreach (var payment in dto.Payments)
             {
                 var paymentType = paymentTypes[payment.PaymentTypeId];
@@ -127,16 +99,16 @@ namespace APICalculos.Application.Services
                 sale.Payments.Add(new SalePayment
                 {
                     PaymentTypeId = payment.PaymentTypeId,
-                    AmountPaid = payment.AmountPaid,      // lo que entró por este medio
-                    AppDiscountPercent = appDiscountPercent,       // lo que cobra la app (ej: 3%)
-                    AppDiscountAmount = appDiscountAmount,        // $372 si pagó $12.400 con débito
-                    NetAmountReceived = netAmountReceived,        // lo que el negocio realmente cobra
+                    AmountPaid = payment.AmountPaid,
+                    AppDiscountPercent = appDiscountPercent,
+                    AppDiscountAmount = appDiscountAmount,
+                    NetAmountReceived = netAmountReceived,
                     PaymentDate = DateTime.Now,
                     StoreId = storeId
                 });
             }
 
-            sale.CalculateTotal(); // suma SaleDetails + SurchargeAmount
+            sale.CalculateTotal();
             await _saleRepository.AddAsync(sale);
             await _unitOfWork.SaveChangesAsync();
 
@@ -148,6 +120,7 @@ namespace APICalculos.Application.Services
             var saleDB = await _saleRepository.GetByIdAsync(id, storeId)
                 ?? throw new KeyNotFoundException("Venta no encontrada");
 
+            // ── 1. Cargar tipos de pago ───────────────────────────────────────────
             var paymentTypes = new Dictionary<int, PaymentTypes>();
             foreach (var p in dto.Payments)
             {
@@ -159,19 +132,33 @@ namespace APICalculos.Application.Services
                 }
             }
 
+            // ── 2. Recalcular recargo según nuevo medio de pago ───────────────────
             var surchargePercent = paymentTypes.Values
                 .Where(pt => pt.ApplySurcharge)
                 .Select(pt => pt.SurchargePercent)
                 .DefaultIfEmpty(0m)
                 .Max();
 
-            var baseAmount = dto.Payments.Sum(p => p.AmountPaid);
-            var surchargeAmount = baseAmount * (surchargePercent / 100m);
-
+            // ── 3. Actualizar cliente y recargo ───────────────────────────────────
             saleDB.ClientId = dto.ClientId;
             saleDB.SurchargePercent = surchargePercent;
-            saleDB.SurchargeAmount = surchargeAmount;
 
+            // ── 4. Reemplazar SaleDetails ─────────────────────────────────────────
+            saleDB.SaleDetail.Clear();
+            foreach (var detail in dto.SaleDetails)
+            {
+                saleDB.SaleDetail.Add(new SaleDetail
+                {
+                    ServiceTypeId = detail.ServiceTypeId,
+                    EmployeeId = detail.EmployeeId,
+                    UnitPrice = detail.UnitPrice,
+                    AdditionalCharge = detail.AdditionalCharge,
+                    DiscountPercent = detail.DiscountPercent,
+                    StoreId = storeId
+                });
+            }
+
+            // ── 5. Reemplazar Payments ────────────────────────────────────────────
             saleDB.Payments.Clear();
             foreach (var paymentDTO in dto.Payments)
             {
@@ -192,7 +179,9 @@ namespace APICalculos.Application.Services
                 });
             }
 
+            // ── 6. Recalcular totales con todo actualizado ────────────────────────
             saleDB.CalculateTotal();
+
             _saleRepository.Update(saleDB);
             await _unitOfWork.SaveChangesAsync();
         }
@@ -202,7 +191,9 @@ namespace APICalculos.Application.Services
             var saleDB = await _saleRepository.GetByIdAsync(id, storeId)
                 ?? throw new KeyNotFoundException("Venta no encontrada");
 
-            _saleRepository.Remove(saleDB);
+            saleDB.IsDeleted = true;
+
+            _saleRepository.Update(saleDB);
             await _unitOfWork.SaveChangesAsync();
         }
     }

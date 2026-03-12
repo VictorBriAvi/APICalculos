@@ -14,44 +14,30 @@ namespace APICalculos.Infrastructure.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<FinancialSummaryDTO> GetFinancialSummaryAsync(
-            int storeId,
-            DateTime? fromDate = null,
-            DateTime? toDate = null)
+        public async Task<FinancialSummaryDTO> GetFinancialSummaryAsync(int storeId,DateTime? fromDate = null,DateTime? toDate = null)
         {
-            var salesQuery = _dbContext.SaleDetails
-                .Include(sd => sd.Sale)
-                .Include(sd => sd.Employee)
-                .Where(sd => !sd.IsDeleted
-                             && !sd.Sale.IsDeleted
-                             && sd.StoreId == storeId);
+            var salesQuery = _dbContext.Sales.Where(s => !s.IsDeleted && s.StoreId == storeId);
 
             if (fromDate.HasValue && toDate.HasValue)
             {
-                salesQuery = salesQuery.Where(sd =>
-                    sd.Sale.DateSale >= fromDate &&
-                    sd.Sale.DateSale <= toDate);
+                salesQuery = salesQuery.Where(s => s.DateSale >= fromDate.Value && s.DateSale <= toDate.Value);
             }
 
-            var totalVentas = await salesQuery.SumAsync(sd =>
-                (sd.UnitPrice + sd.AdditionalCharge) *
-                (1 - sd.DiscountPercent / 100m)
-            );
+            var totalVentas = await salesQuery.SumAsync(s => s.TotalAmount);
 
-            var totalPagosColaboradores = await salesQuery.SumAsync(sd =>
-                (sd.UnitPrice + sd.AdditionalCharge) *
-                (1 - sd.DiscountPercent / 100m) *
-                (sd.Employee.PaymentPercentage / 100m)
-            );
-
-            var expensesQuery = _dbContext.Expenses
-                .Where(e => e.StoreId == storeId);
+            var saleDetailsQuery = _dbContext.SaleDetails.Include(sd => sd.Employee).Include(sd => sd.Sale).Where(sd => !sd.IsDeleted && !sd.Sale.IsDeleted && sd.StoreId == storeId);
 
             if (fromDate.HasValue && toDate.HasValue)
             {
-                expensesQuery = expensesQuery.Where(e =>
-                    e.ExpenseDate >= fromDate &&
-                    e.ExpenseDate <= toDate);
+                saleDetailsQuery = saleDetailsQuery.Where(sd => sd.Sale.DateSale >= fromDate.Value && sd.Sale.DateSale <= toDate.Value);
+            }
+
+            var totalPagosColaboradores = await saleDetailsQuery.SumAsync(sd => sd.UnitPrice * (sd.Employee.PaymentPercentage / 100m));
+            var expensesQuery = _dbContext.Expenses.Where(e => e.StoreId == storeId);
+
+            if (fromDate.HasValue && toDate.HasValue)
+            {
+                expensesQuery = expensesQuery.Where(e => e.ExpenseDate >= fromDate.Value && e.ExpenseDate <= toDate.Value);
             }
 
             var totalGastos = await expensesQuery.SumAsync(e => e.Price);
@@ -60,60 +46,30 @@ namespace APICalculos.Infrastructure.Repositories
             {
                 TotalVentas = totalVentas,
                 TotalPagosColaboradores = totalPagosColaboradores,
-                TotalGastos = totalGastos
+                TotalGastos = totalGastos,
+                GananciaNeta = totalVentas - totalGastos
             };
         }
-
-        public async Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(
-            int storeId,
-            DateTime fromDate,
-            DateTime toDate)
+        public async Task<IEnumerable<DailyFinancialDTO>> GetDailyFinancialSummaryAsync(int storeId, DateTime fromDate, DateTime toDate)
         {
             var from = fromDate.Date;
             var to = toDate.Date.AddDays(1);
 
+            var salesByDate = await _dbContext.SaleDetails.Include(sd => sd.Sale).Include(sd => sd.Employee).Where(sd => !sd.IsDeleted && !sd.Sale.IsDeleted && sd.StoreId == storeId && sd.Sale.DateSale >= from && sd.Sale.DateSale < to).GroupBy(sd => sd.Sale.DateSale.Date).Select(g => new
+            {
+                Fecha = g.Key,
+                TotalVentas = g.Sum(sd => (sd.UnitPrice + sd.AdditionalCharge) * (1 - sd.DiscountPercent / 100m)),
+                TotalPagosColaboradores = g.Sum(sd =>(sd.UnitPrice + sd.AdditionalCharge) * (1 - sd.DiscountPercent / 100m) *(sd.Employee.PaymentPercentage / 100m))
 
+            }).ToListAsync();
 
-            var salesByDate = await _dbContext.SaleDetails
-                .Include(sd => sd.Sale)
-                .Include(sd => sd.Employee)
-                .Where(sd => !sd.IsDeleted
-                             && !sd.Sale.IsDeleted
-                             && sd.StoreId == storeId
-                             && sd.Sale.DateSale >= from
-                             && sd.Sale.DateSale < to)
-                        .GroupBy(sd => sd.Sale.DateSale.Date)
-                .Select(g => new
-                {
-                    Fecha = g.Key,
-                    TotalVentas = g.Sum(sd =>
-                        (sd.UnitPrice + sd.AdditionalCharge) *
-                        (1 - sd.DiscountPercent / 100m)
-                    ),
-                    TotalPagosColaboradores = g.Sum(sd =>
-                        (sd.UnitPrice + sd.AdditionalCharge) *
-                        (1 - sd.DiscountPercent / 100m) *
-                        (sd.Employee.PaymentPercentage / 100m)
-                    )
-                })
-                .ToListAsync();
+            var expensesByDate = await _dbContext.Expenses.Where(e => e.StoreId == storeId && e.ExpenseDate >= fromDate && e.ExpenseDate <= toDate).GroupBy(e => e.ExpenseDate.Date).Select(g => new
+            {
+                Fecha = g.Key,
+                TotalGastos = g.Sum(e => e.Price)
+            }).ToListAsync();
 
-            var expensesByDate = await _dbContext.Expenses
-                .Where(e => e.StoreId == storeId
-                            && e.ExpenseDate >= fromDate
-                            && e.ExpenseDate <= toDate)
-                .GroupBy(e => e.ExpenseDate.Date)
-                .Select(g => new
-                {
-                    Fecha = g.Key,
-                    TotalGastos = g.Sum(e => e.Price)
-                })
-                .ToListAsync();
-
-            var allDates = salesByDate.Select(s => s.Fecha)
-                .Union(expensesByDate.Select(e => e.Fecha))
-                .Distinct()
-                .OrderBy(d => d);
+            var allDates = salesByDate.Select(s => s.Fecha).Union(expensesByDate.Select(e => e.Fecha)).Distinct().OrderBy(d => d);
 
             return allDates.Select(date =>
             {
@@ -141,48 +97,30 @@ namespace APICalculos.Infrastructure.Repositories
             DateTime fromDate,
             DateTime toDate)
         {
-            return await _dbContext.SaleDetails
-                .Where(sd => !sd.IsDeleted
-                             && !sd.Sale.IsDeleted
-                             && sd.StoreId == storeId
-                             && sd.Sale.DateSale >= fromDate
-                             && sd.Sale.DateSale <= toDate)
-                .GroupBy(sd => new
+            return await _dbContext.SaleDetails.Where(sd => !sd.IsDeleted && !sd.Sale.IsDeleted && sd.StoreId == storeId && sd.Sale.DateSale >= fromDate&& sd.Sale.DateSale <= toDate).GroupBy(sd => new
+            {
+                sd.Employee.Id,
+                sd.Employee.Name,
+                sd.Employee.PaymentPercentage
+
+            }).Select(g => new EmployeeSalesSummaryDTO
+            {
+                EmpleadoId = g.Key.Id,
+                Empleado = g.Key.Name,
+                TotalVentas = g.Sum(sd => (sd.UnitPrice + sd.AdditionalCharge) * (1 - sd.DiscountPercent / 100m)),
+                PorcentajePago = g.Key.PaymentPercentage,
+                TotalAPagar = g.Sum(sd =>(sd.UnitPrice + sd.AdditionalCharge) * (1 - sd.DiscountPercent / 100m) * (g.Key.PaymentPercentage / 100m)),
+                TotalServicios = g.Count(),
+                ServiciosRealizados = g.GroupBy(sd => sd.ServiceType.Name).Select(sg => new ServiceCountDTO
                 {
-                    sd.Employee.Id,
-                    sd.Employee.Name,
-                    sd.Employee.PaymentPercentage
-                })
-                .Select(g => new EmployeeSalesSummaryDTO
-                {
-                    EmpleadoId = g.Key.Id,
-                    Empleado = g.Key.Name,
-                    TotalVentas = g.Sum(sd =>
-                        (sd.UnitPrice + sd.AdditionalCharge) *
-                        (1 - sd.DiscountPercent / 100m)),
-                    PorcentajePago = g.Key.PaymentPercentage,
-                    TotalAPagar = g.Sum(sd =>
-                        (sd.UnitPrice + sd.AdditionalCharge) *
-                        (1 - sd.DiscountPercent / 100m) *
-                        (g.Key.PaymentPercentage / 100m)),
-                    TotalServicios = g.Count(),
-                    ServiciosRealizados = g
-                        .GroupBy(sd => sd.ServiceType.Name)
-                        .Select(sg => new ServiceCountDTO
-                        {
-                            Servicio = sg.Key,
-                            Cantidad = sg.Count()
-                        })
-                        .ToList()
-                })
-                .OrderBy(x => x.Empleado)
-                .ToListAsync();
+                    Servicio = sg.Key,
+                    Cantidad = sg.Count()
+                }).ToList()
+
+            }).OrderBy(x => x.Empleado).ToListAsync();
         }
 
-        public async Task<List<SalesByPaymentReportDTO>> GetSalesReportByPaymentTypeAsync(
-            int storeId,
-            DateTime startDate,
-            DateTime endDate)
+        public async Task<List<SalesByPaymentReportDTO>> GetSalesReportByPaymentTypeAsync(int storeId,DateTime startDate,DateTime endDate)
         {
             return await (from sp in _dbContext.SalePayments
                           join s in _dbContext.Sales on sp.SaleId equals s.Id
@@ -201,10 +139,7 @@ namespace APICalculos.Infrastructure.Repositories
                           }).ToListAsync();
         }
 
-        public async Task<List<PaymentTypeBalanceDTO>> GetPaymentTypeBalanceAsync(
-            int storeId,
-            DateTime startDate,
-            DateTime endDate)
+        public async Task<List<PaymentTypeBalanceDTO>> GetPaymentTypeBalanceAsync(int storeId,DateTime startDate,DateTime endDate)
         {
             var fromDate = startDate.Date;
             var toDate = endDate.Date.AddDays(1);
@@ -255,10 +190,7 @@ namespace APICalculos.Infrastructure.Repositories
             return await query.ToListAsync();
         }
 
-        public async Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(
-            int storeId,
-            DateTime? fromDate = null,
-            DateTime? toDate = null)
+        public async Task<IEnumerable<ExpensesByCategoryDTO>> GetExpensesByCategoryAsync(int storeId,DateTime? fromDate = null,DateTime? toDate = null)
         {
             var query = _dbContext.Expenses
                 .Include(e => e.ExpenseType)
